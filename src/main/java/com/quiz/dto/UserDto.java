@@ -1,6 +1,6 @@
-package com.quize.quizebackend.dto;
+package com.quiz.dto;
 
-import com.quize.quizebackend.entities.User;
+import com.quiz.entities.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

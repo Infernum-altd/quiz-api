@@ -1,6 +1,6 @@
-package com.quize.quizebackend.config;
+package com.quiz.config;
 
-import com.quize.quizebackend.security.AuthFilter;
+import com.quiz.security.AuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

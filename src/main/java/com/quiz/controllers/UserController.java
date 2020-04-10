@@ -1,8 +1,7 @@
-package com.quize.quizebackend.controllers;
+package com.quiz.controllers;
 
-import com.quize.quizebackend.dto.UserDto;
-import com.quize.quizebackend.entities.User;
-import com.quize.quizebackend.service.UserService;
+import com.quiz.entities.User;
+import com.quiz.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

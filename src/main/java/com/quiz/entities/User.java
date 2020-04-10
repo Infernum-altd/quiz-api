@@ -1,4 +1,4 @@
-package com.quize.quizebackend.entities;
+package com.quiz.entities;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

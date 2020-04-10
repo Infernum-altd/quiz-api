@@ -1,11 +1,10 @@
-package com.quize.quizebackend.security;
+package com.quiz.security;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -20,7 +19,7 @@ import java.io.IOException;
 public class AuthFilter extends OncePerRequestFilter {
 
     @Autowired
-    private QuizeUserDetailsService userDetailsService;
+    private QuizUserDetailsService userDetailsService;
     @Autowired
     private TokenProvider tokenProvider;
 

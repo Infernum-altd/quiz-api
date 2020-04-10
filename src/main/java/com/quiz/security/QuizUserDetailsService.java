@@ -1,8 +1,7 @@
-package com.quize.quizebackend.security;
+package com.quiz.security;
 
-import com.quize.quizebackend.dao.UserDao;
-import com.quize.quizebackend.entities.User;
-import com.quize.quizebackend.service.UserService;
+import com.quiz.entities.User;
+import com.quiz.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class QuizeUserDetailsService implements UserDetailsService {
+public class QuizUserDetailsService implements UserDetailsService {
 
     private final UserService userService;
 

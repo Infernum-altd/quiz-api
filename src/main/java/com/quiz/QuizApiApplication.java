@@ -1,13 +1,13 @@
-package com.quize.quizebackend;
+package com.quiz;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class QuizeBackendApplication {
+public class QuizApiApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(QuizeBackendApplication.class, args);
+        SpringApplication.run(QuizApiApplication.class, args);
     }
 
 }

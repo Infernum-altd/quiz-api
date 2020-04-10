@@ -1,4 +1,4 @@
-package com.quize.quizebackend.exceptions;
+package com.quiz.exceptions;
 
 public class NotFoundException extends RuntimeException {
 

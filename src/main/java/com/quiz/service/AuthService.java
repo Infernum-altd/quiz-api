@@ -1,12 +1,12 @@
-package com.quize.quizebackend.service;
+package com.quiz.service;
 
-import com.quize.quizebackend.dao.UserDao;
-import com.quize.quizebackend.dto.UserDto;
-import com.quize.quizebackend.entities.User;
-import com.quize.quizebackend.exceptions.EmailExistException;
-import com.quize.quizebackend.exceptions.NotFoundException;
-import com.quize.quizebackend.exceptions.PasswordException;
-import com.quize.quizebackend.security.TokenProvider;
+import com.quiz.security.TokenProvider;
+import com.quiz.dao.UserDao;
+import com.quiz.dto.UserDto;
+import com.quiz.entities.User;
+import com.quiz.exceptions.EmailExistException;
+import com.quiz.exceptions.NotFoundException;
+import com.quiz.exceptions.PasswordException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

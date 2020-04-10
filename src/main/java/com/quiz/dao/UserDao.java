@@ -1,8 +1,8 @@
-package com.quize.quizebackend.dao;
+package com.quiz.dao;
 
-import com.quize.quizebackend.dao.mapper.UserMapper;
-import com.quize.quizebackend.entities.User;
-import com.quize.quizebackend.exceptions.DatabaseException;
+import com.quiz.dao.mapper.UserMapper;
+import com.quiz.exceptions.DatabaseException;
+import com.quiz.entities.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,8 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.quize.quizebackend.dao.mapper.UserMapper.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -69,13 +67,13 @@ public class UserDao {
 
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
                 .withTableName(TABLE_USERS)
-                .usingGeneratedKeyColumns(USERS_ID);
+                .usingGeneratedKeyColumns(UserMapper.USERS_ID);
 
 
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put(USERS_ID, entity.getId());
-        parameters.put(USERS_PASSWORD, entity.getPassword());
-        parameters.put(USERS_EMAIL, entity.getEmail());
+        parameters.put(UserMapper.USERS_ID, entity.getId());
+        parameters.put(UserMapper.USERS_PASSWORD, entity.getPassword());
+        parameters.put(UserMapper.USERS_EMAIL, entity.getEmail());
 
         try {
             id = simpleJdbcInsert.executeAndReturnKey(parameters).intValue();

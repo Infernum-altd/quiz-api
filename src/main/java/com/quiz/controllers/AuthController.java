@@ -1,8 +1,8 @@
-package com.quize.quizebackend.controllers;
+package com.quiz.controllers;
 
-import com.quize.quizebackend.dto.UserDto;
-import com.quize.quizebackend.entities.User;
-import com.quize.quizebackend.service.AuthService;
+import com.quiz.service.AuthService;
+import com.quiz.dto.UserDto;
+import com.quiz.entities.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,6 +1,6 @@
-package com.quize.quizebackend.dao.mapper;
+package com.quiz.dao.mapper;
 
-import com.quize.quizebackend.entities.User;
+import com.quiz.entities.User;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 

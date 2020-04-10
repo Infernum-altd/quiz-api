@@ -1,9 +1,8 @@
-package com.quize.quizebackend.service;
+package com.quiz.service;
 
-import com.quize.quizebackend.dao.UserDao;
-import com.quize.quizebackend.dto.UserDto;
-import com.quize.quizebackend.entities.User;
-import com.quize.quizebackend.exceptions.NotFoundException;
+import com.quiz.dao.UserDao;
+import com.quiz.entities.User;
+import com.quiz.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
