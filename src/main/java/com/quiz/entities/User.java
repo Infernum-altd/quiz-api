@@ -9,7 +9,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class User {
 
-    private UUID id;
+    private int id;
 
     private String password;
 
