@@ -4,11 +4,13 @@ import com.quiz.entities.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 public class UserDto {
 
-    private int id;
+    private UUID id;
 
     private String email;
 
