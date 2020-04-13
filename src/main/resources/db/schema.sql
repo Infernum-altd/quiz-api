@@ -5,6 +5,21 @@ DROP TABLE IF EXISTS favorite_quizzes;
 DROP TABLE IF EXISTS score;
 DROP TABLE IF EXISTS questions;
 DROP TABLE IF EXISTS answers;
+DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS tags;
+DROP TABLE IF EXISTS games;
+DROP TABLE IF EXISTS games_tags;
+DROP TABLE IF EXISTS announcements;
+DROP TABLE IF EXISTS achievement_categories;
+DROP TABLE IF EXISTS achievements;
+DROP TABLE IF EXISTS rules;
+DROP TABLE IF EXISTS achievements_rules;
+DROP TABLE IF EXISTS users_achievements;
+DROP TABLE IF EXISTS friends;
+DROP TABLE IF EXISTS activity_type;
+DROP TABLE IF EXISTS activities;
+
+
 
 CREATE TYPE gender_type AS ENUM ('MALE','FEMALE','NOT_MENTIONED');
 CREATE TYPE role_type AS ENUM ('USER', 'MODERATOR', 'ADMIN','SUPER_ADMIN');
@@ -164,4 +179,35 @@ CREATE TABLE users_achievements
     achievement_id INTEGER REFERENCES achievements (id),
     progress       INTEGER,
     date           DATE
+);
+
+
+
+CREATE TYPE friend_view_settings AS ENUM (''); /* FIXME: add friends notifications settings */
+CREATE TYPE friendship_status AS ENUM ('WAITING','PENDING','FRIEND','DELETED' );
+
+CREATE TABLE friends
+(
+    friend_id    INTEGER REFERENCES users (id) NOT NULL,
+    user_id      INTEGER REFERENCES users (id) NOT NULL,
+    view_setting friend_view_settings          NOT NULL,
+    status       friendship_status             NOT NULL
+);
+
+
+
+CREATE TABLE activity_type
+(
+    id   serial PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE activities
+(
+    id          serial PRIMARY KEY,
+    sender_id   INTEGER REFERENCES users (id)         NOT NULL,
+    receiver_id INTEGER REFERENCES users (id)         NOT NULL,
+    activity_id INTEGER REFERENCES activity_type (id) NOT NULL,
+    info        JSON,
+    date        TIMESTAMP                             NOT NULL
 );
