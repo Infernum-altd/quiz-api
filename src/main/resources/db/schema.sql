@@ -51,15 +51,15 @@ CREATE TABLE quizzes
 
 CREATE TABLE favorite_quizzes
 (
-    user_id INTEGER REFERENCES users (id)  NOT NULL,
-    quiz_id INTEGER REFERENCES quizes (id) NOT NULL
+    user_id INTEGER REFERENCES users (id)   NOT NULL,
+    quiz_id INTEGER REFERENCES quizzes (id) NOT NULL
 );
 
 CREATE TABLE score
 (
-    user_id INTEGER REFERENCES users (id)  NOT NULL,
-    quiz_id INTEGER REFERENCES quizes (id) NOT NULL,
-    score   INTEGER                        NOT NULL
+    user_id INTEGER REFERENCES users (id)   NOT NULL,
+    quiz_id INTEGER REFERENCES quizzes (id) NOT NULL,
+    score   INTEGER                         NOT NULL
 );
 
 
@@ -72,7 +72,8 @@ CREATE TABLE questions
     quiz_id INTEGER REFERENCES quizzes (id),
     type    question_type NOT NULL,
     image   BYTEA,
-    text    TEXT
+    text    TEXT,
+    active  BOOLEAN       NOT NULL DEFAULT true
 );
 
 CREATE TABLE answers
@@ -80,6 +81,39 @@ CREATE TABLE answers
     id             serial PRIMARY KEY,
     question_id    INTEGER REFERENCES questions (id),
     text           TEXT,
-    correct        BOOLEAN,
+    correct        BOOLEAN NOT NULL,
     next_answer_id INTEGER REFERENCES answers (id)
+);
+
+
+
+CREATE TABLE categories
+(
+    id   serial PRIMARY KEY,
+    name VARCHAR(50)
+);
+
+CREATE TABLE tags
+(
+    id   serial PRIMARY KEY,
+    name VARCHAR(50)
+);
+
+CREATE TABLE games
+(
+    id               serial PRIMARY KEY,
+    quiz_id          INTEGER REFERENCES quizzes (id) NOT NULL,
+    host_id          INTEGER REFERENCES users (id)   NOT NULL,
+    category_id      INTEGER REFERENCES categories   NOT NULL,
+    question_timer   INTEGER                         NOT NULL,
+    date             TIMESTAMP                       NOT NULL,
+    sound            BOOLEAN                         NOT NULL DEFAULT true,
+    max_users_number INTEGER                         NOT NULL,
+    private          BOOLEAN                         NOT NULL DEFAULT false
+);
+
+CREATE TABLE games_tags
+(
+    game_id INTEGER REFERENCES games (id),
+    tag_id  INTEGER REFERENCES tags (id)
 );
