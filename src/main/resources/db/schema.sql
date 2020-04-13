@@ -35,7 +35,7 @@ CREATE TABLE users
     notifications user_notification_type NOT NULL DEFAULT 'ON'
 );
 
-CREATE TYPE quiz_status_type AS ENUM ('PENDING','ACTIVE','DEACTIVATED', 'DELETED');
+CREATE TYPE status_type AS ENUM ('PENDING','ACTIVE','DEACTIVATED', 'DELETED');
 
 CREATE TABLE quizzes
 (
@@ -45,7 +45,7 @@ CREATE TABLE quizzes
     author            INTEGER REFERENCES users (id) NOT NULL,
     date              DATE                          NOT NULL,
     description       TEXT,
-    status            quiz_status_type              NOT NULL DEFAULT 'PENDING',
+    status            status_type                   NOT NULL DEFAULT 'PENDING',
     modification_time TIMESTAMP
 );
 
@@ -116,4 +116,52 @@ CREATE TABLE games_tags
 (
     game_id INTEGER REFERENCES games (id),
     tag_id  INTEGER REFERENCES tags (id)
+);
+
+
+
+CREATE TABLE announcements
+(
+    id                serial PRIMARY KEY,
+    user_id           INTEGER REFERENCES users (id),
+    game_id           INTEGER REFERENCES games (id),
+    description       TEXT,
+    status            status_type NOT NULL DEFAULT 'PENDING',
+    modification_time TIMESTAMP
+);
+
+
+
+CREATE TABLE achievement_categories
+(
+    id   serial PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE achievements
+(
+    id          serial PRIMARY KEY,
+    name        VARCHAR(50) NOT NULL,
+    description TEXT,
+    image       BYTEA
+);
+
+CREATE TABLE rules
+(
+    id        serial PRIMARY KEY,
+    condition JSON
+);
+
+CREATE TABLE achievements_rules
+(
+    achievement_id INTEGER REFERENCES achievements (id),
+    rule_id        INTEGER REFERENCES rules (id)
+);
+
+CREATE TABLE users_achievements
+(
+    user_id        INTEGER REFERENCES users (id),
+    achievement_id INTEGER REFERENCES achievements (id),
+    progress       INTEGER,
+    date           DATE
 );
