@@ -18,6 +18,9 @@ DROP TABLE IF EXISTS users_achievements;
 DROP TABLE IF EXISTS friends;
 DROP TABLE IF EXISTS activity_type;
 DROP TABLE IF EXISTS activities;
+DROP TABLE IF EXISTS chats;
+DROP TABLE IF EXISTS chats_users;
+DROP TABLE IF EXISTS messages;
 
 
 
@@ -132,9 +135,6 @@ CREATE TABLE games_tags
     game_id INTEGER REFERENCES games (id),
     tag_id  INTEGER REFERENCES tags (id)
 );
-
-
-
 CREATE TABLE announcements
 (
     id                serial PRIMARY KEY,
@@ -211,3 +211,29 @@ CREATE TABLE activities
     info        JSON,
     date        TIMESTAMP                             NOT NULL
 );
+
+
+
+CREATE TABLE chats
+(
+    id            serial PRIMARY KEY,
+    creator       INTEGER REFERENCES users (id) NOT NULL,
+    name          VARCHAR(50)                   NOT NULL,
+    active        BOOLEAN                       NOT NULL DEFAULT true,
+    notifications BOOLEAN                       NOT NULL DEFAULT true
+);
+
+CREATE TABLE chats_users
+(
+    chat_id INTEGER REFERENCES chats (id) NOT NULL,
+    user_id INTEGER REFERENCES users (id) NOT NULL
+);
+
+CREATE TABLE messages
+(
+    id      serial PRIMARY KEY,
+    user_id INTEGER REFERENCES users (id) NOT NULL,
+    chat_id INTEGER REFERENCES chats (id) NOT NULL,
+    text    TEXT,
+    date    TIMESTAMP
+)
