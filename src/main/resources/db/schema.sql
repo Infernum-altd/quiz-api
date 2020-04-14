@@ -39,11 +39,12 @@ CREATE TABLE users
 (
     id            serial PRIMARY KEY,
     email         VARCHAR(255) UNIQUE    NOT NULL,
+    password      VARCHAR(255)           NOT NULL,
     role          role_type              NOT NULL DEFAULT 'USER',
-    name          VARCHAR(50)            NOT NULL,
+    name          VARCHAR(50)            NOT NULL DEFAULT 'John',
     surname       VARCHAR(50),
     image         BYTEA,
-    birthdate     DATE                   NOT NULL,
+    birthdate     DATE                   NOT NULL DEFAULT CURRENT_DATE,
     gender        gender_type            NOT NULL DEFAULT 'NOT_MENTIONED',
     country_id    INTEGER REFERENCES countries (id),
     city          VARCHAR(255),
@@ -53,7 +54,21 @@ CREATE TABLE users
     notifications user_notification_type NOT NULL DEFAULT 'ON'
 );
 
-CREATE TYPE status_type AS ENUM ('PENDING','ACTIVE','DEACTIVATED', 'DELETED');
+
+
+CREATE TYPE status_type AS ENUM ('PENDING','ACTIVE','DEACTIVATED');
+
+CREATE TABLE categories
+(
+    id   serial PRIMARY KEY,
+    name VARCHAR(50)
+);
+
+CREATE TABLE tags
+(
+    id   serial PRIMARY KEY,
+    name VARCHAR(50)
+);
 
 CREATE TABLE quizzes
 (
@@ -61,10 +76,17 @@ CREATE TABLE quizzes
     name              VARCHAR(255)                  NOT NULL,
     image             BYTEA,
     author            INTEGER REFERENCES users (id) NOT NULL,
+    category_id       INTEGER REFERENCES categories (id),
     date              DATE                          NOT NULL,
     description       TEXT,
     status            status_type                   NOT NULL DEFAULT 'PENDING',
     modification_time TIMESTAMP
+);
+
+CREATE TABLE quizzes_tags
+(
+    quiz_id INTEGER REFERENCES quizzes (id),
+    tag_id  INTEGER REFERENCES tags (id)
 );
 
 CREATE TABLE favorite_quizzes
@@ -99,30 +121,18 @@ CREATE TABLE answers
     id             serial PRIMARY KEY,
     question_id    INTEGER REFERENCES questions (id),
     text           TEXT,
+    image          BYTEA,
     correct        BOOLEAN NOT NULL,
     next_answer_id INTEGER REFERENCES answers (id)
 );
 
 
 
-CREATE TABLE categories
-(
-    id   serial PRIMARY KEY,
-    name VARCHAR(50)
-);
-
-CREATE TABLE tags
-(
-    id   serial PRIMARY KEY,
-    name VARCHAR(50)
-);
-
 CREATE TABLE games
 (
     id               serial PRIMARY KEY,
     quiz_id          INTEGER REFERENCES quizzes (id) NOT NULL,
     host_id          INTEGER REFERENCES users (id)   NOT NULL,
-    category_id      INTEGER REFERENCES categories   NOT NULL,
     question_timer   INTEGER                         NOT NULL,
     date             TIMESTAMP                       NOT NULL,
     sound            BOOLEAN                         NOT NULL DEFAULT true,
@@ -130,11 +140,7 @@ CREATE TABLE games
     private          BOOLEAN                         NOT NULL DEFAULT false
 );
 
-CREATE TABLE games_tags
-(
-    game_id INTEGER REFERENCES games (id),
-    tag_id  INTEGER REFERENCES tags (id)
-);
+
 CREATE TABLE announcements
 (
     id                serial PRIMARY KEY,
@@ -183,8 +189,8 @@ CREATE TABLE users_achievements
 
 
 
-CREATE TYPE friend_view_settings AS ENUM (''); /* FIXME: add friends notifications settings */
-CREATE TYPE friendship_status AS ENUM ('WAITING','PENDING','FRIEND','DELETED' );
+CREATE TYPE friend_view_settings AS ENUM ('ALL','FAVORITES','QUIZZES','SOCIAL','OFF');
+CREATE TYPE friendship_status AS ENUM ('WAITING','PENDING','FRIEND' );
 
 CREATE TABLE friends
 (
@@ -207,7 +213,7 @@ CREATE TABLE activities
     id          serial PRIMARY KEY,
     sender_id   INTEGER REFERENCES users (id)         NOT NULL,
     receiver_id INTEGER REFERENCES users (id)         NOT NULL,
-    activity_id INTEGER REFERENCES activity_type (id) NOT NULL,
+    activity_type_id INTEGER REFERENCES activity_type (id) NOT NULL,
     info        JSON,
     date        TIMESTAMP                             NOT NULL
 );
@@ -216,17 +222,18 @@ CREATE TABLE activities
 
 CREATE TABLE chats
 (
-    id            serial PRIMARY KEY,
-    creator       INTEGER REFERENCES users (id) NOT NULL,
-    name          VARCHAR(50)                   NOT NULL,
-    active        BOOLEAN                       NOT NULL DEFAULT true,
-    notifications BOOLEAN                       NOT NULL DEFAULT true
+    id      serial PRIMARY KEY,
+    creator INTEGER REFERENCES users (id) NOT NULL,
+    name    VARCHAR(50)                   NOT NULL,
+    image   BYTEA,
+    active  BOOLEAN                       NOT NULL DEFAULT true
 );
 
 CREATE TABLE chats_users
 (
-    chat_id INTEGER REFERENCES chats (id) NOT NULL,
-    user_id INTEGER REFERENCES users (id) NOT NULL
+    chat_id       INTEGER REFERENCES chats (id) NOT NULL,
+    user_id       INTEGER REFERENCES users (id) NOT NULL,
+    notifications BOOLEAN                       NOT NULL DEFAULT true
 );
 
 CREATE TABLE messages
@@ -235,5 +242,6 @@ CREATE TABLE messages
     user_id INTEGER REFERENCES users (id) NOT NULL,
     chat_id INTEGER REFERENCES chats (id) NOT NULL,
     text    TEXT,
+    image   BYTEA,
     date    TIMESTAMP
 )
