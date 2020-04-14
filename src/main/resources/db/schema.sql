@@ -1,26 +1,34 @@
-DROP TABLE IF EXISTS countries;
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS quizzes;
-DROP TABLE IF EXISTS favorite_quizzes;
-DROP TABLE IF EXISTS score;
-DROP TABLE IF EXISTS questions;
-DROP TABLE IF EXISTS answers;
-DROP TABLE IF EXISTS categories;
-DROP TABLE IF EXISTS tags;
-DROP TABLE IF EXISTS games;
-DROP TABLE IF EXISTS games_tags;
-DROP TABLE IF EXISTS announcements;
-DROP TABLE IF EXISTS achievement_categories;
-DROP TABLE IF EXISTS achievements;
-DROP TABLE IF EXISTS rules;
-DROP TABLE IF EXISTS achievements_rules;
-DROP TABLE IF EXISTS users_achievements;
-DROP TABLE IF EXISTS friends;
-DROP TABLE IF EXISTS activity_type;
-DROP TABLE IF EXISTS activities;
-DROP TABLE IF EXISTS chats;
-DROP TABLE IF EXISTS chats_users;
-DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS countries CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS quizzes CASCADE;
+DROP TABLE IF EXISTS favorite_quizzes CASCADE;
+DROP TABLE IF EXISTS score CASCADE;
+DROP TABLE IF EXISTS questions CASCADE;
+DROP TABLE IF EXISTS answers CASCADE;
+DROP TABLE IF EXISTS categories CASCADE;
+DROP TABLE IF EXISTS tags CASCADE;
+DROP TABLE IF EXISTS games CASCADE;
+DROP TABLE IF EXISTS quizzes_tags CASCADE;
+DROP TABLE IF EXISTS announcements CASCADE;
+DROP TABLE IF EXISTS achievement_categories CASCADE;
+DROP TABLE IF EXISTS achievements CASCADE;
+DROP TABLE IF EXISTS rules CASCADE;
+DROP TABLE IF EXISTS achievements_rules CASCADE;
+DROP TABLE IF EXISTS users_achievements CASCADE;
+DROP TABLE IF EXISTS friends CASCADE;
+DROP TABLE IF EXISTS activity_type CASCADE;
+DROP TABLE IF EXISTS activities CASCADE;
+DROP TABLE IF EXISTS chats CASCADE;
+DROP TABLE IF EXISTS chats_users CASCADE;
+DROP TABLE IF EXISTS messages CASCADE;
+
+DROP TYPE IF EXISTS gender_type CASCADE;
+DROP TYPE IF EXISTS role_type CASCADE;
+DROP TYPE IF EXISTS user_notification_type CASCADE;
+DROP TYPE IF EXISTS status_type CASCADE;
+DROP TYPE IF EXISTS question_type CASCADE;
+DROP TYPE IF EXISTS friend_view_settings CASCADE;
+DROP TYPE IF EXISTS friendship_status CASCADE;
 
 
 
@@ -164,7 +172,8 @@ CREATE TABLE achievements
     id          serial PRIMARY KEY,
     name        VARCHAR(50) NOT NULL,
     description TEXT,
-    image       BYTEA
+    image       BYTEA,
+    category_id INTEGER REFERENCES achievement_categories (id)
 );
 
 CREATE TABLE rules
@@ -210,12 +219,12 @@ CREATE TABLE activity_type
 
 CREATE TABLE activities
 (
-    id          serial PRIMARY KEY,
-    sender_id   INTEGER REFERENCES users (id)         NOT NULL,
-    receiver_id INTEGER REFERENCES users (id)         NOT NULL,
+    id               serial PRIMARY KEY,
+    sender_id        INTEGER REFERENCES users (id)         NOT NULL,
+    receiver_id      INTEGER REFERENCES users (id)         NOT NULL,
     activity_type_id INTEGER REFERENCES activity_type (id) NOT NULL,
-    info        JSON,
-    date        TIMESTAMP                             NOT NULL
+    info             JSON,
+    date             TIMESTAMP                             NOT NULL
 );
 
 
