@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.io.File;
-import java.util.Date;
+import java.sql.Date;
 
 @Data
 @NoArgsConstructor

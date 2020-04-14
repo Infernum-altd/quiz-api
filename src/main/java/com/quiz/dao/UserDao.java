@@ -7,13 +7,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
+import java.sql.PreparedStatement;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Repository
@@ -23,7 +23,7 @@ public class UserDao {
     private final JdbcTemplate jdbcTemplate;
     private final static String USER_FIND_BY_EMAIL = "SELECT * FROM users WHERE email = ?";
     private final static String USER_FIND_BY_ID = "SELECT * FROM users WHERE id = ?";
-    private final static String INSERT_USER = "INSERT INTO users (id,email,password,name,surname,image,birthdate, gender, city,about) VALUES(?,?,?,?,?,?,?,?,?,?)";
+    private final static String INSERT_USER = "INSERT INTO users (email,password,name,surname,image,birthdate, gender, city,about) VALUES(?,?,?,?,?,?,CAST(? AS gender_type),?,?)";
     public static final String TABLE_USERS = "users";
 
     public User findByEmail(String email) {
@@ -56,8 +56,7 @@ public class UserDao {
                 return null;
             }
         } catch (DataAccessException e) {
-            // TODO: 09.04.2020  check message
-            throw new DatabaseException(String.format("Find user by id '%s' database error occured", id));
+            throw new DatabaseException(String.format("Find user by id '%s' database error occurred", id));
         }
 
         return users.get(0);
@@ -67,27 +66,25 @@ public class UserDao {
     public User insert(User entity) {
         int id;
 
-        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
-                .withTableName(TABLE_USERS)
-                .usingGeneratedKeyColumns(UserMapper.USERS_ID);
-
-
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(UserMapper.USERS_ID, entity.getId());
-        parameters.put(UserMapper.USERS_PASSWORD, entity.getPassword());
-        parameters.put(UserMapper.USERS_EMAIL, entity.getEmail());
-        parameters.put(UserMapper.USERS_NAME, entity.getName());
-        parameters.put(UserMapper.USERS_SURNAME, entity.getSurname());
-        parameters.put(UserMapper.USERS_BIRTHDATE, entity.getBirthdate());
-        parameters.put(UserMapper.USERS_ABOUT, entity.getAbout());
-        parameters.put(UserMapper.USERS_CITY, entity.getCity());
-        parameters.put(UserMapper.USERS_IMAGE, entity.getImage());
-        parameters.put(UserMapper.USERS_GENDER, entity.getGender().toString());
-        parameters.put(UserMapper.USERS_ROLE, entity.getRole().toString());
-
-
         try {
-            id = simpleJdbcInsert.executeAndReturnKey(parameters).intValue();
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            jdbcTemplate.update(
+                    connection -> {
+                        PreparedStatement ps =
+                                connection.prepareStatement(INSERT_USER, new String[] {"id"});
+                        ps.setString(1, entity.getEmail());
+                        ps.setString(2,entity.getPassword());
+                        ps.setString(3,entity.getName());
+                        ps.setString(4,entity.getSurname());
+                        ps.setBytes(5,entity.getImage());
+                        ps.setDate(6, entity.getBirthdate());
+                        ps.setString(7,entity.getGender().toString());
+                        ps.setString(8,entity.getCity());
+                        ps.setString(9,entity.getAbout());
+                        return ps;
+                    },
+                    keyHolder);
+            id = (Integer) keyHolder.getKey();
             entity.setId(id);
         } catch (DataAccessException e) {
             log.error("",e);
