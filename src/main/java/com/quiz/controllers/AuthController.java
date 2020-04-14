@@ -17,9 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+
     // TODO: 09.04.2020 validation
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@RequestBody User user){
+    public ResponseEntity<UserDto> register(@RequestBody User user) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(authService.register(user));
     }
@@ -27,6 +28,7 @@ public class AuthController {
     // TODO: 09.04.2020 dto for login
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody User user) {
+
         return ResponseEntity.ok(authService.login(user));
     }
 }

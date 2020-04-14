@@ -17,15 +17,18 @@ public class UserPrincipal implements UserDetails {
 
     private String email;
 
+    private Collection<? extends GrantedAuthority> roles;
+
     public UserPrincipal(User user) {
         id = user.getId();
         password = user.getPassword();
         email = user.getEmail();
+        roles=Collections.singletonList(new SimpleGrantedAuthority(user.getRole().toString()));
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));// TODO: 10.04.2020 create const
+        return roles;
     }
 
     @Override
