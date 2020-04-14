@@ -72,14 +72,17 @@ public class UserDao {
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(UserMapper.USERS_ID, entity.getId());
-        parameters.put(UserMapper.USERS_PASSWORD, entity.getPassword());
         parameters.put(UserMapper.USERS_EMAIL, entity.getEmail());
+        parameters.put(UserMapper.USERS_PASSWORD, entity.getPassword());
+
 
         try {
-            id = simpleJdbcInsert.executeAndReturnKey(parameters).intValue();
-            entity.setId(id);
+            //id = simpleJdbcInsert.executeAndReturnKey(parameters).intValue();
+            jdbcTemplate.update("insert into users (email, password) values(?,?)",entity.getEmail(), entity.getPassword());
+            //id = jdbcTemplate.queryFor"select (id) from users where email =" + entity.getEmail());
+            //entity.setId(id);
         } catch (DataAccessException e) {
-            throw new DatabaseException("Database access exception while user insert");
+            //throw new DatabaseException("Database access exception while user insert");
         }
 
         return entity;
