@@ -35,7 +35,11 @@ public class UserService {
     }
 
 
-    public User updateUser(User user) {
-        return user;
+    public boolean updateUser(User user) {
+        return userDao.updateUser(user);
+    }
+
+    public boolean updatePasswordById(int id, String newPassword) {
+        return userDao.updatePasswordById(id, newPassword);
     }
 }

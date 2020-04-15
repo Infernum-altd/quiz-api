@@ -14,31 +14,18 @@ import java.util.Date;
 public class UserDto {
 
     private int id;
-
     private String email;
-
     private Role role;
-
     private String name;
-
     private String surname;
-
     private Date birthdate;
-
     private Gender gender;
-
     private int country_id;
-
     private String city;
-
     private int rating;
-
     private String about;
-
     private boolean active;
-
     private NotificationStatus notification;
-
     private int languageId;
 
     public UserDto(User user) {

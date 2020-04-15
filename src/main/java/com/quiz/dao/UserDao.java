@@ -9,13 +9,10 @@ import com.quiz.entities.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +27,9 @@ public class UserDao {
     private final static String USER_FIND_BY_ID = "SELECT id,email,password FROM users WHERE id = ?";
     private final static String USER_GET_ALL_FOR_PROFILE_BY_ID = "SELECT id, name, surname, birthdate, gender, city, about FROM users WHERE id = ?";
     private final static String FIND_FRIENDS_BY_USER_ID = "SELECT friend_id, name, surname, rating FROM users INNER JOIN friends ON id = user_id WHERE id = ?";
-    public final static String INSERT_USER = "INSERT INTO users (email, password) VALUES (?,?)";
+    private final static String INSERT_USER = "INSERT INTO users (email, password) VALUES (?,?)";
+    private final static String UPDATE_USER = "UPDATE users  SET name = ?, surname = ?, birthdate = ?, gender = ?, city = ?, about = ? WHERE id = ?";
+    private final static String UPDATE_USER_PASSWORD = "UPDATE users SET password = ? WHERE id = ?";
     public static final String TABLE_USERS = "users";
 
     public User findByEmail(String email) {
@@ -152,5 +151,19 @@ public class UserDao {
         }
 
         return friends;
+    }
+
+    public boolean updateUser(User user) {
+        int affectedRowNumber = jdbcTemplate.update(UPDATE_USER, user.getName(),
+                user.getSurname(), user.getBirthdate(),
+                user.getGender(), user.getCity(),
+                user.getAbout());
+
+        return affectedRowNumber > 0;
+    }
+
+    public boolean updatePasswordById(int id, String newPassword) {
+        int affectedNumberOfRows = jdbcTemplate.update(UPDATE_USER_PASSWORD, newPassword, id);
+        return affectedNumberOfRows > 0;
     }
 }
