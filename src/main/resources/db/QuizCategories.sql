@@ -1,0 +1,15 @@
+INSERT INTO categories (name)
+VALUES ('General'),
+       ('Entertainment'),
+       ('Celebrities'),
+       ('Geography'),
+       ('Art'),
+       ('Music'),
+       ('Mathematics'),
+       ('Movies'),
+       ('History'),
+       ('Politics'),
+       ('Technologies'),
+       ('Books'),
+       ('Sport'),
+       ('Other');
