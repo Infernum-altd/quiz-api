@@ -6,6 +6,8 @@ import com.quiz.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class UserService {
@@ -22,5 +24,18 @@ public class UserService {
 
     public User findById(int id) {
         return userDao.findById(id);
+    }
+
+    public User findProfileInfoByUserId(int id) {
+        return userDao.findProfileInfoByUserId(id);
+    }
+
+    public List<User> findFriendByUserId(int id) {
+        return userDao.findFriendByUserId(id);
+    }
+
+
+    public User updateUser(User user) {
+        return user;
     }
 }
