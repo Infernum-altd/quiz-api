@@ -21,6 +21,10 @@ DROP TABLE IF EXISTS activities CASCADE;
 DROP TABLE IF EXISTS chats CASCADE;
 DROP TABLE IF EXISTS chats_users CASCADE;
 DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS moderators_quizzes CASCADE;
+DROP TABLE IF EXISTS moderators_announcements CASCADE;
+DROP TABLE IF EXISTS languages CASCADE;
+DROP TABLE IF EXISTS quizzes_languages CASCADE;
 
 DROP TYPE IF EXISTS gender_type CASCADE;
 DROP TYPE IF EXISTS role_type CASCADE;
@@ -29,6 +33,7 @@ DROP TYPE IF EXISTS status_type CASCADE;
 DROP TYPE IF EXISTS question_type CASCADE;
 DROP TYPE IF EXISTS friend_view_settings CASCADE;
 DROP TYPE IF EXISTS friendship_status CASCADE;
+DROP TYPE IF EXISTS game_status_type CASCADE;
 
 
 
@@ -41,6 +46,12 @@ CREATE TABLE countries
 (
     id   serial PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL
+);
+
+CREATE TABLE languages
+(
+    id   serial PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
 );
 
 CREATE TABLE users
@@ -59,12 +70,13 @@ CREATE TABLE users
     rating        INTEGER                         DEFAULT 0,
     about         TEXT,
     active        BOOLEAN                NOT NULL DEFAULT true,
-    notifications user_notification_type NOT NULL DEFAULT 'ON'
+    notifications user_notification_type NOT NULL DEFAULT 'ON',
+    language_id   INTEGER REFERENCES languages (id)
 );
 
 
 
-CREATE TYPE status_type AS ENUM ('PENDING','ACTIVE','DEACTIVATED');
+CREATE TYPE status_type AS ENUM ('PENDING','ACTIVE','DEACTIVATED','DELETED');
 
 CREATE TABLE categories
 (
@@ -103,11 +115,10 @@ CREATE TABLE favorite_quizzes
     quiz_id INTEGER REFERENCES quizzes (id) NOT NULL
 );
 
-CREATE TABLE score
+CREATE TABLE quizzes_languages
 (
-    user_id INTEGER REFERENCES users (id)   NOT NULL,
-    quiz_id INTEGER REFERENCES quizzes (id) NOT NULL,
-    score   INTEGER                         NOT NULL
+    quiz_id     INTEGER REFERENCES quizzes (id),
+    language_id INTEGER REFERENCES languages (id)
 );
 
 
@@ -116,12 +127,13 @@ CREATE TYPE question_type AS ENUM ('OPTION','BOOLEAN','ANSWER','SEQUENCE');
 
 CREATE TABLE questions
 (
-    id      serial PRIMARY KEY,
-    quiz_id INTEGER REFERENCES quizzes (id),
-    type    question_type NOT NULL,
-    image   BYTEA,
-    text    TEXT,
-    active  BOOLEAN       NOT NULL DEFAULT true
+    id          serial PRIMARY KEY,
+    quiz_id     INTEGER REFERENCES quizzes (id),
+    type        question_type NOT NULL,
+    image       BYTEA,
+    text        TEXT,
+    active      BOOLEAN       NOT NULL DEFAULT true,
+    language_id INTEGER REFERENCES languages (id)
 );
 
 CREATE TABLE answers
@@ -136,6 +148,8 @@ CREATE TABLE answers
 
 
 
+CREATE TYPE game_status_type AS ENUM ('WAITING','STARTED','FINISHED');
+
 CREATE TABLE games
 (
     id               serial PRIMARY KEY,
@@ -145,7 +159,15 @@ CREATE TABLE games
     date             TIMESTAMP                       NOT NULL,
     sound            BOOLEAN                         NOT NULL DEFAULT true,
     max_users_number INTEGER                         NOT NULL,
-    private          BOOLEAN                         NOT NULL DEFAULT false
+    private          BOOLEAN                         NOT NULL DEFAULT false,
+    status           game_status_type                NOT NULL DEFAULT 'WAITING'
+);
+
+CREATE TABLE score
+(
+    user_id INTEGER REFERENCES users (id) NOT NULL,
+    game_id INTEGER REFERENCES games (id) NOT NULL,
+    score   INTEGER                       NOT NULL
 );
 
 
@@ -157,6 +179,20 @@ CREATE TABLE announcements
     description       TEXT,
     status            status_type NOT NULL DEFAULT 'PENDING',
     modification_time TIMESTAMP
+);
+
+
+
+CREATE TABLE moderators_quizzes
+(
+    moderator_id INTEGER REFERENCES users (id)   NOT NULL,
+    quiz_id      INTEGER REFERENCES quizzes (id) NOT NULL
+);
+
+CREATE TABLE moderators_announcements
+(
+    moderator_id    INTEGER REFERENCES users (id)         NOT NULL,
+    announcement_id INTEGER REFERENCES announcements (id) NOT NULL
 );
 
 
@@ -199,7 +235,7 @@ CREATE TABLE users_achievements
 
 
 CREATE TYPE friend_view_settings AS ENUM ('ALL','FAVORITES','QUIZZES','SOCIAL','OFF');
-CREATE TYPE friendship_status AS ENUM ('WAITING','PENDING','FRIEND' );
+CREATE TYPE friendship_status AS ENUM ('WAITING','PENDING','FRIEND','SPAM');
 
 CREATE TABLE friends
 (
@@ -231,11 +267,12 @@ CREATE TABLE activities
 
 CREATE TABLE chats
 (
-    id      serial PRIMARY KEY,
-    creator INTEGER REFERENCES users (id) NOT NULL,
-    name    VARCHAR(50)                   NOT NULL,
-    image   BYTEA,
-    active  BOOLEAN                       NOT NULL DEFAULT true
+    id         serial PRIMARY KEY,
+    creator    INTEGER REFERENCES users (id) NOT NULL,
+    name       VARCHAR(50)                   NOT NULL,
+    image      BYTEA,
+    active     BOOLEAN                       NOT NULL DEFAULT true,
+    group_chat BOOLEAN                       NOT NULL DEFAULT false
 );
 
 CREATE TABLE chats_users
