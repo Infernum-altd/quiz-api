@@ -6,7 +6,12 @@ import lombok.Data;
 public class ResponseToken {
     String token;
 
-    public ResponseToken(String token) {
+    String id;
+    String email;
+
+    public ResponseToken(String token, String id, String email) {
         this.token = token;
+        this.id = id;
+        this.email = email;
     }
 }

@@ -42,4 +42,8 @@ public class UserService {
     public boolean updatePasswordById(int id, String newPassword) {
         return userDao.updatePasswordById(id, newPassword);
     }
+
+    public int getUserIdByEmail(String email){
+        return userDao.getUserIdByEmail(email);
+    }
 }

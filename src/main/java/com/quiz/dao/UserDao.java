@@ -30,6 +30,7 @@ public class UserDao {
     private final static String INSERT_USER = "INSERT INTO users (email, password) VALUES (?,?)";
     private final static String UPDATE_USER = "UPDATE users  SET name = ?, surname = ?, birthdate = ?, gender = ?, city = ?, about = ? WHERE id = ?";
     private final static String UPDATE_USER_PASSWORD = "UPDATE users SET password = ? WHERE id = ?";
+    private static final String GET_USER_ID_BY_EMAIL = "SELECT id FROM users WHERE email = ?";
     public static final String TABLE_USERS = "users";
 
     public User findByEmail(String email) {
@@ -165,5 +166,13 @@ public class UserDao {
     public boolean updatePasswordById(int id, String newPassword) {
         int affectedNumberOfRows = jdbcTemplate.update(UPDATE_USER_PASSWORD, newPassword, id);
         return affectedNumberOfRows > 0;
+    }
+
+    public int getUserIdByEmail(String email) {
+        List<Integer> id = jdbcTemplate.query(GET_USER_ID_BY_EMAIL, new Object[]{email}, (resultSet, i) -> {
+             return resultSet.getInt("id");
+        });
+
+        return id.get(0);
     }
 }
