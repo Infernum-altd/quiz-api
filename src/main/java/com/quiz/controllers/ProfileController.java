@@ -4,6 +4,7 @@ import com.quiz.entities.Quiz;
 import com.quiz.entities.User;
 import com.quiz.service.QuizService;
 import com.quiz.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,18 +13,20 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin
 @RequestMapping("/profile")
+@RequiredArgsConstructor
+@CrossOrigin
 public class ProfileController {
+
     @Autowired
     UserService userRepo;
-
     @Autowired
     QuizService quizService;
 
+    @CrossOrigin
     @GetMapping("/myprofile/{userId}")
     public ResponseEntity<User> getUserProfile(@PathVariable int userId){
-        return ResponseEntity.ok(userRepo.findProfileInfoByUserId(userId));
+        return ResponseEntity.status(HttpStatus.OK).body(userRepo.findProfileInfoByUserId(userId));
     }
 
     @GetMapping("/myfriends/{userId}")
