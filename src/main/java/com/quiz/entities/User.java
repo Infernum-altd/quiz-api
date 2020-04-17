@@ -7,6 +7,8 @@ import lombok.ToString;
 import java.io.File;
 import java.sql.Date;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 public class User {
