@@ -28,7 +28,7 @@ public class UserDao {
     private final static String USER_GET_ALL_FOR_PROFILE_BY_ID = "SELECT id, name, surname, birthdate, gender, city, about FROM users WHERE id = ?";
     private final static String FIND_FRIENDS_BY_USER_ID = "SELECT friend_id, name, surname, rating FROM users INNER JOIN friends ON id = user_id WHERE id = ?";
     private final static String INSERT_USER = "INSERT INTO users (email, password) VALUES (?,?)";
-    private final static String UPDATE_USER = "UPDATE users  SET name = ?, surname = ?, birthdate = ?, gender = ?, city = ?, about = ? WHERE id = ?";
+    private final static String UPDATE_USER = "UPDATE users  SET name = ?, surname = ?, birthdate = ?, gender = ?::gender_type, city = ?, about = ? WHERE id = ?";
     private final static String UPDATE_USER_PASSWORD = "UPDATE users SET password = ? WHERE id = ?";
     private static final String GET_USER_ID_BY_EMAIL = "SELECT id FROM users WHERE email = ?";
     public static final String TABLE_USERS = "users";
@@ -157,8 +157,8 @@ public class UserDao {
     public boolean updateUser(User user) {
         int affectedRowNumber = jdbcTemplate.update(UPDATE_USER, user.getName(),
                 user.getSurname(), user.getBirthdate(),
-                user.getGender(), user.getCity(),
-                user.getAbout());
+                String.valueOf(user.getGender()), user.getCity(),
+                user.getAbout(), user.getId());
 
         return affectedRowNumber > 0;
     }
@@ -169,9 +169,7 @@ public class UserDao {
     }
 
     public int getUserIdByEmail(String email) {
-        List<Integer> id = jdbcTemplate.query(GET_USER_ID_BY_EMAIL, new Object[]{email}, (resultSet, i) -> {
-             return resultSet.getInt("id");
-        });
+        List<Integer> id = jdbcTemplate.query(GET_USER_ID_BY_EMAIL, new Object[]{email}, (resultSet, i) -> resultSet.getInt("id"));
 
         return id.get(0);
     }

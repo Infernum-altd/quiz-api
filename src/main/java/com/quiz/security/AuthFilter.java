@@ -14,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Enumeration;
 
 @Slf4j
 public class AuthFilter extends OncePerRequestFilter {
@@ -42,6 +43,7 @@ public class AuthFilter extends OncePerRequestFilter {
 
     // TODO: 09.04.2020 create const
     private String getToken(HttpServletRequest request) {
+
         String token = request.getHeader("authorization");
         if (!StringUtils.isEmpty(token) && token.startsWith("Bearer ")) {
             return token.replace("Bearer ", "");

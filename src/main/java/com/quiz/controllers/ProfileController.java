@@ -7,6 +7,7 @@ import com.quiz.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/profile")
 @RequiredArgsConstructor
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public class ProfileController {
 
     @Autowired
@@ -23,7 +24,6 @@ public class ProfileController {
     @Autowired
     QuizService quizService;
 
-    @CrossOrigin
     @GetMapping("/myprofile/{userId}")
     public ResponseEntity<User> getUserProfile(@PathVariable int userId){
         return ResponseEntity.status(HttpStatus.OK).body(userRepo.findProfileInfoByUserId(userId));
@@ -35,11 +35,11 @@ public class ProfileController {
     }
 
     @PostMapping("/myprofile/update")
-    public ResponseEntity<String> updateUserProfile(@RequestBody User user){
+    public ResponseEntity<User> updateUserProfile(@RequestBody User user){
         boolean isRecordAffected = userRepo.updateUser(user);
 
         if (isRecordAffected){
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+            return ResponseEntity.ok(user);
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
