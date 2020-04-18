@@ -1,13 +1,13 @@
 package com.quiz.controllers;
 
 import com.quiz.entities.Quiz;
+import com.quiz.entities.ResponseText;
 import com.quiz.entities.User;
 import com.quiz.service.QuizService;
 import com.quiz.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +30,7 @@ public class ProfileController {
     }
 
     @GetMapping("/myfriends/{userId}")
-    public ResponseEntity<List<User>> showFriends(@PathVariable int userId) {
+    public ResponseEntity<List<User>> getFriends(@PathVariable int userId) {
         return ResponseEntity.ok(userRepo.findFriendByUserId(userId));
     }
 
@@ -62,5 +62,10 @@ public class ProfileController {
     @GetMapping("/myfavorite/{userId}")
     public ResponseEntity<List<Quiz>> getFavoriteQuizzes(@PathVariable int userId){
         return ResponseEntity.ok(quizService.findFavoriteQuizzes(userId));
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<ResponseText> getCategoryNameByCategoryId(@PathVariable int categoryId){
+        return ResponseEntity.ok(new ResponseText(quizService.getCategoryNameByCategoryId(categoryId)));
     }
 }

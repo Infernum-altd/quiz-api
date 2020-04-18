@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
+
 @RequiredArgsConstructor
 public class UserDao {
 
@@ -26,7 +27,7 @@ public class UserDao {
     private final static String USER_FIND_BY_EMAIL = "SELECT id, email, password FROM users WHERE email = ?";
     private final static String USER_FIND_BY_ID = "SELECT id,email,password FROM users WHERE id = ?";
     private final static String USER_GET_ALL_FOR_PROFILE_BY_ID = "SELECT id, name, surname, birthdate, gender, city, about FROM users WHERE id = ?";
-    private final static String FIND_FRIENDS_BY_USER_ID = "SELECT friend_id, name, surname, rating FROM users INNER JOIN friends ON id = user_id WHERE id = ?";
+    private final static String FIND_FRIENDS_BY_USER_ID = "SELECT id, name, surname, rating FROM users where id in (SELECT friend_id FROM users INNER JOIN friends ON user_id = id WHERE id = ?)";
     private final static String INSERT_USER = "INSERT INTO users (email, password) VALUES (?,?)";
     private final static String UPDATE_USER = "UPDATE users  SET name = ?, surname = ?, birthdate = ?, gender = ?::gender_type, city = ?, about = ? WHERE id = ?";
     private final static String UPDATE_USER_PASSWORD = "UPDATE users SET password = ? WHERE id = ?";
@@ -139,7 +140,7 @@ public class UserDao {
                 FIND_FRIENDS_BY_USER_ID,
                 new Object[]{id}, (resultSet, i) -> {
                     User user = new User();
-                    user.setId(resultSet.getInt("friend_id"));
+                    user.setId(resultSet.getInt(USERS_ID));
                     user.setName(resultSet.getString(USERS_NAME));
                     user.setSurname(resultSet.getString(USERS_SURNAME));
                     user.setRating(resultSet.getInt(USERS_RATING));

@@ -4,6 +4,7 @@ import com.quiz.dao.UserDao;
 import com.quiz.entities.User;
 import com.quiz.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 public class UserService {
 
     private final UserDao userDao;
+    private final PasswordEncoder passwordEncoder;
 
     public User findByEmail(String email) {
         User userdb = userDao.findByEmail(email);
@@ -40,7 +42,7 @@ public class UserService {
     }
 
     public boolean updatePasswordById(int id, String newPassword) {
-        return userDao.updatePasswordById(id, newPassword);
+        return userDao.updatePasswordById(id, passwordEncoder.encode(newPassword));
     }
 
     public int getUserIdByEmail(String email){

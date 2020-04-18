@@ -20,4 +20,8 @@ public class QuizService {
     public List<Quiz> findFavoriteQuizzes(int userId) {
         return quizDao.getFavoriteGamesByUserId(userId);
     }
+
+    public String getCategoryNameByCategoryId(int categoryId){
+        return quizDao.getCategoryNameByCategoryId(categoryId);
+    }
 }
