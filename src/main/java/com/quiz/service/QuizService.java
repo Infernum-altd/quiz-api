@@ -1,8 +1,11 @@
 package com.quiz.service;
 
 import com.quiz.dao.QuizDao;
+import com.quiz.dto.QuizDto;
 import com.quiz.entities.Quiz;
+import com.quiz.entities.StatusType;
 import com.quiz.entities.User;
+import com.quiz.exceptions.EmailExistException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +17,17 @@ public class QuizService {
 
     private final QuizDao quizDao;
 
-    public Quiz findById(int id) { return quizDao.findById(id); }
+    public List<Quiz> findQuizzesByStatus(StatusType status){
+        return quizDao.getQuizzesByStatus(status);
+    }
+
+    public List<Quiz> findAllQuizzes(){
+        return quizDao.getAllQuizzes();
+    }
+
+    public Quiz findQuizById(int id) {
+        return quizDao.findById(id);
+    }
 
     public List<Quiz> findQuizzesCreatedByUserId(int userId) {
         return quizDao.getQuizzesCreatedByUser(userId);
@@ -28,8 +41,21 @@ public class QuizService {
         return quizDao.getQuizzesByCategory(categoryId);
     }
 
+    public List<Quiz> findQuizzesByTag(int tagId) {
+        return quizDao.getQuizzesByTag(tagId);
+    }
+
+    public List<Quiz> findQuizzesByName(String name) {
+        return quizDao.findQuizzesByName(name);
+    }
+
     public boolean updateQuiz(Quiz quiz) {
         return quizDao.updateQuiz(quiz);
+    }
+
+    public QuizDto insertQuiz(Quiz quiz) {
+        quizDao.insert(quiz);
+        return new QuizDto(quiz);
     }
 
 }
