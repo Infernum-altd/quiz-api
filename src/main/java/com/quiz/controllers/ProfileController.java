@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -67,5 +69,35 @@ public class ProfileController {
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<ResponseText> getCategoryNameByCategoryId(@PathVariable int categoryId){
         return ResponseEntity.ok(new ResponseText(quizService.getCategoryNameByCategoryId(categoryId)));
+    }
+
+    @PostMapping("/newicon/{userId}")
+    public ResponseEntity<String> changeProfileIcon(@RequestParam(value = "image") MultipartFile image, @PathVariable int userId){
+        boolean isRecordAffected = userRepo.updateProfileImage(image, userId);
+
+        if (isRecordAffected){
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    @GetMapping("/getimage/{userId}")
+    public ResponseEntity<ResponseText> getUserImage(@PathVariable int userId){
+        return ResponseEntity.ok(new ResponseText(new String(Base64.getEncoder().encode(userRepo.getImageByUserId(userId)))));
+    }
+
+    @PostMapping("/status/{userId}")
+    public ResponseEntity<ResponseText> updateNotificationStatus(@RequestBody String status, @PathVariable int userId){
+        boolean isRecordAffected = userRepo.changeNotificationStatus(status, userId);
+
+        if (isRecordAffected){
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    @GetMapping("status/{userId}")
+    public ResponseEntity<ResponseText> getUserNotificationStatus(@PathVariable int userId){
+        return ResponseEntity.ok(new ResponseText(userRepo.getNotificationStatus(userId)));
     }
 }

@@ -6,7 +6,9 @@ import com.quiz.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
 
 @Component
@@ -47,5 +49,21 @@ public class UserService {
 
     public int getUserIdByEmail(String email){
         return userDao.getUserIdByEmail(email);
+    }
+
+    public boolean updateProfileImage(MultipartFile image, int userId) {
+        return userDao.updateProfileImage(image, userId);
+    }
+
+    public byte[] getImageByUserId(int userId) {
+        return userDao.getUserImageByUserId(userId);
+    }
+
+    public boolean changeNotificationStatus(String status, int userId) {
+        return userDao.updateNotificationStatus(status, userId);
+    }
+
+    public String getNotificationStatus(int userId) {
+        return userDao.getUserNotification(userId);
     }
 }

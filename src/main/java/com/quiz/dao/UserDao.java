@@ -12,7 +12,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +33,11 @@ public class UserDao {
     private final static String INSERT_USER = "INSERT INTO users (email, password) VALUES (?,?)";
     private final static String UPDATE_USER = "UPDATE users  SET name = ?, surname = ?, birthdate = ?, gender = ?::gender_type, city = ?, about = ? WHERE id = ?";
     private final static String UPDATE_USER_PASSWORD = "UPDATE users SET password = ? WHERE id = ?";
-    private static final String GET_USER_ID_BY_EMAIL = "SELECT id FROM users WHERE email = ?";
+    private final static String UPDATE_USER_IMAGE = "UPDATE users SET image = ? WHERE id = ?";
+    private final static String GET_USER_ID_BY_EMAIL = "SELECT id FROM users WHERE email = ?";
+    private final static String GET_USER_IMAGE_BY_USER_ID = "SELECT image FROM users WHERE id = ?";
+    private final static String UPDATE_NOTIFICATION_STATUS = "UPDATE users SET notifications = ?::user_notification_type WHERE id = ?";
+    private final static String GET_NOTIFICATION = "SELECT notifications from users WHERE id = ?";
     public static final String TABLE_USERS = "users";
 
     public User findByEmail(String email) {
@@ -173,5 +179,33 @@ public class UserDao {
         List<Integer> id = jdbcTemplate.query(GET_USER_ID_BY_EMAIL, new Object[]{email}, (resultSet, i) -> resultSet.getInt("id"));
 
         return id.get(0);
+    }
+
+    public boolean updateProfileImage(MultipartFile image, int userId) {
+        int affectedNumbersOfRows = 0;
+        try {
+            affectedNumbersOfRows = jdbcTemplate.update(UPDATE_USER_IMAGE, image.getBytes(), userId);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        return affectedNumbersOfRows > 0;
+    }
+
+    public byte[] getUserImageByUserId(int userId) {
+        List<byte[]> imageBlob = jdbcTemplate.query(GET_USER_IMAGE_BY_USER_ID, new Object[]{userId}, (resultSet, i) -> resultSet.getBytes("image"));
+
+        if (imageBlob.get(0) == null){
+            return null;
+        }
+        return imageBlob.get(0);
+    }
+
+    public boolean updateNotificationStatus(String status, int userId) {
+        int affectedNumberOfRows = jdbcTemplate.update(UPDATE_NOTIFICATION_STATUS, status, userId);
+        return affectedNumberOfRows > 0;
+    }
+
+    public String getUserNotification(int userId) {
+        return jdbcTemplate.query(GET_NOTIFICATION, new Object[]{userId}, (resultSet, i) -> resultSet.getString("notifications")).get(0);
     }
 }
