@@ -1,5 +1,6 @@
 package com.quiz.controllers;
 
+import com.quiz.entities.NotificationStatus;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.ResponseText;
 import com.quiz.entities.User;
@@ -87,7 +88,7 @@ public class ProfileController {
     }
 
     @PostMapping("/status/{userId}")
-    public ResponseEntity<ResponseText> updateNotificationStatus(@RequestBody String status, @PathVariable int userId){
+    public ResponseEntity<String> updateNotificationStatus(@RequestBody String status, @PathVariable int userId){
         boolean isRecordAffected = userRepo.changeNotificationStatus(status, userId);
 
         if (isRecordAffected){
@@ -97,7 +98,7 @@ public class ProfileController {
     }
 
     @GetMapping("status/{userId}")
-    public ResponseEntity<ResponseText> getUserNotificationStatus(@PathVariable int userId){
-        return ResponseEntity.ok(new ResponseText(userRepo.getNotificationStatus(userId)));
+    public ResponseEntity<NotificationStatus> getUserNotificationStatus(@PathVariable int userId){
+        return ResponseEntity.ok(userRepo.getNotificationStatus(userId));
     }
 }

@@ -1,6 +1,7 @@
 package com.quiz.service;
 
 import com.quiz.dao.UserDao;
+import com.quiz.entities.NotificationStatus;
 import com.quiz.entities.User;
 import com.quiz.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -63,7 +64,7 @@ public class UserService {
         return userDao.updateNotificationStatus(status, userId);
     }
 
-    public String getNotificationStatus(int userId) {
+    public NotificationStatus getNotificationStatus(int userId) {
         return userDao.getUserNotification(userId);
     }
 }

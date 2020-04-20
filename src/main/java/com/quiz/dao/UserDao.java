@@ -4,6 +4,7 @@ import static com.quiz.dao.mapper.UserMapper.*;
 
 import com.quiz.dao.mapper.UserMapper;
 import com.quiz.entities.Gender;
+import com.quiz.entities.NotificationStatus;
 import com.quiz.exceptions.DatabaseException;
 import com.quiz.entities.User;
 import lombok.RequiredArgsConstructor;
@@ -205,7 +206,7 @@ public class UserDao {
         return affectedNumberOfRows > 0;
     }
 
-    public String getUserNotification(int userId) {
-        return jdbcTemplate.query(GET_NOTIFICATION, new Object[]{userId}, (resultSet, i) -> resultSet.getString("notifications")).get(0);
+    public NotificationStatus getUserNotification(int userId) {
+        return NotificationStatus.valueOf(jdbcTemplate.query(GET_NOTIFICATION, new Object[]{userId}, (resultSet, i) -> resultSet.getString("notifications")).get(0));
     }
 }
