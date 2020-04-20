@@ -3,7 +3,6 @@ package com.quiz.dao;
 import com.quiz.dao.mapper.QuizMapper;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.StatusType;
-import com.quiz.entities.User;
 import com.quiz.exceptions.DatabaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
@@ -12,13 +11,11 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.quiz.dao.mapper.QuizMapper.*;
-import static com.quiz.dao.mapper.UserMapper.*;
 
 @Repository
 @RequiredArgsConstructor

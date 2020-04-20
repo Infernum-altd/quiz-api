@@ -1,11 +1,9 @@
 package com.quiz.dao;
 
-import static com.quiz.dao.mapper.UserMapper.*;
-
 import com.quiz.dao.mapper.UserMapper;
 import com.quiz.entities.Gender;
-import com.quiz.exceptions.DatabaseException;
 import com.quiz.entities.User;
+import com.quiz.exceptions.DatabaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.quiz.dao.mapper.UserMapper.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -35,15 +35,15 @@ public class UserDao {
     public User findByEmail(String email) {
         List<User> users;
 
-       try {
+        try {
             users = jdbcTemplate.query(
                     USER_FIND_BY_EMAIL,
                     new Object[]{email}, (resultSet, i) -> {
                         User user = new User();
 
-                            user.setId(resultSet.getInt(USERS_ID));
-                            user.setEmail(resultSet.getString(USERS_EMAIL));
-                            user.setPassword(resultSet.getString(USERS_PASSWORD));
+                        user.setId(resultSet.getInt(USERS_ID));
+                        user.setEmail(resultSet.getString(USERS_EMAIL));
+                        user.setPassword(resultSet.getString(USERS_PASSWORD));
 
                         return user;
                     }
@@ -51,10 +51,10 @@ public class UserDao {
             if (users.isEmpty()) {
                 return null;
             }
-       } catch (DataAccessException e) {
+        } catch (DataAccessException e) {
             // TODO: 09.04.2020  check message
-           throw new DatabaseException(String.format("Find user by email '%s' database error occured", email));
-       }
+            throw new DatabaseException(String.format("Find user by email '%s' database error occured", email));
+        }
 
         return users.get(0);
     }
@@ -104,13 +104,13 @@ public class UserDao {
             jdbcTemplate.update(INSERT_USER, entity.getEmail(), entity.getPassword());
             //entity.setId(id);
         } catch (DataAccessException e) {
-          throw new DatabaseException("Database access exception while user insert");
+            throw new DatabaseException("Database access exception while user insert");
         }
 
         return entity;
     }
 
-    public User findProfileInfoByUserId(int id){
+    public User findProfileInfoByUserId(int id) {
         List<User> users = jdbcTemplate.query(
                 USER_GET_ALL_FOR_PROFILE_BY_ID,
                 new Object[]{id}, (resultSet, i) -> {
@@ -126,14 +126,14 @@ public class UserDao {
                     return user;
                 });
 
-        if (users.isEmpty()){
+        if (users.isEmpty()) {
             return null;
         }
 
         return users.get(0);
     }
 
-    public List<User> findFriendByUserId(int id){
+    public List<User> findFriendByUserId(int id) {
         List<User> friends = jdbcTemplate.query(
                 FIND_FRIENDS_BY_USER_ID,
                 new Object[]{id}, (resultSet, i) -> {
@@ -146,7 +146,7 @@ public class UserDao {
                     return user;
                 });
 
-        if (friends.isEmpty()){
+        if (friends.isEmpty()) {
             return null;
         }
 

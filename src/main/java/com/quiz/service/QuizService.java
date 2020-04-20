@@ -4,8 +4,6 @@ import com.quiz.dao.QuizDao;
 import com.quiz.dto.QuizDto;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.StatusType;
-import com.quiz.entities.User;
-import com.quiz.exceptions.EmailExistException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

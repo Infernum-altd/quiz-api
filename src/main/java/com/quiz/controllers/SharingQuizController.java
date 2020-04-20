@@ -44,7 +44,7 @@ public class SharingQuizController {
         return ResponseEntity.ok(quizService.findQuizzesByName(name));
     }
 
-    @PostMapping("/update")
+    @PostMapping("/update_quiz")
     public ResponseEntity<Quiz> updateQuizInfo(@RequestBody Quiz quiz){
 
         boolean isRecordAffected = quizService.updateQuiz(quiz);
@@ -55,7 +55,7 @@ public class SharingQuizController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-    @PostMapping("/insert")
+    @PostMapping("/new_quiz")
     public ResponseEntity<QuizDto> insert(@RequestBody Quiz quiz){
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(quizService.insertQuiz(quiz));
