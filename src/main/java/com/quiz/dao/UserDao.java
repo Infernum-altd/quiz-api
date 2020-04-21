@@ -1,7 +1,5 @@
 package com.quiz.dao;
 
-import static com.quiz.dao.mapper.UserMapper.*;
-
 import com.quiz.dao.mapper.UserMapper;
 import com.quiz.entities.Gender;
 import com.quiz.entities.NotificationStatus;
@@ -20,8 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Repository
+import static com.quiz.dao.mapper.UserMapper.*;
 
+@Repository
 @RequiredArgsConstructor
 public class UserDao {
 
@@ -119,7 +118,7 @@ public class UserDao {
         return entity;
     }
 
-    public User findProfileInfoByUserId(int id){
+    public User findProfileInfoByUserId(int id) {
         List<User> users = jdbcTemplate.query(
                 USER_GET_ALL_FOR_PROFILE_BY_ID,
                 new Object[]{id}, (resultSet, i) -> {
@@ -136,14 +135,14 @@ public class UserDao {
                     return user;
                 });
 
-        if (users.isEmpty()){
+        if (users.isEmpty()) {
             return null;
         }
 
         return users.get(0);
     }
 
-    public List<User> findFriendByUserId(int id){
+    public List<User> findFriendByUserId(int id) {
         List<User> friends = jdbcTemplate.query(
                 FIND_FRIENDS_BY_USER_ID,
                 new Object[]{id}, (resultSet, i) -> {
@@ -157,7 +156,7 @@ public class UserDao {
                     return user;
                 });
 
-        if (friends.isEmpty()){
+        if (friends.isEmpty()) {
             return null;
         }
 

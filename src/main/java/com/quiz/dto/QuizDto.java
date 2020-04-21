@@ -1,5 +1,6 @@
 package com.quiz.dto;
 
+import com.quiz.entities.Quiz;
 import com.quiz.entities.StatusType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,5 +30,16 @@ public class QuizDto {
         this.description = description;
         this.status = status;
         this.modificationTime = modificationTime;
+    }
+
+    public QuizDto(Quiz quiz){
+        this.id = quiz.getId();
+        this.name = quiz.getName();
+        this.author = quiz.getAuthor();
+        this.category_id = quiz.getCategory_id();
+        this.date = quiz.getDate();
+        this.description = quiz.getDescription();
+        this.status = quiz.getStatus();
+        this.modificationTime = quiz.getModificationTime();
     }
 }
