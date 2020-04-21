@@ -29,8 +29,8 @@ public class UserDao {
 
     private final static String USER_FIND_BY_EMAIL = "SELECT id, email, password FROM users WHERE email = ?";
     private final static String USER_FIND_BY_ID = "SELECT id,email,password FROM users WHERE id = ?";
-    private final static String USER_GET_ALL_FOR_PROFILE_BY_ID = "SELECT id, name, surname, birthdate, gender, city, about FROM users WHERE id = ?";
-    private final static String FIND_FRIENDS_BY_USER_ID = "SELECT id, name, surname, rating FROM users where id in (SELECT friend_id FROM users INNER JOIN friends ON user_id = id WHERE id = ?)";
+    private final static String USER_GET_ALL_FOR_PROFILE_BY_ID = "SELECT id, email, name, surname, birthdate, gender, city, about FROM users WHERE id = ?";
+    private final static String FIND_FRIENDS_BY_USER_ID = "SELECT id, email, name, surname, rating FROM users where id in (SELECT friend_id FROM users INNER JOIN friends ON user_id = id WHERE id = ?)";
     private final static String INSERT_USER = "INSERT INTO users (email, password) VALUES (?,?)";
     private final static String UPDATE_USER = "UPDATE users  SET name = ?, surname = ?, birthdate = ?, gender = ?::gender_type, city = ?, about = ? WHERE id = ?";
     private final static String UPDATE_USER_PASSWORD = "UPDATE users SET password = ? WHERE id = ?";
@@ -125,6 +125,7 @@ public class UserDao {
                 new Object[]{id}, (resultSet, i) -> {
                     User user = new User();
 
+                    user.setEmail(resultSet.getString(USERS_EMAIL));
                     user.setName(resultSet.getString(USERS_NAME));
                     user.setSurname(resultSet.getString(USERS_SURNAME));
                     user.setBirthdate(resultSet.getDate(USERS_BIRTHDATE));
@@ -148,6 +149,7 @@ public class UserDao {
                 new Object[]{id}, (resultSet, i) -> {
                     User user = new User();
                     user.setId(resultSet.getInt(USERS_ID));
+                    user.setEmail(resultSet.getString(USERS_EMAIL));
                     user.setName(resultSet.getString(USERS_NAME));
                     user.setSurname(resultSet.getString(USERS_SURNAME));
                     user.setRating(resultSet.getInt(USERS_RATING));
