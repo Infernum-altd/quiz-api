@@ -2,21 +2,29 @@ package com.quiz.dao;
 
 import static com.quiz.dao.mapper.UserMapper.*;
 
+import com.quiz.dao.mapper.QuizMapper;
 import com.quiz.dao.mapper.UserMapper;
 import com.quiz.entities.Gender;
+import com.quiz.entities.Quiz;
+import com.quiz.entities.Role;
 import com.quiz.exceptions.DatabaseException;
 import com.quiz.entities.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.PreparedStatement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class UserDao {
@@ -28,9 +36,12 @@ public class UserDao {
     private final static String USER_GET_ALL_FOR_PROFILE_BY_ID = "SELECT id, name, surname, birthdate, gender, city, about FROM users WHERE id = ?";
     private final static String FIND_FRIENDS_BY_USER_ID = "SELECT friend_id, name, surname, rating FROM users INNER JOIN friends ON id = user_id WHERE id = ?";
     private final static String INSERT_USER = "INSERT INTO users (email, password) VALUES (?,?)";
+    private final static String INSERT_MODERATOR = "INSERT INTO users (email, password, role) VALUES (?,?,CAST(? AS role_type))";
     private final static String UPDATE_USER = "UPDATE users  SET name = ?, surname = ?, birthdate = ?, gender = ?, city = ?, about = ? WHERE id = ?";
     private final static String UPDATE_USER_PASSWORD = "UPDATE users SET password = ? WHERE id = ?";
     private static final String GET_USER_ID_BY_EMAIL = "SELECT id FROM users WHERE email = ?";
+    private final static String FIND_ADMINS_USERS = "SELECT id,email,name,surname,role FROM users WHERE role = 'ADMIN' OR role = 'MODERATOR' OR role = 'SUPER_ADMIN'";
+    private final static String DELETE_USER="DELETE FROM users WHERE id = ?";
     public static final String TABLE_USERS = "users";
 
     public User findByEmail(String email) {
@@ -174,5 +185,50 @@ public class UserDao {
         });
 
         return id.get(0);
+    }
+    public List<User> findAdminsUsers() {
+        List<User> adminsUsers = jdbcTemplate.query(
+                FIND_ADMINS_USERS, (resultSet, i) -> {
+                    User user = new User();
+                    user.setEmail(resultSet.getString(USERS_EMAIL));
+                    user.setName(resultSet.getString(USERS_NAME));
+                    user.setSurname(resultSet.getString(USERS_SURNAME));
+                    user.setRole(Role.valueOf(resultSet.getString(USERS_ROLE).trim()));
+
+                    return user;
+                });
+
+        if (adminsUsers.isEmpty()) {
+            return null;
+        }
+
+        return adminsUsers;
+    }
+    @Transactional
+    public User createAdminUsers(User entity,String role) {
+        int id;
+        try {
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            jdbcTemplate.update(
+                    connection -> {
+                        PreparedStatement ps =
+                                connection.prepareStatement(INSERT_MODERATOR, new String[] {"id"});
+                        ps.setString(1, entity.getEmail());
+                        ps.setString(2,entity.getPassword());
+                        ps.setString(3,(role.equals("moderator")) ? Role.MODERATOR.toString() : Role.ADMIN.toString());
+                        return ps;
+                    },
+                    keyHolder);
+            id = (Integer) keyHolder.getKey();
+            entity.setId(id);
+        } catch (DataAccessException e) {
+            log.error("",e);
+            throw new DatabaseException("Database access exception while user insert");
+        }
+
+        return entity;
+    }
+    public void deleteUserById(int id) {
+        jdbcTemplate.update(DELETE_USER,id);
     }
 }

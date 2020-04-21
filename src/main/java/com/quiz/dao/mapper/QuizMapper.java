@@ -23,3 +23,4 @@ public class QuizMapper implements RowMapper<Quiz> {
         return quiz;
     }
 }
+

@@ -1,5 +1,6 @@
 package com.quiz.controllers;
 
+import com.quiz.dto.UserDto;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.User;
 import com.quiz.service.QuizService;
@@ -62,5 +63,25 @@ public class ProfileController {
     @GetMapping("/myfavorite/{userId}")
     public ResponseEntity<List<Quiz>> getFavoriteQuizzes(@PathVariable int userId){
         return ResponseEntity.ok(quizService.findFavoriteQuizzes(userId));
+    }
+
+    @GetMapping("/admin_users")
+    public ResponseEntity<List<User>> getAdminsUsers(){
+        return ResponseEntity.ok(userRepo.findAdminsUsers());
+    }
+    @PostMapping("myprofile/create_moderator/{role}")
+    public ResponseEntity<UserDto> createAdminUsers(@RequestBody User adminUsers,@PathVariable String role){
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userRepo.createAdminUsers(adminUsers, role));
+    }
+
+    @DeleteMapping("/delete/{id}")
+    void deleteUserById(@PathVariable int id) {
+        userRepo.deleteUserById(id);
+    }
+
+    @GetMapping("/not_checked_quizzes")
+    public ResponseEntity<List<Quiz>> getNotCheckedQuizzes(){
+        return ResponseEntity.ok(quizService.findNotCheckedQuizzes());
     }
 }

@@ -16,6 +16,7 @@ public class QuizDao {
 
     private final static String GET_GAMES_CREATED_BY_USER_ID = "SELECT * FROM quizzes WHERE author = ?";
     private final static String GET_FAVORITE_GAMES_BY_USER_ID = "SELECT * FROM quizzes INNER JOIN favorite_quizzes ON id = quiz_id WHERE user_id = ?";
+    private final static String GET_NOT_CHECKED_QUIZZES = "SELECT * FROM quizzes where status='PENDING'";
 
     public List<Quiz> getGamesCreatedByUser(int userId) {
 
@@ -36,6 +37,16 @@ public class QuizDao {
         }
 
         return quizzesCreatedByUser;
+    }
+
+    public List<Quiz> getNotCheckedQuizzes() {
+        List<Quiz> notCheckedQuizzes = jdbcTemplate.query(GET_NOT_CHECKED_QUIZZES, new Object[]{}, new QuizMapper());
+
+        if (notCheckedQuizzes.isEmpty()){
+            return null;
+        }
+
+        return notCheckedQuizzes;
     }
 
 }

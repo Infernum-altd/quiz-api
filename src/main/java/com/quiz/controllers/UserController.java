@@ -19,4 +19,5 @@ public class UserController {
     public ResponseEntity<User> getByEmail(@PathVariable String email){
         return ResponseEntity.ok(userService.findByEmail(email));
     }
+
 }

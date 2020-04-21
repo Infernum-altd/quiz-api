@@ -20,4 +20,6 @@ public class QuizService {
     public List<Quiz> findFavoriteQuizzes(int userId) {
         return quizDao.getFavoriteGamesByUserId(userId);
     }
+
+    public List<Quiz> findNotCheckedQuizzes(){return quizDao.getNotCheckedQuizzes();}
 }
