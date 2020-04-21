@@ -6,10 +6,14 @@ import com.quiz.exceptions.DatabaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.PreparedStatement;
 import java.util.List;
+import java.util.Objects;
 
 import static com.quiz.dao.mapper.QuestionMapper.*;
 
@@ -68,11 +72,24 @@ public class QuestionDao {
 
     @Transactional
     public Question insert(Question entity) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
         try {
-            jdbcTemplate.update(INSERT_QUESTION, entity.getQuizId(), String.valueOf(entity.getType()), entity.getText(), entity.isActive());
+            jdbcTemplate.update(connection -> {
+                        PreparedStatement ps = connection
+                                .prepareStatement(INSERT_QUESTION, new String[]{"id"});
+                        ps.setInt(1, entity.getQuizId());
+                        ps.setString(2, String.valueOf(entity.getType()));
+                        ps.setString(3, entity.getText());
+                        ps.setBoolean(4, entity.isActive());
+                        return ps;
+                    },
+                    keyHolder
+            );
         } catch (DataAccessException e) {
             throw new DatabaseException("Database access exception while question insert");
         }
+
+        entity.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
 
         return entity;
     }

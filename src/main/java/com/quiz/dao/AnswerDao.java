@@ -72,15 +72,19 @@ public class AnswerDao {
     public Answer insert(Answer answer) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection
-                    .prepareStatement(INSERT_ANSWER, new String[]{"id"});
-            ps.setInt(1, answer.getQuestionId());
-            ps.setString(2, answer.getText());
-            ps.setBoolean(3, answer.isCorrect());
+        try {
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection
+                        .prepareStatement(INSERT_ANSWER, new String[]{"id"});
+                ps.setInt(1, answer.getQuestionId());
+                ps.setString(2, answer.getText());
+                ps.setBoolean(3, answer.isCorrect());
 
-            return ps;
-        }, keyHolder);
+                return ps;
+            }, keyHolder);
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Database access exception while quiz insert");
+        }
 
         answer.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
 
