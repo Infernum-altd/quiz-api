@@ -18,12 +18,12 @@ import static com.quiz.dao.mapper.QuestionMapper.*;
 public class QuestionDao {
     private final JdbcTemplate jdbcTemplate;
 
-    private final static String QUESTION_FIND_BY_ID = "SELECT id, quiz_id, type, text, active FROM questions WHERE id = ?";
-    private final static String QUESTION_FIND_BY_QUIZ_ID = "SELECT id, quiz_id, type, text, active FROM questions WHERE quiz_id = ?";
+    private static final String QUESTION_FIND_BY_ID = "SELECT id, quiz_id, type, text, active FROM questions WHERE id = ?";
+    private static final String QUESTION_FIND_BY_QUIZ_ID = "SELECT id, quiz_id, type, text, active FROM questions WHERE quiz_id = ?";
 
-    private final static String INSERT_QUESTION = "INSERT INTO questions (quiz_id, type, text, active) VALUES ( ?, ?::question_type, ?, ?)";
+    private static final String INSERT_QUESTION = "INSERT INTO questions (quiz_id, type, text, active) VALUES ( ?, ?::question_type, ?, ?)";
 
-    private final static String UPDATE_QUESTION = "UPDATE questions SET type=?, text=?, active=? WHERE id=?";
+    private static final String UPDATE_QUESTION = "UPDATE questions SET type=?, text=?, active=? WHERE id=?";
 
     public static final String TABLE_QUESTIONS = "questions";
 
@@ -31,21 +31,7 @@ public class QuestionDao {
         List<Question> questions;
 
         try {
-            questions = jdbcTemplate.query(
-                    QUESTION_FIND_BY_ID,
-                    new Object[]{id},
-                    (resultSet, i) -> {
-                        Question question = new Question();
-
-                        question.setId(resultSet.getInt(QUESTION_ID));
-                        question.setQuizId(resultSet.getInt(QUESTION_QUIZ_ID));
-                        question.setType(QuestionType.valueOf(resultSet.getString(QUESTION_TYPE)));
-                        question.setText(resultSet.getString(QUESTION_TEXT));
-                        question.setActive(resultSet.getBoolean(QUESTION_ACTIVE));
-
-                        return question;
-                    }
-            );
+            questions = getQuery(QUESTION_FIND_BY_ID, id);
             if (questions.isEmpty()) {
                 return null;
             }
@@ -58,9 +44,9 @@ public class QuestionDao {
         return questions.get(0);
     }
 
-    public List<Question> findQuestionsByQuizId(int id) {
-        List<Question> questions = jdbcTemplate.query(
-                QUESTION_FIND_BY_QUIZ_ID,
+    private List<Question> getQuery(String sql, int id) {
+        return jdbcTemplate.query(
+                sql,
                 new Object[]{id},
                 (resultSet, i) -> {
                     Question question = new Question();
@@ -72,8 +58,12 @@ public class QuestionDao {
                     question.setActive(resultSet.getBoolean(QUESTION_ACTIVE));
 
                     return question;
-                });
-        return questions;
+                }
+        );
+    }
+
+    public List<Question> findQuestionsByQuizId(int id) {
+        return getQuery(QUESTION_FIND_BY_QUIZ_ID, id);
     }
 
     @Transactional
