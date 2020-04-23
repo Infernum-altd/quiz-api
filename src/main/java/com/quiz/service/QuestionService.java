@@ -5,6 +5,7 @@ import com.quiz.dto.QuestionDto;
 import com.quiz.entities.Question;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -27,8 +28,16 @@ public class QuestionService {
         return new QuestionDto(question);
     }
 
+    public byte[] getQuestionByQuestionId(int questionId) {
+        return questionDao.getQuestionImageByQuestionId(questionId);
+    }
+
     public boolean updateQuestion(Question question) {
         return questionDao.updateQuestion(question);
+    }
+
+    public boolean updateImageByQuestionId(MultipartFile image, int answerId) {
+        return questionDao.updateQuestionImage(image, answerId);
     }
 
 }

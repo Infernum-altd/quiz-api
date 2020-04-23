@@ -11,8 +11,11 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,8 +35,10 @@ public class QuizDao {
     private final static String GET_QUIZZES_BY_CATEGORY_ID = "SELECT * FROM quizzes WHERE category_id = ?";
     private final static String GET_QUIZZES_BY_TAG = "SELECT * FROM quizzes INNER JOIN quizzes_tags on id = quiz_id where tag_id = ?";
     private final static String GET_QUIZZES_BY_NAME = "SELECT * FROM quizzes WHERE name LIKE ?";
-    private final static String INSERT_QUIZ = "INSERT INTO quizzes (name , author, category_id, date, description,status, modification_time) VALUES (?,?,?,?,?,?::status_type,?)";
+    private final static String GET_QUIZ_IMAGE_BY_QUIZ_ID = "SELECT image FROM quizzes WHERE id = ?";
+    private final static String INSERT_QUIZ = "INSERT INTO quizzes (name , author, category_id, date, description,status, modification_time) VALUES (?,?,?,?,?,?,?)";
     private final static String UPDATE_QUIZ = "UPDATE quizzes SET name = ?, author = ?, category_id = ?, date = ?, description = ?, status = ?::status_type, modification_time = ? WHERE id = ?";
+    private final static String UPDATE_QUIZ_IMAGE = "UPDATE quizzes SET image = ? WHERE id = ?";
     public static final String TABLE_QUIZZES = "quizzes";
 
     public List<Quiz> getQuizzesByStatus(StatusType status) {
@@ -142,6 +147,17 @@ public class QuizDao {
         return quizzesByTag;
     }
 
+    public byte[] getQuizImageByQuizId(int quizId) {
+        List<byte[]> imageBlob = jdbcTemplate.query(
+                GET_QUIZ_IMAGE_BY_QUIZ_ID,
+                new Object[]{quizId},
+                (resultSet, i) -> resultSet.getBytes("image"));
+        if (imageBlob.get(0) == null) {
+            return null;
+        }
+        return imageBlob.get(0);
+    }
+
     @Transactional
     public Quiz insert(Quiz entity) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -176,5 +192,15 @@ public class QuizDao {
                 quiz.getStatus(), quiz.getModificationTime(), quiz.getId());
 
         return affectedRowNumber > 0;
+    }
+
+    public boolean updateQuizImage(MultipartFile image, int quizId) {
+        int affectedNumberOfRows = 0;
+        try {
+            affectedNumberOfRows = jdbcTemplate.update(UPDATE_QUIZ_IMAGE, image.getBytes(), quizId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return affectedNumberOfRows > 0;
     }
 }

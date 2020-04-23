@@ -6,6 +6,7 @@ import com.quiz.entities.Quiz;
 import com.quiz.entities.StatusType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,11 +16,11 @@ public class QuizService {
 
     private final QuizDao quizDao;
 
-    public List<Quiz> findQuizzesByStatus(StatusType status){
+    public List<Quiz> findQuizzesByStatus(StatusType status) {
         return quizDao.getQuizzesByStatus(status);
     }
 
-    public List<Quiz> findAllQuizzes(){
+    public List<Quiz> findAllQuizzes() {
         return quizDao.getAllQuizzes();
     }
 
@@ -47,8 +48,16 @@ public class QuizService {
         return quizDao.findQuizzesByName(name);
     }
 
+    public byte[] getImageByQuizId(int quizId) {
+        return quizDao.getQuizImageByQuizId(quizId);
+    }
+
     public boolean updateQuiz(Quiz quiz) {
         return quizDao.updateQuiz(quiz);
+    }
+
+    public boolean updateQuizImage(MultipartFile image, int quizId) {
+        return quizDao.updateQuizImage(image, quizId);
     }
 
     public QuizDto insertQuiz(Quiz quiz) {

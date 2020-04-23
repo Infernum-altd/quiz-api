@@ -21,7 +21,7 @@ public class TagDao {
     private final JdbcTemplate jdbcTemplate;
 
     private static final String TAG_BY_ID = "SELECT id, name FROM tags WHERE id = ?";
-    private static final String TAG_BY_NAME = "SELECT id, name FROM tags WHERE name = ?";
+    private static final String TAG_BY_NAME = "SELECT id, name FROM tags WHERE name LIKE ?";
     private static final String TAGS_BY_QUIZ = "SELECT id, name FROM tags INNER JOIN quizzes_tags on id = tag_id where quiz_id = ?";
     private static final String INSERT_TAG = "INSERT INTO tags (name) SELECT (?) WHERE NOT EXISTS(SELECT FROM tags WHERE name = ?)";
 
