@@ -21,7 +21,8 @@ public class TagDao {
     private final JdbcTemplate jdbcTemplate;
 
     private static final String TAG_BY_ID = "SELECT id, name FROM tags WHERE id = ?";
-    private static final String TAG_BY_NAME = "SELECT id, name FROM tags WHERE name LIKE ?";
+    private static final String TAG_BY_NAME = "SELECT id, name FROM tags WHERE name = ?";
+    private static final String TAGS_BY_NAME = "SELECT id, name FROM tags WHERE name SIMILAR TO ?";
     private static final String TAGS_BY_QUIZ = "SELECT id, name FROM tags INNER JOIN quizzes_tags on id = tag_id where quiz_id = ?";
     private static final String INSERT_TAG = "INSERT INTO tags (name) SELECT (?) WHERE NOT EXISTS(SELECT FROM tags WHERE name = ?)";
 
@@ -55,6 +56,22 @@ public class TagDao {
         }
 
         return tags.get(0);
+    }
+
+    public List<Tag> getTagsByName(String name) {
+        List<Tag> tags;
+
+        try {
+            tags = jdbcTemplate.query(
+                    TAGS_BY_NAME,
+                    new Object[]{name},
+                    new TagMapper()
+            );
+        } catch (DataAccessException e) {
+            throw new DatabaseException(String.format("Find tag by name '%s' database error occurred", name));
+        }
+
+        return tags;
     }
 
     public List<Tag> getTagsByQuiz(int quizId) {

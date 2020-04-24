@@ -17,8 +17,12 @@ public class TagService {
         return tagDao.getTagById(id);
     }
 
-    public Tag findByName(String name) {
+    public Tag findTagByName(String name) {
         return tagDao.getTagByName(name);
+    }
+
+    public List<Tag> findTagsByName(String name) {
+        return tagDao.getTagsByName(name);
     }
 
     public List<Tag> findTagsByQuiz(int quizId){

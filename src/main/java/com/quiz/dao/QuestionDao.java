@@ -28,7 +28,7 @@ public class QuestionDao {
     private static final String QUESTION_FIND_BY_QUIZ_ID = "SELECT id, quiz_id, type, text, active FROM questions WHERE quiz_id = ?";
     private static final String QUESTION_IMAGE_BY_QUESTION_ID = "SELECT image from questions WHERE id = ?";
 
-    private static final String INSERT_QUESTION = "INSERT INTO questions (quiz_id, type, text, active) VALUES ( ?, ?, ?, ?)";
+    private static final String INSERT_QUESTION = "INSERT INTO questions (quiz_id, type, text, active) VALUES ( ?, ?::question_type, ?, ?)";
 
     private static final String UPDATE_QUESTION = "UPDATE questions SET type=?, text=?, active=? WHERE id=?";
     private static final String UPDATE_QUESTION_IMAGE = "UPDATE questions SET image = ? WHERE id = ?";

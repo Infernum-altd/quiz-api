@@ -25,7 +25,12 @@ public class TagController {
 
     @GetMapping("/name/{tagName}")
     public ResponseEntity<Tag> getTagByName(@PathVariable String tagName) {
-        return ResponseEntity.ok(tagService.findByName(tagName));
+        return ResponseEntity.ok(tagService.findTagByName(tagName));
+    }
+
+    @GetMapping("/regex_name")
+    public ResponseEntity<List<Tag>> getTagsByName(@RequestParam(value = "name") String tagName) {
+        return ResponseEntity.ok(tagService.findTagsByName(tagName));
     }
 
     @GetMapping("/quiz/{quizId}")
