@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 import com.quiz.entities.Announcement;
+import com.quiz.entities.StatusType;
 @Component
 public class AnnouncementMapper implements RowMapper<Announcement>{
 
@@ -24,6 +25,7 @@ public class AnnouncementMapper implements RowMapper<Announcement>{
 		an.setUser_id(rs.getInt(ANNOUNCEMENT_USER_ID));
 		an.setGame_id(rs.getInt(ANNOUNCEMENT_GAME_ID));
 		an.setDescription(rs.getString(ANNOUNCEMENT_DESCRIPTION));
+		an.setStatus(StatusType.valueOf(rs.getString(ANNOUNCEMENT_STATUS)));
 		an.setModification_time(rs.getDate(ANNOUNCEMENT_MODIFICATION_TIME));
 		
 		return an;

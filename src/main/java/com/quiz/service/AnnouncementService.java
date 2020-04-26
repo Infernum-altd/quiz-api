@@ -15,9 +15,23 @@ public class AnnouncementService {
 	
 	private final AnnouncementsDao anDao;
 	
-	public List<Announcement> getActiveAnnouncementList(int startIndex, int endIndex) {
-		List<Announcement> result = anDao.getAnnouncements(startIndex, endIndex);
+	public List<Announcement> getAnnouncementList(int startIndex, int endIndex) {
+		List<Announcement> result = anDao.getAnnouncementsByIdLimits(startIndex, endIndex);
+		return result;
+	}
+	
+	public List<Announcement> getAnnouncementList() {
+		List<Announcement> result = anDao.getAllAnnouncements();
 		return result;
 	}
 
+	public List<Announcement> getAnnouncementListByUserID(int user_id) {
+		List<Announcement> result = anDao.getAnnouncementsByUserId(user_id);
+		return result;
+	}
+	
+	public List<Announcement> getAnnouncementListByGameID(int game_id) {
+		List<Announcement> result = anDao.getAnnouncementsByUserId(game_id);
+		return result;
+	}
 }
