@@ -25,7 +25,7 @@ public class AnnouncementController {
 	
 	@GetMapping
 	public List<Announcement> getAnnouncement() {
-		return anService.getActiveAnnouncementList(1,10);
+		return anService.getActiveAnnouncementList(2,10);
 	}
 	
 }
