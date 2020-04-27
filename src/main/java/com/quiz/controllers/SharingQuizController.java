@@ -79,4 +79,9 @@ public class SharingQuizController {
     }
 
 
+    @PostMapping("/add_tag")
+    public ResponseEntity<String> addTagToQuiz(@RequestParam(value = "quizId") int quizId, @RequestParam(value = "tagId") int tagId) {
+        boolean isRecordAffected = quizService.addTag(quizId, tagId);
+        return ResponseEntity.status(isRecordAffected ? HttpStatus.CREATED : HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
 }

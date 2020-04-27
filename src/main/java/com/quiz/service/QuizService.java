@@ -65,4 +65,8 @@ public class QuizService {
         return new QuizDto(quiz);
     }
 
+    public boolean addTag(int quizId, int tagId) {
+        return quizDao.addTagToQuiz(quizId, tagId);
+    }
+
 }
