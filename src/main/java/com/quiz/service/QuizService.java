@@ -69,4 +69,16 @@ public class QuizService {
         return quizDao.addTagToQuiz(quizId, tagId);
     }
 
+    public List<Quiz> findTopPopularQuizzes(int limit) {
+        return quizDao.getTopPopularQuizzes(limit);
+    }
+
+    public List<Quiz> findTopPopularQuizzesByCategory(int categoryId, int limit) {
+        return quizDao.getTopPopularQuizzesByCategory(categoryId, limit);
+    }
+
+    public List<Quiz> findRecentGames(int userId, int limit) {
+        return quizDao.getRecentGames(userId, limit);
+    }
+
 }

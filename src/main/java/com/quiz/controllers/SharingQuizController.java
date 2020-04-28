@@ -84,4 +84,19 @@ public class SharingQuizController {
         boolean isRecordAffected = quizService.addTag(quizId, tagId);
         return ResponseEntity.status(isRecordAffected ? HttpStatus.CREATED : HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+
+    @GetMapping("/top_quizzes")
+    public ResponseEntity<List<Quiz>> getTopQuizzes(@RequestParam(value = "limit") int limit) {
+        return ResponseEntity.ok(quizService.findTopPopularQuizzes(limit));
+    }
+
+    @GetMapping("/top_quizzes/{categoryId}")
+    public ResponseEntity<List<Quiz>> getTopQuizzesByCategory(@RequestParam(value = "limit") int limit, @PathVariable int categoryId) {
+        return ResponseEntity.ok(quizService.findTopPopularQuizzesByCategory(categoryId, limit));
+    }
+
+    @GetMapping("/recent_quizzes/{userId}")
+    public ResponseEntity<List<Quiz>> getRecentQuizzes(@RequestParam(value = "limit") int limit, @PathVariable int userId) {
+        return ResponseEntity.ok(quizService.findRecentGames(userId, limit));
+    }
 }

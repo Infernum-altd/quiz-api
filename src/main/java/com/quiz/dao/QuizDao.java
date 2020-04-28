@@ -40,6 +40,12 @@ public class QuizDao {
     private final static String ADD_TAG_TO_QUIZ = "INSERT INTO quizzes_tags (quiz_id, tag_id) VALUES (?,?)";
     private final static String UPDATE_QUIZ = "UPDATE quizzes SET name = ?, author = ?, category_id = ?, date = ?, description = ?, status = ?::status_type, modification_time = ? WHERE id = ?";
     private final static String UPDATE_QUIZ_IMAGE = "UPDATE quizzes SET image = ? WHERE id = ?";
+
+    //Functionality for dashboard
+    public static final String GET_TOP_POPULAR_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE category_id=3 GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
+    public static final String GET_TOP_POPULAR_QUIZZES_BY_CATEGORY = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE category_id=? GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
+    public static final String GET_RECENT_GAMES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE games.id = (SELECT games.id FROM score WHERE user_id = ?) GROUP BY quizzes.id, games.date ORDER BY games.date DESC LIMIT ?";
+
     public static final String TABLE_QUIZZES = "quizzes";
 
     public List<Quiz> getQuizzesByStatus(StatusType status) {
@@ -214,5 +220,78 @@ public class QuizDao {
             e.printStackTrace();
         }
         return affectedNumberOfRows > 0;
+    }
+
+
+    public List<Quiz> getTopPopularQuizzes(int limit) {
+        List<Quiz> quizzes = jdbcTemplate.query(
+                GET_TOP_POPULAR_QUIZZES,
+                new Object[]{limit}, (resultSet, i) -> {
+                    Quiz quiz = new Quiz();
+
+                    quiz.setId(resultSet.getInt(QUIZ_ID));
+                    quiz.setName(resultSet.getString(QUIZ_NAME));
+                    quiz.setAuthor(resultSet.getInt(QUIZ_AUTHOR));
+                    quiz.setCategory_id(resultSet.getInt(QUIZ_CATEGORY));
+                    quiz.setDate(resultSet.getDate(QUIZ_DATE));
+                    quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
+                    quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
+                    quiz.setModificationTime(resultSet.getTimestamp(QUIZ_MODIFICATION_TIME));
+                    return quiz;
+                }
+        );
+        if (quizzes.isEmpty()) {
+            return null;
+        }
+
+        return quizzes;
+    }
+
+    public List<Quiz> getTopPopularQuizzesByCategory(int categoryId, int limit) {
+        List<Quiz> quizzes = jdbcTemplate.query(
+                GET_TOP_POPULAR_QUIZZES_BY_CATEGORY,
+                new Object[]{categoryId, limit}, (resultSet, i) -> {
+                    Quiz quiz = new Quiz();
+
+                    quiz.setId(resultSet.getInt(QUIZ_ID));
+                    quiz.setName(resultSet.getString(QUIZ_NAME));
+                    quiz.setAuthor(resultSet.getInt(QUIZ_AUTHOR));
+                    quiz.setCategory_id(resultSet.getInt(QUIZ_CATEGORY));
+                    quiz.setDate(resultSet.getDate(QUIZ_DATE));
+                    quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
+                    quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
+                    quiz.setModificationTime(resultSet.getTimestamp(QUIZ_MODIFICATION_TIME));
+                    return quiz;
+                }
+        );
+        if (quizzes.isEmpty()) {
+            return null;
+        }
+
+        return quizzes;
+    }
+
+    public List<Quiz> getRecentGames(int userId, int limit) {
+        List<Quiz> quizzes = jdbcTemplate.query(
+                GET_RECENT_GAMES,
+                new Object[]{userId, limit}, (resultSet, i) -> {
+                    Quiz quiz = new Quiz();
+
+                    quiz.setId(resultSet.getInt(QUIZ_ID));
+                    quiz.setName(resultSet.getString(QUIZ_NAME));
+                    quiz.setAuthor(resultSet.getInt(QUIZ_AUTHOR));
+                    quiz.setCategory_id(resultSet.getInt(QUIZ_CATEGORY));
+                    quiz.setDate(resultSet.getDate(QUIZ_DATE));
+                    quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
+                    quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
+                    quiz.setModificationTime(resultSet.getTimestamp(QUIZ_MODIFICATION_TIME));
+                    return quiz;
+                }
+        );
+        if (quizzes.isEmpty()) {
+            return null;
+        }
+
+        return quizzes;
     }
 }
