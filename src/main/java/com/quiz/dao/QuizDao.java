@@ -42,9 +42,9 @@ public class QuizDao {
     private final static String UPDATE_QUIZ_IMAGE = "UPDATE quizzes SET image = ? WHERE id = ?";
 
     //Functionality for dashboard
-    public static final String GET_TOP_POPULAR_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE category_id=3 GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
+    public static final String GET_TOP_POPULAR_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.id = quizzes.id GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
     public static final String GET_TOP_POPULAR_QUIZZES_BY_CATEGORY = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE category_id=? GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
-    public static final String GET_RECENT_GAMES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE games.id = (SELECT games.id FROM score WHERE user_id = ?) GROUP BY quizzes.id, games.date ORDER BY games.date DESC LIMIT ?";
+    public static final String GET_RECENT_GAMES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE games.id IN (SELECT games.id FROM score WHERE user_id = ?) AND games.status = 'FINISHED' GROUP BY quizzes.id, games.date ORDER BY games.date DESC LIMIT ?";
 
     public static final String TABLE_QUIZZES = "quizzes";
     private final static String GET_GAMES_CREATED_BY_USER_ID = "SELECT * FROM quizzes WHERE author = ?";
