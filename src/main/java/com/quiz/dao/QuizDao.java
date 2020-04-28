@@ -11,8 +11,11 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,8 +35,17 @@ public class QuizDao {
     private final static String GET_QUIZZES_BY_CATEGORY_ID = "SELECT * FROM quizzes WHERE category_id = ?";
     private final static String GET_QUIZZES_BY_TAG = "SELECT * FROM quizzes INNER JOIN quizzes_tags on id = quiz_id where tag_id = ?";
     private final static String GET_QUIZZES_BY_NAME = "SELECT * FROM quizzes WHERE name LIKE ?";
+    private final static String GET_QUIZ_IMAGE_BY_QUIZ_ID = "SELECT image FROM quizzes WHERE id = ?";
     private final static String INSERT_QUIZ = "INSERT INTO quizzes (name , author, category_id, date, description,status, modification_time) VALUES (?,?,?,?,?,?::status_type,?)";
+    private final static String ADD_TAG_TO_QUIZ = "INSERT INTO quizzes_tags (quiz_id, tag_id) VALUES (?,?)";
     private final static String UPDATE_QUIZ = "UPDATE quizzes SET name = ?, author = ?, category_id = ?, date = ?, description = ?, status = ?::status_type, modification_time = ? WHERE id = ?";
+    private final static String UPDATE_QUIZ_IMAGE = "UPDATE quizzes SET image = ? WHERE id = ?";
+
+    //Functionality for dashboard
+    public static final String GET_TOP_POPULAR_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE category_id=3 GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
+    public static final String GET_TOP_POPULAR_QUIZZES_BY_CATEGORY = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE category_id=? GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
+    public static final String GET_RECENT_GAMES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE games.id = (SELECT games.id FROM score WHERE user_id = ?) GROUP BY quizzes.id, games.date ORDER BY games.date DESC LIMIT ?";
+
     public static final String TABLE_QUIZZES = "quizzes";
     private final static String GET_GAMES_CREATED_BY_USER_ID = "SELECT * FROM quizzes WHERE author = ?";
     private final static String GET_FAVORITE_GAMES_BY_USER_ID = "SELECT * FROM quizzes INNER JOIN favorite_quizzes ON id = quiz_id WHERE user_id = ?";
@@ -161,6 +173,17 @@ public class QuizDao {
         return quizzesByTag;
     }
 
+    public byte[] getQuizImageByQuizId(int quizId) {
+        List<byte[]> imageBlob = jdbcTemplate.query(
+                GET_QUIZ_IMAGE_BY_QUIZ_ID,
+                new Object[]{quizId},
+                (resultSet, i) -> resultSet.getBytes("image"));
+        if (imageBlob.get(0) == null) {
+            return null;
+        }
+        return imageBlob.get(0);
+    }
+
     @Transactional
     public Quiz insert(Quiz entity) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -188,6 +211,17 @@ public class QuizDao {
         return entity;
     }
 
+    @Transactional
+    public boolean addTagToQuiz(int quizId, int tagId) {
+        int affectedRowNumber;
+        try {
+            affectedRowNumber = jdbcTemplate.update(ADD_TAG_TO_QUIZ, quizId, tagId);
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Database access exception while quiz-tag insert");
+        }
+        return affectedRowNumber > 0;
+    }
+
     public boolean updateQuiz(Quiz quiz) {
         int affectedRowNumber = jdbcTemplate.update(UPDATE_QUIZ, quiz.getName(),
                 quiz.getAuthor(), quiz.getCategory_id(),
@@ -195,5 +229,88 @@ public class QuizDao {
                 quiz.getStatus(), quiz.getModificationTime(), quiz.getId());
 
         return affectedRowNumber > 0;
+    }
+
+    public boolean updateQuizImage(MultipartFile image, int quizId) {
+        int affectedNumberOfRows = 0;
+        try {
+            affectedNumberOfRows = jdbcTemplate.update(UPDATE_QUIZ_IMAGE, image.getBytes(), quizId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return affectedNumberOfRows > 0;
+    }
+
+
+    public List<Quiz> getTopPopularQuizzes(int limit) {
+        List<Quiz> quizzes = jdbcTemplate.query(
+                GET_TOP_POPULAR_QUIZZES,
+                new Object[]{limit}, (resultSet, i) -> {
+                    Quiz quiz = new Quiz();
+
+                    quiz.setId(resultSet.getInt(QUIZ_ID));
+                    quiz.setName(resultSet.getString(QUIZ_NAME));
+                    quiz.setAuthor(resultSet.getInt(QUIZ_AUTHOR));
+                    quiz.setCategory_id(resultSet.getInt(QUIZ_CATEGORY));
+                    quiz.setDate(resultSet.getDate(QUIZ_DATE));
+                    quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
+                    quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
+                    quiz.setModificationTime(resultSet.getTimestamp(QUIZ_MODIFICATION_TIME));
+                    return quiz;
+                }
+        );
+        if (quizzes.isEmpty()) {
+            return null;
+        }
+
+        return quizzes;
+    }
+
+    public List<Quiz> getTopPopularQuizzesByCategory(int categoryId, int limit) {
+        List<Quiz> quizzes = jdbcTemplate.query(
+                GET_TOP_POPULAR_QUIZZES_BY_CATEGORY,
+                new Object[]{categoryId, limit}, (resultSet, i) -> {
+                    Quiz quiz = new Quiz();
+
+                    quiz.setId(resultSet.getInt(QUIZ_ID));
+                    quiz.setName(resultSet.getString(QUIZ_NAME));
+                    quiz.setAuthor(resultSet.getInt(QUIZ_AUTHOR));
+                    quiz.setCategory_id(resultSet.getInt(QUIZ_CATEGORY));
+                    quiz.setDate(resultSet.getDate(QUIZ_DATE));
+                    quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
+                    quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
+                    quiz.setModificationTime(resultSet.getTimestamp(QUIZ_MODIFICATION_TIME));
+                    return quiz;
+                }
+        );
+        if (quizzes.isEmpty()) {
+            return null;
+        }
+
+        return quizzes;
+    }
+
+    public List<Quiz> getRecentGames(int userId, int limit) {
+        List<Quiz> quizzes = jdbcTemplate.query(
+                GET_RECENT_GAMES,
+                new Object[]{userId, limit}, (resultSet, i) -> {
+                    Quiz quiz = new Quiz();
+
+                    quiz.setId(resultSet.getInt(QUIZ_ID));
+                    quiz.setName(resultSet.getString(QUIZ_NAME));
+                    quiz.setAuthor(resultSet.getInt(QUIZ_AUTHOR));
+                    quiz.setCategory_id(resultSet.getInt(QUIZ_CATEGORY));
+                    quiz.setDate(resultSet.getDate(QUIZ_DATE));
+                    quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
+                    quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
+                    quiz.setModificationTime(resultSet.getTimestamp(QUIZ_MODIFICATION_TIME));
+                    return quiz;
+                }
+        );
+        if (quizzes.isEmpty()) {
+            return null;
+        }
+
+        return quizzes;
     }
 }
