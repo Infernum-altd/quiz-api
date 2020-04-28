@@ -48,7 +48,7 @@ public class UserService {
         return userDao.updatePasswordById(id, passwordEncoder.encode(newPassword));
     }
 
-    public int getUserIdByEmail(String email){
+    public int getUserIdByEmail(String email) {
         return userDao.getUserIdByEmail(email);
     }
 
@@ -66,5 +66,9 @@ public class UserService {
 
     public NotificationStatus getNotificationStatus(int userId) {
         return userDao.getUserNotification(userId);
+    }
+
+    public Integer getRating(int userId) {
+        return userDao.getRating(userId);
     }
 }
