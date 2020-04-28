@@ -8,9 +8,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Announcement {
 	private int id;
-	private int user_id;
-	private int game_id;
+	private int userId;
+	private int gameId;
 	private String description;
 	private StatusType status;
-	private Date modification_time;
+	private AnnouncementType announcementType;
+	private Date modificationTime;
 }
