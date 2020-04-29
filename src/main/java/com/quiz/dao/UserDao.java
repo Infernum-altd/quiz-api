@@ -193,6 +193,7 @@ public class UserDao {
         return affectedNumbersOfRows > 0;
     }
 
+
     public byte[] getUserImageByUserId(int userId) {
         List<byte[]> imageBlob = jdbcTemplate.query(GET_USER_IMAGE_BY_USER_ID, new Object[]{userId}, (resultSet, i) -> resultSet.getBytes("image"));
 

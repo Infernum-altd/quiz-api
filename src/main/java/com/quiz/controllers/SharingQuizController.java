@@ -3,7 +3,10 @@ package com.quiz.controllers;
 
 import com.quiz.dto.QuizDto;
 import com.quiz.entities.Quiz;
+import com.quiz.entities.ResponcePaginatedList;
 import com.quiz.entities.ResponseText;
+import com.quiz.entities.User;
+import com.quiz.service.PaginationService;
 import com.quiz.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,20 +24,24 @@ public class SharingQuizController {
 
     @Autowired
     QuizService quizService;
+    @Autowired
+    PaginationService paginationService;
 
     @GetMapping("/{quizId}")
     public ResponseEntity<Quiz> getQuiz(@PathVariable int quizId) {
         return ResponseEntity.ok(quizService.findQuizById(quizId));
     }
 
-    @GetMapping("")
-    public ResponseEntity<List<Quiz>> getAllQuizzes() {
-        return ResponseEntity.ok(quizService.findAllQuizzes());
+    @GetMapping("/{pageSize}/{pageNumber}")
+    public ResponseEntity<ResponcePaginatedList<Quiz>> getAllQuizzes(@PathVariable int pageSize, @PathVariable int pageNumber) {
+        List<Quiz> quizzes = quizService.findAllQuizzes();
+        return ResponseEntity.ok(new ResponcePaginatedList<Quiz>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
-    @GetMapping("/categories/{categoryId}")
-    public ResponseEntity<List<Quiz>> getQuizzesByCategory(@PathVariable int categoryId) {
-        return ResponseEntity.ok(quizService.findQuizzesByCategory(categoryId));
+    @GetMapping("/categories/{categoryId}/{pageSize}/{pageNumber}")
+    public ResponseEntity<ResponcePaginatedList<Quiz>> getQuizzesByCategory(@PathVariable int categoryId, @PathVariable int pageSize, @PathVariable int pageNumber) {
+        List<Quiz> quizzes = quizService.findQuizzesByCategory(categoryId);
+        return ResponseEntity.ok(new ResponcePaginatedList<Quiz>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
     @GetMapping("/tags/{tagId}")

@@ -5,6 +5,7 @@ import com.quiz.dto.QuizDto;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.StatusType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class QuizService {
 
+    @Autowired
     private final QuizDao quizDao;
 
     public List<Quiz> findQuizzesByStatus(StatusType status) {

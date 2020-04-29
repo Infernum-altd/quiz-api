@@ -1,9 +1,7 @@
 package com.quiz.controllers;
 
-import com.quiz.entities.NotificationStatus;
-import com.quiz.entities.Quiz;
-import com.quiz.entities.ResponseText;
-import com.quiz.entities.User;
+import com.quiz.entities.*;
+import com.quiz.service.PaginationService;
 import com.quiz.service.QuizService;
 import com.quiz.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +24,8 @@ public class ProfileController {
     UserService userRepo;
     @Autowired
     QuizService quizService;
+    @Autowired
+    PaginationService paginationService;
 
     @GetMapping("/myprofile/{userId}")
     public ResponseEntity<User> getUserProfile(@PathVariable int userId){
@@ -33,8 +33,10 @@ public class ProfileController {
     }
 
     @GetMapping("/myfriends/{userId}")
-    public ResponseEntity<List<User>> getFriends(@PathVariable int userId) {
-        return ResponseEntity.ok(userRepo.findFriendByUserId(userId));
+    public ResponseEntity<ResponcePaginatedList<User>> getFriends(@PathVariable int userId) {
+        //return ResponseEntity.ok(userRepo.findFriendByUserId(userId));
+        List<User> friends = userRepo.findFriendByUserId(userId);
+        return ResponseEntity.ok(new ResponcePaginatedList<User>(paginationService.paginate(friends, 5, 1), friends.size()));
     }
 
     @PostMapping("/myprofile/update")
