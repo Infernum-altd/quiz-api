@@ -87,4 +87,7 @@ public class QuizService {
         return quizDao.getRecentGames(userId, limit);
     }
 
+    public List<Quiz> getQuizzesByFilter(String searchByUser) {
+        return quizDao.getQuizzesByFilter(searchByUser);
+    }
 }

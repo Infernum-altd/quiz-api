@@ -5,7 +5,6 @@ import com.quiz.dto.QuizDto;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.ResponcePaginatedList;
 import com.quiz.entities.ResponseText;
-import com.quiz.entities.User;
 import com.quiz.service.PaginationService;
 import com.quiz.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,5 +104,11 @@ public class SharingQuizController {
     @GetMapping("/recent_quizzes/{userId}")
     public ResponseEntity<List<Quiz>> getRecentQuizzes(@RequestParam(value = "limit") int limit, @PathVariable int userId) {
         return ResponseEntity.ok(quizService.findRecentGames(userId, limit));
+    }
+
+    @GetMapping("/filter/")
+    public ResponseEntity<ResponcePaginatedList<Quiz>> getFilteredQuizzes(@PathVariable String searchByUser, @PathVariable int pageSize, @PathVariable int pageNumber){
+        List<Quiz> quizzes = quizService.getQuizzesByFilter(searchByUser);
+        return ResponseEntity.ok(new ResponcePaginatedList<Quiz>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 }

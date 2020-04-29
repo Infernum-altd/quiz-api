@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,6 +39,16 @@ public class QuizDao {
     private final static String ADD_TAG_TO_QUIZ = "INSERT INTO quizzes_tags (quiz_id, tag_id) VALUES (?,?)";
     private final static String UPDATE_QUIZ = "UPDATE quizzes SET name = ?, author = ?, category_id = ?, date = ?, description = ?, status = ?::status_type, modification_time = ? WHERE id = ?";
     private final static String UPDATE_QUIZ_IMAGE = "UPDATE quizzes SET image = ? WHERE id = ?";
+    private final static String GET_FILTERED_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.image, author, category_id, date, description, status,\n" +
+            "modification_time, categories.id, categories.name AS category,\n" +
+            "users.name AS authorName, users.surname AS authorSurname \n" +
+            "FROM quizzes INNER JOIN categories ON categories.id = category_id\n" +
+            "INNER JOIN users ON quizzes.author = users.id\n" +
+            "WHERE LOWER(quizzes.name) LIKE LOWER('%?%') OR\n" +
+            "LOWER(categories.name) LIKE LOWER('%?%') OR\n" +
+            "LOWER(users.name) LIKE LOWER('%?%') OR\n" +
+            "LOWER(users.surname) LIKE LOWER('%?%') OR\n" +
+            "date::text LIKE '%?%'";
 
     //Functionality for dashboard
     public static final String GET_TOP_POPULAR_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE category_id=3 GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
@@ -312,5 +321,16 @@ public class QuizDao {
         }
 
         return quizzes;
+    }
+
+    public List<Quiz> getQuizzesByFilter(String searchByUser) {
+        List<Quiz> getFilteredQuizzes = jdbcTemplate.query(
+                GET_FILTERED_QUIZZES,
+                new Object[]{searchByUser}, new QuizMapper());
+
+        if (getFilteredQuizzes.isEmpty()) {
+            return null;
+        }
+        return getFilteredQuizzes;
     }
 }
