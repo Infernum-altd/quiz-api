@@ -85,4 +85,12 @@ public class QuizService {
         return quizDao.getRecentGames(userId, limit);
     }
 
+    public List<Quiz> findRecommendations(int userId, int limit){
+        return quizDao.getRecommendations(userId,limit);
+    }
+
+    public List<Quiz> findRecommendationsByFriends(int userId, int limit){
+        return quizDao.getRecommendationsByFriends(userId,limit);
+    }
+
 }
