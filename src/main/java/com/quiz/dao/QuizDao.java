@@ -15,8 +15,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.quiz.dao.mapper.QuizMapper.*;
 
@@ -27,11 +30,11 @@ public class QuizDao {
     private final JdbcTemplate jdbcTemplate;
 
     private final static String GET_QUIZZES_BY_STATUS = "SELECT * FROM quizzes WHERE status = ?::status_type";
-    private final static String GET_ALL_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id";
+    private final static String GET_ALL_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE quizzes.status = 'ACTIVE'";
     private final static String GET_QUIZ_BY_ID = "SELECT * FROM quizzes WHERE id = ?";
     private final static String GET_QUIZZES_CREATED_BY_USER_ID = "SELECT * FROM quizzes WHERE author = ? AND (status<>'DELETED' AND status<>'DEACTIVATED')";
     private final static String GET_FAVORITE_QUIZZES_BY_USER_ID = "SELECT * FROM quizzes INNER JOIN favorite_quizzes ON id = quiz_id WHERE user_id = ?";
-    private final static String GET_QUIZZES_BY_CATEGORY_ID = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE category_id = ?";
+    private final static String GET_QUIZZES_BY_CATEGORY_ID = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE category_id = ? AND quizzes.status = 'ACTIVE'";
     private final static String GET_QUIZZES_BY_TAG = "SELECT * FROM quizzes INNER JOIN quizzes_tags on id = quiz_id where tag_id = ?";
     private final static String GET_QUIZZES_BY_NAME = "SELECT * FROM quizzes WHERE name LIKE ?";
     private final static String GET_QUIZ_IMAGE_BY_QUIZ_ID = "SELECT image FROM quizzes WHERE id = ?";
@@ -39,16 +42,16 @@ public class QuizDao {
     private final static String ADD_TAG_TO_QUIZ = "INSERT INTO quizzes_tags (quiz_id, tag_id) VALUES (?,?)";
     private final static String UPDATE_QUIZ = "UPDATE quizzes SET name = ?, author = ?, category_id = ?, date = ?, description = ?, status = ?::status_type, modification_time = ? WHERE id = ?";
     private final static String UPDATE_QUIZ_IMAGE = "UPDATE quizzes SET image = ? WHERE id = ?";
-    private final static String GET_FILTERED_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.image, author, category_id, date, description, status,\n" +
-            "modification_time, categories.id, categories.name AS category,\n" +
-            "users.name AS authorName, users.surname AS authorSurname \n" +
-            "FROM quizzes INNER JOIN categories ON categories.id = category_id\n" +
-            "INNER JOIN users ON quizzes.author = users.id\n" +
-            "WHERE LOWER(quizzes.name) LIKE LOWER('%?%') OR\n" +
-            "LOWER(categories.name) LIKE LOWER('%?%') OR\n" +
-            "LOWER(users.name) LIKE LOWER('%?%') OR\n" +
-            "LOWER(users.surname) LIKE LOWER('%?%') OR\n" +
-            "date::text LIKE '%?%'";
+    private final static String GET_FILTERED_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.image, author, category_id, date, description, status, " +
+            "modification_time, categories.id, categories.name AS category, " +
+            "users.name AS authorName, users.surname AS authorSurname " +
+            "FROM quizzes INNER JOIN categories ON categories.id = category_id " +
+            "INNER JOIN users ON quizzes.author = users.id " +
+            "WHERE LOWER(quizzes.name) LIKE LOWER(?) OR " +
+            "LOWER(categories.name) LIKE LOWER(?) OR " +
+            "LOWER(users.name) LIKE LOWER(?) OR " +
+            "LOWER(users.surname) LIKE LOWER(?) OR " +
+            "date::text LIKE ?";
 
     //Functionality for dashboard
     public static final String GET_TOP_POPULAR_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE category_id=3 GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
@@ -324,13 +327,29 @@ public class QuizDao {
     }
 
     public List<Quiz> getQuizzesByFilter(String searchByUser) {
-        List<Quiz> getFilteredQuizzes = jdbcTemplate.query(
-                GET_FILTERED_QUIZZES,
-                new Object[]{searchByUser}, new QuizMapper());
+        String regEx = "'%" + searchByUser + "%'";
+        List<Quiz> getFilteredQuizzes = jdbcTemplate.query("SELECT quizzes.id, quizzes.name, quizzes.image, author, category_id, date, description, status," +
+                        "modification_time, categories.id, categories.name AS category, " +
+                        "users.name AS authorName, users.surname AS authorSurname " +
+                        "FROM quizzes INNER JOIN categories ON categories.id = category_id " +
+                        "INNER JOIN users ON quizzes.author = users.id " +
+                        "INNER JOIN quizzes_tags ON  quizzes.id = quizzes_tags.quiz_id " +
+                        "INNER JOIN tags ON tags.id = quizzes_tags.tag_id " +
+                        "WHERE (LOWER(quizzes.name) LIKE LOWER(" + regEx +") OR " +
+                        "LOWER(categories.name) LIKE LOWER(" + regEx +") OR " +
+                        "LOWER(users.name) LIKE LOWER(" + regEx +") OR " +
+                        "LOWER(users.surname) LIKE LOWER(" + regEx +") OR " +
+                        "LOWER(tags.name) LIKE LOWER('%hat%') OR " +
+                        "date::text LIKE (" + regEx +")) AND (quizzes.status = 'ACTIVE')",
+/*                GET_FILTERED_QUIZZES,*/
+/*                new Object[]{regEx, regEx, regEx, regEx, regEx},*/
+                new QuizMapper());
 
         if (getFilteredQuizzes.isEmpty()) {
             return null;
         }
-        return getFilteredQuizzes;
+        return getFilteredQuizzes.stream().distinct().collect(Collectors.toList());
+
     }
 }
+

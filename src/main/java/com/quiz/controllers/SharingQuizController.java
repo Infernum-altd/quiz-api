@@ -106,7 +106,7 @@ public class SharingQuizController {
         return ResponseEntity.ok(quizService.findRecentGames(userId, limit));
     }
 
-    @GetMapping("/filter/")
+    @GetMapping("/filter/{searchByUser}/{pageSize}/{pageNumber}")
     public ResponseEntity<ResponcePaginatedList<Quiz>> getFilteredQuizzes(@PathVariable String searchByUser, @PathVariable int pageSize, @PathVariable int pageNumber){
         List<Quiz> quizzes = quizService.getQuizzesByFilter(searchByUser);
         return ResponseEntity.ok(new ResponcePaginatedList<Quiz>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
