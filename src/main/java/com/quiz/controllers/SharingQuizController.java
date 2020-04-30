@@ -31,9 +31,9 @@ public class SharingQuizController {
         return ResponseEntity.ok(quizService.findQuizById(quizId));
     }
 
-    @GetMapping("/{pageSize}/{pageNumber}")
-    public ResponseEntity<ResponcePaginatedList<Quiz>> getAllQuizzes(@PathVariable int pageSize, @PathVariable int pageNumber) {
-        List<Quiz> quizzes = quizService.findAllQuizzes();
+    @GetMapping("/{pageSize}/{pageNumber}/{userId}")
+    public ResponseEntity<ResponcePaginatedList<Quiz>> getAllQuizzes(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId) {
+        List<Quiz> quizzes = quizService.findAllQuizzes(userId);
         return ResponseEntity.ok(new ResponcePaginatedList<Quiz>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
@@ -110,5 +110,23 @@ public class SharingQuizController {
     public ResponseEntity<ResponcePaginatedList<Quiz>> getFilteredQuizzes(@PathVariable String searchByUser, @PathVariable int pageSize, @PathVariable int pageNumber){
         List<Quiz> quizzes = quizService.getQuizzesByFilter(searchByUser);
         return ResponseEntity.ok(new ResponcePaginatedList<Quiz>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
+    }
+
+    @PostMapping("/mark/{quizId}/{userId}")
+    public ResponseEntity<String> markQuizAsFavorite (@PathVariable int quizId, @PathVariable int userId){
+        boolean isRecordAffected = quizService.markQuizAsFavorite(quizId, userId);
+        if (isRecordAffected) {
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    @PostMapping("/unmark/{quizId}/{userId}")
+    public ResponseEntity<String> unmarkQuizAsFavorite (@PathVariable int quizId, @PathVariable int userId){
+        boolean isRecordAffected = quizService.unmarkQuizAsFavorite(quizId, userId);
+        if (isRecordAffected) {
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 }

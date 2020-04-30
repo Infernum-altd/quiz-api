@@ -15,10 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.quiz.dao.mapper.QuizMapper.*;
@@ -34,7 +32,7 @@ public class QuizDao {
     private final static String GET_QUIZ_BY_ID = "SELECT * FROM quizzes WHERE id = ?";
     private final static String GET_QUIZZES_CREATED_BY_USER_ID = "SELECT * FROM quizzes WHERE author = ? AND (status<>'DELETED' AND status<>'DEACTIVATED')";
     private final static String GET_FAVORITE_QUIZZES_BY_USER_ID = "SELECT * FROM quizzes INNER JOIN favorite_quizzes ON id = quiz_id WHERE user_id = ?";
-    private final static String GET_QUIZZES_BY_CATEGORY_ID = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE category_id = ? AND quizzes.status = 'ACTIVE'";
+    private final static String GET_QUIZZES_BY_CATEGORY_ID = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE (category_id = ?) AND (quizzes.status = 'ACTIVE')";
     private final static String GET_QUIZZES_BY_TAG = "SELECT * FROM quizzes INNER JOIN quizzes_tags on id = quiz_id where tag_id = ?";
     private final static String GET_QUIZZES_BY_NAME = "SELECT * FROM quizzes WHERE name LIKE ?";
     private final static String GET_QUIZ_IMAGE_BY_QUIZ_ID = "SELECT image FROM quizzes WHERE id = ?";
@@ -52,6 +50,11 @@ public class QuizDao {
             "LOWER(users.name) LIKE LOWER(?) OR " +
             "LOWER(users.surname) LIKE LOWER(?) OR " +
             "date::text LIKE ?";
+
+    private final static String IS_FAVORITE_QUIZ = "select * from favorite_quizzes WHERE quiz_id = ? AND user_id = ?";
+    private final static String MARK_QUIZ_AS_FAVORITE = "INSERT INTO favorite_quizzes (user_id, quiz_id) VALUES(?, ?) ";
+    private final static String UNMARK_QUIZ_AS_FAVORITE = "DELETE FROM favorite_quizzes where user_id = ? AND quiz_id = ?";
+    private final static String GET_TAGS_BY_QUIZ_Id = "select name from tags INNER JOIN quizzes_tags ON tags.id = quizzes_tags.tag_id WHERE quizzes_tags.quiz_id = ?";
 
     //Functionality for dashboard
     public static final String GET_TOP_POPULAR_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE category_id=3 GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
@@ -85,13 +88,24 @@ public class QuizDao {
         return quizzesByStatus;
     }
 
-    public List<Quiz> getAllQuizzes() {
+    public List<Quiz> getAllQuizzes(int userId) {
         List<Quiz> quizzes = jdbcTemplate.query(GET_ALL_QUIZZES, new QuizMapper());
 
         if (quizzes.isEmpty()) {
             return null;
         }
 
+        for (Quiz quiz: quizzes) {
+            quiz.setTags(getQuizTags(quiz.getId()));
+           List<Integer> answer = jdbcTemplate.query(IS_FAVORITE_QUIZ, new Object[]{quiz.getId(), userId}, (resultSet, i) -> {return resultSet.getInt("quiz_id");
+           });
+
+            if (answer.isEmpty()) {
+                quiz.setFavorite(false);
+            } else {
+                quiz.setFavorite(true);
+            }
+        }
         return quizzes;
     }
 
@@ -348,8 +362,33 @@ public class QuizDao {
         if (getFilteredQuizzes.isEmpty()) {
             return null;
         }
-        return getFilteredQuizzes.stream().distinct().collect(Collectors.toList());
+        getFilteredQuizzes = getFilteredQuizzes.stream().distinct().collect(Collectors.toList());
 
+        return getFilteredQuizzes.stream().distinct().collect(Collectors.toList());
+    }
+
+    public boolean markQuizAsFavorite(int quizId, int userId) {
+        int affectedRowNumber = jdbcTemplate.update(MARK_QUIZ_AS_FAVORITE, userId, quizId);
+
+        return affectedRowNumber > 0;
+    }
+
+    public boolean unmarkQuizAsFavorite(int quizId, int userId) {
+        int affectedRowNumber = jdbcTemplate.update(UNMARK_QUIZ_AS_FAVORITE, userId, quizId);
+
+        return affectedRowNumber > 0;
+    }
+
+    private List<String> getQuizTags(int quizId){
+        List<String> tags = jdbcTemplate.query(
+                GET_TAGS_BY_QUIZ_Id,
+                new Object[]{quizId}, (resultSet, i) -> resultSet.getString("name")
+        );
+        if (tags.isEmpty()) {
+            return null;
+        }
+
+        return tags;
     }
 }
 

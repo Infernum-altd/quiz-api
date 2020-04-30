@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.sql.Date;
-import java.util.Base64;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -21,5 +21,6 @@ public class Quiz {
     private StatusType status;
     private Timestamp modificationTime;
     private String category;
-
+    private boolean isFavorite;
+    private List<String> tags;
 }
