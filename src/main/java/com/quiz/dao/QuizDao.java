@@ -41,13 +41,13 @@ public class QuizDao {
     private final static String UPDATE_QUIZ = "UPDATE quizzes SET name = ?, author = ?, category_id = ?, date = ?, description = ?, status = ?::status_type, modification_time = ? WHERE id = ?";
     private final static String UPDATE_QUIZ_IMAGE = "UPDATE quizzes SET image = ? WHERE id = ?";
 
-    private static final String GET_QUIZ_RECOMMENDATIONS="SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date,quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS count_games_general, count_games FROM quizzes INNER JOIN games ON quizzes.id = games.quiz_id INNER JOIN favorite_categories(?) ON quizzes.category_id=favorite_categories.category_id WHERE quizzes.status='ACTIVE' GROUP BY quizzes.id,favorite_categories.count_games ORDER BY count_games_general DESC , count_games DESC LIMIT ?";
-    private static final String GET_QUIZ_RECOMMENDATIONS_BY_FRIENDS="SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes on games.quiz_id=quizzes.id WHERE games.id IN(SELECT games.quiz_id FROM games WHERE games.id IN (SELECT games.id FROM score WHERE score.user_id IN (SELECT friend_id FROM friends WHERE friends.user_id = ?) ) ) AND quizzes.status = 'ACTIVE' GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
+    private static final String GET_QUIZ_RECOMMENDATIONS = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date,quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS count_games_general, count_games FROM quizzes INNER JOIN games ON quizzes.id = games.quiz_id INNER JOIN favorite_categories(?) ON quizzes.category_id=favorite_categories.category_id WHERE quizzes.status='ACTIVE' GROUP BY quizzes.id,favorite_categories.count_games ORDER BY count_games_general DESC , count_games DESC LIMIT ?";
+    private static final String GET_QUIZ_RECOMMENDATIONS_BY_FRIENDS = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes on games.quiz_id=quizzes.id WHERE games.id IN(SELECT games.quiz_id FROM games WHERE games.id IN (SELECT games.id FROM score WHERE score.user_id IN (SELECT friend_id FROM friends WHERE friends.user_id = ?) ) ) AND quizzes.status = 'ACTIVE' GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
 
 
     //Functionality for dashboard
-    private static final String GET_TOP_POPULAR_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.id = quizzes.id GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
-    private static final String GET_TOP_POPULAR_QUIZZES_BY_CATEGORY = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE category_id=? GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
+    private static final String GET_TOP_POPULAR_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.quiz_id = quizzes.id GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
+    private static final String GET_TOP_POPULAR_QUIZZES_BY_CATEGORY = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.quiz_id = quizzes.id WHERE category_id=? GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
     private static final String GET_RECENT_GAMES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time FROM games INNER JOIN quizzes ON games.quiz_id = quizzes.id WHERE games.id IN (SELECT games.id FROM score WHERE user_id = ?) AND games.status = 'FINISHED' GROUP BY quizzes.id, games.date ORDER BY games.date DESC LIMIT ?";
 
     public static final String TABLE_QUIZZES = "quizzes";
@@ -58,7 +58,7 @@ public class QuizDao {
 
         List<Quiz> quizzesCreatedByUser = jdbcTemplate.query(GET_GAMES_CREATED_BY_USER_ID, new Object[]{userId}, new QuizMapper());
 
-        if (quizzesCreatedByUser.isEmpty()){
+        if (quizzesCreatedByUser.isEmpty()) {
             return null;
         }
 
@@ -121,18 +121,19 @@ public class QuizDao {
 
         List<Quiz> quizzesCreatedByUser = jdbcTemplate.query(GET_QUIZZES_CREATED_BY_USER_ID, new Object[]{userId}, new QuizMapper());
 
-        if (quizzesCreatedByUser.isEmpty()){
+        if (quizzesCreatedByUser.isEmpty()) {
             return null;
         }
 
         return quizzesCreatedByUser;
     }
 
-    public String getCategoryNameByCategoryId(int categoryId){
+    public String getCategoryNameByCategoryId(int categoryId) {
         List<String> categoryNames = jdbcTemplate.query(GET_QUIZ_CATEGORY_BY_CATEGORY_ID, new Object[]{categoryId}, (resultSet, i) -> resultSet.getString("name"));
 
         return categoryNames.get(0);
     }
+
     public List<Quiz> findQuizzesByName(String name) {
 
         List<Quiz> quizzesByName = jdbcTemplate.query(GET_QUIZZES_BY_NAME, new Object[]{"%" + name + "%"}, new QuizMapper());
@@ -317,7 +318,7 @@ public class QuizDao {
         return quizzes;
     }
 
-    public List<Quiz> getRecommendations(int userId, int limit){
+    public List<Quiz> getRecommendations(int userId, int limit) {
         List<Quiz> quizzes = jdbcTemplate.query(
                 GET_QUIZ_RECOMMENDATIONS,
                 new Object[]{userId, limit}, (resultSet, i) -> {
@@ -341,7 +342,7 @@ public class QuizDao {
         return quizzes;
     }
 
-    public List<Quiz> getRecommendationsByFriends(int userId, int limit){
+    public List<Quiz> getRecommendationsByFriends(int userId, int limit) {
         List<Quiz> quizzes = jdbcTemplate.query(
                 GET_QUIZ_RECOMMENDATIONS_BY_FRIENDS,
                 new Object[]{userId, limit}, (resultSet, i) -> {

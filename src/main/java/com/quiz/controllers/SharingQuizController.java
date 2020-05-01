@@ -91,22 +91,22 @@ public class SharingQuizController {
     }
 
     @GetMapping("/top_quizzes/{categoryId}")
-    public ResponseEntity<List<Quiz>> getTopQuizzesByCategory(@RequestParam(value = "limit") int limit, @RequestParam(value = "categoryId") int categoryId) {
+    public ResponseEntity<List<Quiz>> getTopQuizzesByCategory(@PathVariable int categoryId, @RequestParam(value = "limit") int limit) {
         return ResponseEntity.ok(quizService.findTopPopularQuizzesByCategory(categoryId, limit));
     }
 
     @GetMapping("/recent_quizzes/{userId}")
-    public ResponseEntity<List<Quiz>> getRecentQuizzes(@RequestParam(value = "limit") int limit, @RequestParam(value = "userId") int userId) {
+    public ResponseEntity<List<Quiz>> getRecentQuizzes(@PathVariable int userId, @RequestParam(value = "limit") int limit) {
         return ResponseEntity.ok(quizService.findRecentGames(userId, limit));
     }
 
-    @GetMapping("/recommendations")
-    public ResponseEntity<List<Quiz>> getRecommendations(@RequestParam(value = "userId") int userId, @RequestParam(value = "limit") int limit){
+    @GetMapping("/recommendations/{userId}")
+    public ResponseEntity<List<Quiz>> getRecommendations(@PathVariable int userId, @RequestParam(value = "limit") int limit) {
         return ResponseEntity.ok(quizService.findRecommendations(userId, limit));
     }
 
-    @GetMapping("/recommendations/friends")
-    public ResponseEntity<List<Quiz>> getRecommendationsByFriends(@RequestParam(value = "userId") int userId, @RequestParam(value = "limit") int limit){
+    @GetMapping("/recommendations/friends/{userId}")
+    public ResponseEntity<List<Quiz>> getRecommendationsByFriends(@PathVariable int userId, @RequestParam(value = "limit") int limit) {
         return ResponseEntity.ok(quizService.findRecommendationsByFriends(userId, limit));
     }
 }
