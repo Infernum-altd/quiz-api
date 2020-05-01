@@ -38,20 +38,23 @@ public class UserDao {
     private final static String GET_USER_IMAGE_BY_USER_ID = "SELECT image FROM users WHERE id = ?";
     private final static String UPDATE_NOTIFICATION_STATUS = "UPDATE users SET notifications = ?::user_notification_type WHERE id = ?";
     private final static String GET_NOTIFICATION = "SELECT notifications from users WHERE id = ?";
+
+    private final static String GET_RATING = "SELECT rowNumb FROM (SELECT id, ROW_NUMBER() OVER (ORDER BY rating) AS rowNumb FROM users) AS irN WHERE id=?";
+
     public static final String TABLE_USERS = "users";
 
     public User findByEmail(String email) {
         List<User> users;
 
-       try {
+        try {
             users = jdbcTemplate.query(
                     USER_FIND_BY_EMAIL,
                     new Object[]{email}, (resultSet, i) -> {
                         User user = new User();
 
-                            user.setId(resultSet.getInt(USERS_ID));
-                            user.setEmail(resultSet.getString(USERS_EMAIL));
-                            user.setPassword(resultSet.getString(USERS_PASSWORD));
+                        user.setId(resultSet.getInt(USERS_ID));
+                        user.setEmail(resultSet.getString(USERS_EMAIL));
+                        user.setPassword(resultSet.getString(USERS_PASSWORD));
 
                         return user;
                     }
@@ -59,10 +62,10 @@ public class UserDao {
             if (users.isEmpty()) {
                 return null;
             }
-       } catch (DataAccessException e) {
+        } catch (DataAccessException e) {
             // TODO: 09.04.2020  check message
-           throw new DatabaseException(String.format("Find user by email '%s' database error occured", email));
-       }
+            throw new DatabaseException(String.format("Find user by email '%s' database error occured", email));
+        }
 
         return users.get(0);
     }
@@ -112,7 +115,7 @@ public class UserDao {
             jdbcTemplate.update(INSERT_USER, entity.getEmail(), entity.getPassword());
             //entity.setId(id);
         } catch (DataAccessException e) {
-          throw new DatabaseException("Database access exception while user insert");
+            throw new DatabaseException("Database access exception while user insert");
         }
 
         return entity;
@@ -187,7 +190,7 @@ public class UserDao {
         int affectedNumbersOfRows = 0;
         try {
             affectedNumbersOfRows = jdbcTemplate.update(UPDATE_USER_IMAGE, image.getBytes(), userId);
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return affectedNumbersOfRows > 0;
@@ -197,7 +200,7 @@ public class UserDao {
     public byte[] getUserImageByUserId(int userId) {
         List<byte[]> imageBlob = jdbcTemplate.query(GET_USER_IMAGE_BY_USER_ID, new Object[]{userId}, (resultSet, i) -> resultSet.getBytes("image"));
 
-        if (imageBlob.get(0) == null){
+        if (imageBlob.get(0) == null) {
             return null;
         }
         return imageBlob.get(0);
@@ -210,5 +213,9 @@ public class UserDao {
 
     public NotificationStatus getUserNotification(int userId) {
         return NotificationStatus.valueOf(jdbcTemplate.query(GET_NOTIFICATION, new Object[]{userId}, (resultSet, i) -> resultSet.getString("notifications")).get(0));
+    }
+
+    public Integer getRating(int userId) {
+        return jdbcTemplate.queryForObject(GET_RATING, new Object[]{userId}, Integer.class);
     }
 }

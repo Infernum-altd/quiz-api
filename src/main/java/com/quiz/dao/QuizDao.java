@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -56,10 +57,14 @@ public class QuizDao {
     private final static String UNMARK_QUIZ_AS_FAVORITE = "DELETE FROM favorite_quizzes where user_id = ? AND quiz_id = ?";
     private final static String GET_TAGS_BY_QUIZ_Id = "select name from tags INNER JOIN quizzes_tags ON tags.id = quizzes_tags.tag_id WHERE quizzes_tags.quiz_id = ?";
 
+    private static final String GET_QUIZ_RECOMMENDATIONS = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date,quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS count_games_general, count_games FROM quizzes INNER JOIN games ON quizzes.id = games.quiz_id INNER JOIN favorite_categories(?) ON quizzes.category_id=favorite_categories.category_id WHERE quizzes.status='ACTIVE' GROUP BY quizzes.id,favorite_categories.count_games ORDER BY count_games_general DESC , count_games DESC LIMIT ?";
+    private static final String GET_QUIZ_RECOMMENDATIONS_BY_FRIENDS = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes on games.quiz_id=quizzes.id WHERE games.id IN(SELECT games.quiz_id FROM games WHERE games.id IN (SELECT games.id FROM score WHERE score.user_id IN (SELECT friend_id FROM friends WHERE friends.user_id = ?) ) ) AND quizzes.status = 'ACTIVE' GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
+
+
     //Functionality for dashboard
-    public static final String GET_TOP_POPULAR_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE category_id=3 GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
-    public static final String GET_TOP_POPULAR_QUIZZES_BY_CATEGORY = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE category_id=? GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
-    public static final String GET_RECENT_GAMES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time FROM games INNER JOIN quizzes ON games.id = quizzes.id WHERE games.id = (SELECT games.id FROM score WHERE user_id = ?) GROUP BY quizzes.id, games.date ORDER BY games.date DESC LIMIT ?";
+    private static final String GET_TOP_POPULAR_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.quiz_id = quizzes.id GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
+    private static final String GET_TOP_POPULAR_QUIZZES_BY_CATEGORY = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.quiz_id = quizzes.id WHERE category_id=? GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
+    private static final String GET_RECENT_GAMES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time FROM games INNER JOIN quizzes ON games.quiz_id = quizzes.id WHERE games.id IN (SELECT games.id FROM score WHERE user_id = ?) AND games.status = 'FINISHED' GROUP BY quizzes.id, games.date ORDER BY games.date DESC LIMIT ?";
 
     public static final String TABLE_QUIZZES = "quizzes";
     private final static String GET_GAMES_CREATED_BY_USER_ID = "SELECT * FROM quizzes WHERE author = ?";
@@ -70,7 +75,7 @@ public class QuizDao {
 
         List<Quiz> quizzesCreatedByUser = jdbcTemplate.query(GET_GAMES_CREATED_BY_USER_ID, new Object[]{userId}, new QuizMapper());
 
-        if (quizzesCreatedByUser.isEmpty()){
+        if (quizzesCreatedByUser.isEmpty()) {
             return null;
         }
 
@@ -144,7 +149,7 @@ public class QuizDao {
 
         List<Quiz> quizzesCreatedByUser = jdbcTemplate.query(GET_QUIZZES_CREATED_BY_USER_ID, new Object[]{userId}, new QuizMapper());
 
-        if (quizzesCreatedByUser.isEmpty()){
+        if (quizzesCreatedByUser.isEmpty()) {
             return null;
         }
 
@@ -319,6 +324,54 @@ public class QuizDao {
     public List<Quiz> getRecentGames(int userId, int limit) {
         List<Quiz> quizzes = jdbcTemplate.query(
                 GET_RECENT_GAMES,
+                new Object[]{userId, limit}, (resultSet, i) -> {
+                    Quiz quiz = new Quiz();
+
+                    quiz.setId(resultSet.getInt(QUIZ_ID));
+                    quiz.setName(resultSet.getString(QUIZ_NAME));
+                    quiz.setAuthor(resultSet.getInt(QUIZ_AUTHOR));
+                    quiz.setCategory_id(resultSet.getInt(QUIZ_CATEGORY));
+                    quiz.setDate(resultSet.getDate(QUIZ_DATE));
+                    quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
+                    quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
+                    quiz.setModificationTime(resultSet.getTimestamp(QUIZ_MODIFICATION_TIME));
+                    return quiz;
+                }
+        );
+        if (quizzes.isEmpty()) {
+            return null;
+        }
+
+        return quizzes;
+    }
+
+    public List<Quiz> getRecommendations(int userId, int limit) {
+        List<Quiz> quizzes = jdbcTemplate.query(
+                GET_QUIZ_RECOMMENDATIONS,
+                new Object[]{userId, limit}, (resultSet, i) -> {
+                    Quiz quiz = new Quiz();
+
+                    quiz.setId(resultSet.getInt(QUIZ_ID));
+                    quiz.setName(resultSet.getString(QUIZ_NAME));
+                    quiz.setAuthor(resultSet.getInt(QUIZ_AUTHOR));
+                    quiz.setCategory_id(resultSet.getInt(QUIZ_CATEGORY));
+                    quiz.setDate(resultSet.getDate(QUIZ_DATE));
+                    quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
+                    quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
+                    quiz.setModificationTime(resultSet.getTimestamp(QUIZ_MODIFICATION_TIME));
+                    return quiz;
+                }
+        );
+        if (quizzes.isEmpty()) {
+            return null;
+        }
+
+        return quizzes;
+    }
+
+    public List<Quiz> getRecommendationsByFriends(int userId, int limit) {
+        List<Quiz> quizzes = jdbcTemplate.query(
+                GET_QUIZ_RECOMMENDATIONS_BY_FRIENDS,
                 new Object[]{userId, limit}, (resultSet, i) -> {
                     Quiz quiz = new Quiz();
 
