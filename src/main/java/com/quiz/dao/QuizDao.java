@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -51,6 +50,7 @@ public class QuizDao {
             "LOWER(users.name) LIKE LOWER(?) OR " +
             "LOWER(users.surname) LIKE LOWER(?) OR " +
             "date::text LIKE ?";
+    private final static String GET_POPULAR_QUIZ = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category, COUNT(quiz_id)  AS counter FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN favorite_quizzes ON quizzes.id = favorite_quizzes.quiz_id WHERE quizzes.status = 'ACTIVE' GROUP BY quizzes.id, categories.id ORDER BY counter DESC LIMIT ?";
 
     private final static String IS_FAVORITE_QUIZ = "select * from favorite_quizzes WHERE quiz_id = ? AND user_id = ?";
     private final static String MARK_QUIZ_AS_FAVORITE = "INSERT INTO favorite_quizzes (user_id, quiz_id) VALUES(?, ?) ";
@@ -100,17 +100,13 @@ public class QuizDao {
             return null;
         }
 
-        for (Quiz quiz: quizzes) {
-            quiz.setTags(getQuizTags(quiz.getId()));
-           List<Integer> answer = jdbcTemplate.query(IS_FAVORITE_QUIZ, new Object[]{quiz.getId(), userId}, (resultSet, i) -> {return resultSet.getInt("quiz_id");
-           });
-
-            if (answer.isEmpty()) {
-                quiz.setFavorite(false);
-            } else {
-                quiz.setFavorite(true);
-            }
+        if (userId == 0) {
+            quizzes.forEach(quiz -> quiz.setTags(getQuizTags(quiz.getId())));
+        } else {
+            quizzes.forEach(quiz -> quiz.setTags(getQuizTags(quiz.getId())));
+            quizzes.forEach(quiz -> quiz.setFavorite(isQuizFavorite(quiz.getId(), userId)));
         }
+
         return quizzes;
     }
 
@@ -182,13 +178,26 @@ public class QuizDao {
         return quizzesFavoriteByUser;
     }
 
-    public List<Quiz> getQuizzesByCategory(int categoryId) {
+    public List<Quiz> getQuizzesByCategory(int categoryId, int userId) {
 
         List<Quiz> quizzesByCategory = jdbcTemplate.query(GET_QUIZZES_BY_CATEGORY_ID, new Object[]{categoryId}, new QuizMapper());
 
         if (quizzesByCategory.isEmpty()) {
             return null;
         }
+
+        if (userId == 0) {
+            quizzesByCategory.forEach(quiz -> quiz.setTags(getQuizTags(quiz.getId())));
+        } else {
+            quizzesByCategory.forEach(quiz -> quiz.setTags(getQuizTags(quiz.getId())));
+            quizzesByCategory.forEach(quiz -> quiz.setFavorite(isQuizFavorite(quiz.getId(), userId)));
+        }
+
+
+
+
+
+
 
         return quizzesByCategory;
     }
@@ -347,7 +356,7 @@ public class QuizDao {
 
     public List<Quiz> getRecommendations(int userId, int limit) {
         List<Quiz> quizzes = jdbcTemplate.query(
-                GET_QUIZ_RECOMMENDATIONS,
+                    GET_QUIZ_RECOMMENDATIONS,
                 new Object[]{userId, limit}, (resultSet, i) -> {
                     Quiz quiz = new Quiz();
 
@@ -393,7 +402,7 @@ public class QuizDao {
         return quizzes;
     }
 
-    public List<Quiz> getQuizzesByFilter(String searchByUser) {
+    public List<Quiz> getQuizzesByFilter(String searchByUser, int userId) {
         String regEx = "'%" + searchByUser + "%'";
         List<Quiz> getFilteredQuizzes = jdbcTemplate.query("SELECT quizzes.id, quizzes.name, quizzes.image, author, category_id, date, description, status," +
                         "modification_time, categories.id, categories.name AS category, " +
@@ -416,8 +425,10 @@ public class QuizDao {
             return null;
         }
         getFilteredQuizzes = getFilteredQuizzes.stream().distinct().collect(Collectors.toList());
+        getFilteredQuizzes.forEach(quiz -> quiz.setTags(getQuizTags(quiz.getId())));
+        getFilteredQuizzes.forEach(quiz -> quiz.setFavorite(isQuizFavorite(quiz.getId(), userId)));
 
-        return getFilteredQuizzes.stream().distinct().collect(Collectors.toList());
+        return getFilteredQuizzes;
     }
 
     public boolean markQuizAsFavorite(int quizId, int userId) {
@@ -442,6 +453,27 @@ public class QuizDao {
         }
 
         return tags;
+    }
+
+    private boolean isQuizFavorite(int quizId, int userId){
+        List<Integer> answer = jdbcTemplate.query(IS_FAVORITE_QUIZ, new Object[]{quizId, userId}, (resultSet, i) -> {return resultSet.getInt("quiz_id");
+        });
+
+        return !answer.isEmpty();
+    }
+
+    public List<Quiz> getPopularQuizzes(int limit, int userId) {
+        List<Quiz> quizzes = jdbcTemplate.query(
+                GET_POPULAR_QUIZ,
+                new Object[]{limit}, new QuizMapper());
+
+        if (quizzes.isEmpty()){
+            return null;
+        }
+        quizzes.forEach(quiz -> quiz.setTags(getQuizTags(quiz.getId())));
+        quizzes.forEach(quiz -> quiz.setFavorite(isQuizFavorite(quiz.getId(), userId)));
+
+        return quizzes;
     }
 }
 
