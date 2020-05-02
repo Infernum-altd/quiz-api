@@ -140,8 +140,8 @@ public class SharingQuizController {
         return ResponseEntity.ok(quizService.findRecommendationsByFriends(userId, limit));
     }
 
-    @GetMapping("/popular/{limit}/{userId}")
-    public ResponseEntity<List<Quiz>> getPopularQuizzes(@PathVariable int limit, @PathVariable int userId) {
-        return ResponseEntity.ok(quizService.findPopularQuizzes(limit, userId));
+    @GetMapping("/popular/{limit}")
+    public ResponseEntity<List<Quiz>> getPopularQuizzes(@PathVariable int limit) {
+        return ResponseEntity.ok(quizService.findPopularQuizzes(limit));
     }
 }

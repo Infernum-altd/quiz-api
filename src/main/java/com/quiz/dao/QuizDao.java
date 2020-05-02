@@ -62,7 +62,7 @@ public class QuizDao {
 
 
     //Functionality for dashboard
-    private static final String GET_TOP_POPULAR_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.quiz_id = quizzes.id GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
+    private static final String GET_TOP_POPULAR_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.image, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, categories.name AS category, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.quiz_id = quizzes.id INNER JOIN categories ON categories.id = category_id GROUP BY quizzes.id, categories.name ORDER BY gamescount DESC LIMIT ?";
     private static final String GET_TOP_POPULAR_QUIZZES_BY_CATEGORY = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes ON games.quiz_id = quizzes.id WHERE category_id=? GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
     private static final String GET_RECENT_GAMES = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time FROM games INNER JOIN quizzes ON games.quiz_id = quizzes.id WHERE games.id IN (SELECT games.id FROM score WHERE user_id = ?) AND games.status = 'FINISHED' GROUP BY quizzes.id, games.date ORDER BY games.date DESC LIMIT ?";
 
@@ -285,7 +285,7 @@ public class QuizDao {
     public List<Quiz> getTopPopularQuizzes(int limit) {
         List<Quiz> quizzes = jdbcTemplate.query(
                 GET_TOP_POPULAR_QUIZZES,
-                new Object[]{limit}, (resultSet, i) -> {
+                new Object[]{limit}, new QuizMapper()); /*(resultSet, i) -> {
                     Quiz quiz = new Quiz();
 
                     quiz.setId(resultSet.getInt(QUIZ_ID));
@@ -298,7 +298,7 @@ public class QuizDao {
                     quiz.setModificationTime(resultSet.getTimestamp(QUIZ_MODIFICATION_TIME));
                     return quiz;
                 }
-        );
+        );*/
         if (quizzes.isEmpty()) {
             return null;
         }
@@ -462,7 +462,7 @@ public class QuizDao {
         return !answer.isEmpty();
     }
 
-    public List<Quiz> getPopularQuizzes(int limit, int userId) {
+    public List<Quiz> getPopularQuizzes(int limit) {
         List<Quiz> quizzes = jdbcTemplate.query(
                 GET_POPULAR_QUIZ,
                 new Object[]{limit}, new QuizMapper());
@@ -471,7 +471,6 @@ public class QuizDao {
             return null;
         }
         quizzes.forEach(quiz -> quiz.setTags(getQuizTags(quiz.getId())));
-        quizzes.forEach(quiz -> quiz.setFavorite(isQuizFavorite(quiz.getId(), userId)));
 
         return quizzes;
     }

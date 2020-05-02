@@ -106,7 +106,7 @@ public class QuizService {
         return quizDao.getRecommendationsByFriends(userId,limit);
     }
 
-    public List<Quiz> findPopularQuizzes(int limit, int userId) {
-        return  quizDao.getPopularQuizzes(limit, userId);
+    public List<Quiz> findPopularQuizzes(int limit) {
+        return  quizDao.getPopularQuizzes(limit);
     }
 }
