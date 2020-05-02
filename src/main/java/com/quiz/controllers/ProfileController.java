@@ -32,11 +32,10 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.OK).body(userRepo.findProfileInfoByUserId(userId));
     }
 
-    @GetMapping("/myfriends/{userId}")
-    public ResponseEntity<ResponcePaginatedList<User>> getFriends(@PathVariable int userId) {
-        //return ResponseEntity.ok(userRepo.findFriendByUserId(userId));
+    @GetMapping("/myfriends/{pageSize}/{pageNumber}/{userId}")
+    public ResponseEntity<ResponcePaginatedList<User>> getFriends(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId) {
         List<User> friends = userRepo.findFriendByUserId(userId);
-        return ResponseEntity.ok(new ResponcePaginatedList<User>(paginationService.paginate(friends, 5, 1), friends.size()));
+        return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(friends, pageSize, pageNumber), friends.size()));
     }
 
     @PostMapping("/myprofile/update")
@@ -59,9 +58,10 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-    @GetMapping("/myquizzes/{userId}")
-    public ResponseEntity<List<Quiz>> getUserQuizzes(@PathVariable int userId){
-        return ResponseEntity.ok(quizService.findQuizzesCreatedByUserId(userId));
+    @GetMapping("/myquizzes/{pageSize}/{pageNumber}/{userId}")
+    public ResponseEntity<ResponcePaginatedList<Quiz>> getUserQuizzes(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId){
+        List<Quiz> quizzes = quizService.findQuizzesCreatedByUserId(userId);
+        return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
     @GetMapping("/myfavorite/{userId}")
