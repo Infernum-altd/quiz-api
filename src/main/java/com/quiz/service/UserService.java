@@ -9,7 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.util.List;
 
 @Component
@@ -68,7 +67,15 @@ public class UserService {
         return userDao.getUserNotification(userId);
     }
 
-    public Integer getRating(int userId) {
-        return userDao.getRating(userId);
+    public Integer getRatingByUser(int userId) {
+        return userDao.getRatingByUser(userId);
+    }
+
+    public List<User> getRating(int from, int to) {
+        return userDao.getRating(from, to);
+    }
+
+    public List<User> getRatingInRange(int userId, int range) {
+        return userDao.getRatingInRange(userId, range);
     }
 }

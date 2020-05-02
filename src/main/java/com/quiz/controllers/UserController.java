@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @CrossOrigin
@@ -21,7 +23,17 @@ public class UserController {
     }
 
     @GetMapping("/rating/{userId}")
-    public ResponseEntity<Integer> getRating(@PathVariable int userId) {
-        return ResponseEntity.ok(userService.getRating(userId));
+    public ResponseEntity<Integer> getRatingByUser(@PathVariable int userId) {
+        return ResponseEntity.ok(userService.getRatingByUser(userId));
+    }
+
+    @GetMapping("/rating/range/{userId}")
+    public ResponseEntity<List<User>> getRatingByUser(@PathVariable int userId, @RequestParam(value = "range") int range) {
+        return ResponseEntity.ok(userService.getRatingInRange(userId, range));
+    }
+
+    @GetMapping("/rating")
+    public ResponseEntity<List<User>> getRating(@RequestParam(value = "from") int from, @RequestParam(value = "to") int to) {
+        return ResponseEntity.ok(userService.getRating(from, to));
     }
 }
