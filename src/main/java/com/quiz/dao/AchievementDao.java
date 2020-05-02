@@ -15,7 +15,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Objects;
 
-import static com.quiz.dao.mapper.AchievementMapper.ACHIEVEMENT_ID;
+import static com.quiz.dao.mapper.AchievementMapper.*;
+import static com.quiz.dao.mapper.AchievementMapper.ACHIEVEMENT_CATEGORY_ID;
 
 @Repository
 @RequiredArgsConstructor
@@ -23,6 +24,8 @@ public class AchievementDao {
     private final JdbcTemplate jdbcTemplate;
 
     public static final String GET_ACHIEVEMENT_CATEGORIES = "SELECT id, name FROM achievement_categories";
+    public static final String GET_ACHIEVEMENTS = "SELECT id, name, description, category_id FROM achievements";
+    public static final String GET_ACHIEVEMENTS_BY_USER = "SELECT id, name, description, category_id, progress FROM achievements INNER JOIN users_achievements on achievements.id = users_achievements.achievement_id WHERE user_id = ?";
     public static final String GET_ACHIEVEMENTS_BY_CATEGORIES = "SELECT id, name, description, category_id FROM achievements WHERE category_id = ?";
     public static final String COUNT_TOTAL_ACHIEVEMENTS = "SELECT COUNT(*) FROM achievements";
     public static final String COUNT_ACHIEVEMENTS_OF_USER = "SELECT COUNT(achievement_id) FROM users_achievements WHERE user_id=? AND progress=100";
@@ -37,8 +40,42 @@ public class AchievementDao {
         return achievementCategories;
     }
 
+    public List<Achievement> getAchievements() {
+        List<Achievement> achievements = jdbcTemplate.query(GET_ACHIEVEMENTS, (resultSet, i) -> {
+            Achievement achievement = new Achievement();
+
+            achievement.setId(resultSet.getInt(ACHIEVEMENT_ID));
+            achievement.setName(resultSet.getString(ACHIEVEMENT_NAME));
+            achievement.setDescription(resultSet.getString(ACHIEVEMENT_DESCRIPTION));
+            achievement.setCategoryId(resultSet.getInt(ACHIEVEMENT_CATEGORY_ID));
+
+            return achievement;
+        });
+        if (achievements.isEmpty()) {
+            return null;
+        }
+        return achievements;
+    }
+
     public List<Achievement> getAchievementsByCategory(int categoryId) {
-        List<Achievement> achievements = jdbcTemplate.query(GET_ACHIEVEMENTS_BY_CATEGORIES, new Object[]{categoryId}, new AchievementMapper());
+        List<Achievement> achievements = jdbcTemplate.query(GET_ACHIEVEMENTS_BY_CATEGORIES, new Object[]{categoryId}, (resultSet, i) -> {
+            Achievement achievement = new Achievement();
+
+            achievement.setId(resultSet.getInt(ACHIEVEMENT_ID));
+            achievement.setName(resultSet.getString(ACHIEVEMENT_NAME));
+            achievement.setDescription(resultSet.getString(ACHIEVEMENT_DESCRIPTION));
+            achievement.setCategoryId(resultSet.getInt(ACHIEVEMENT_CATEGORY_ID));
+
+            return achievement;
+        });
+        if (achievements.isEmpty()) {
+            return null;
+        }
+        return achievements;
+    }
+
+    public List<Achievement> getAchievementsByUser(int userId) {
+        List<Achievement> achievements = jdbcTemplate.query(GET_ACHIEVEMENTS_BY_USER, new Object[]{userId}, new AchievementMapper());
         if (achievements.isEmpty()) {
             return null;
         }

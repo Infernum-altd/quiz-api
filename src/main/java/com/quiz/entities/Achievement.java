@@ -10,4 +10,5 @@ public class Achievement {
     private String name;
     private String description;
     private int categoryId;
+    private int progress;
 }
