@@ -41,8 +41,9 @@ public class UserDao {
     private final static String GET_NOTIFICATION = "SELECT notifications from users WHERE id = ?";
     private final static String FILTER_FRIENDS_BY_USER_ID = "SELECT id, email, name, surname, rating FROM users where (id in (SELECT friend_id FROM users INNER JOIN friends ON user_id = id WHERE id = ?)) AND (CONCAT(name, ' ', surname) ~*?  OR rating::text ~* ?)";
 
-    private final static String GET_RATING = "SELECT rowNumb FROM (SELECT id, ROW_NUMBER() OVER (ORDER BY rating) AS rowNumb FROM users) AS irN WHERE id=?";
-
+    private final static String GET_RATING_BY_USER_ID = "SELECT rowNumb FROM (SELECT id, ROW_NUMBER() OVER (ORDER BY rating DESC) AS rowNumb FROM users) AS irN WHERE id=?";
+    private final static String GET_RATING = "SELECT id, name, surname, rating, ROW_NUMBER() OVER (ORDER BY rating DESC) AS rowNumb FROM users LIMIT ? OFFSET ?";
+    private static final String GET_RATING_IN_RANGE = "WITH numbereduserstable AS (SELECT id, name, surname, rating, ROW_NUMBER() OVER (ORDER BY rating DESC) AS row_number FROM users), current AS (SELECT row_number FROM numbereduserstable WHERE id = ?) SELECT numbereduserstable.* FROM numbereduserstable, current WHERE ABS(numbereduserstable.row_number - current.row_number) <= ? ORDER BY numbereduserstable.row_number";
     public static final String TABLE_USERS = "users";
 
     public User findByEmail(String email) {
@@ -219,8 +220,34 @@ public class UserDao {
         return NotificationStatus.valueOf(jdbcTemplate.query(GET_NOTIFICATION, new Object[]{userId}, (resultSet, i) -> resultSet.getString("notifications")).get(0));
     }
 
-    public Integer getRating(int userId) {
-        return jdbcTemplate.queryForObject(GET_RATING, new Object[]{userId}, Integer.class);
+    public Integer getRatingByUser(int userId) {
+        return jdbcTemplate.queryForObject(GET_RATING_BY_USER_ID, new Object[]{userId}, Integer.class);
+    }
+
+    public List<User> getRating(int from, int to) {
+        return jdbcTemplate.query(GET_RATING, new Object[]{to, from}, (resultSet, i) -> {
+            User user = new User();
+
+            user.setId(resultSet.getInt(USERS_ID));
+            user.setName(resultSet.getString(USERS_NAME));
+            user.setSurname(resultSet.getString(USERS_SURNAME));
+            user.setRating(resultSet.getInt(USERS_RATING));
+
+            return user;
+        });
+    }
+
+    public List<User> getRatingInRange(int userId, int range) {
+        return jdbcTemplate.query(GET_RATING_IN_RANGE, new Object[]{userId, range}, (resultSet, i) -> {
+            User user = new User();
+
+            user.setId(resultSet.getInt(USERS_ID));
+            user.setName(resultSet.getString(USERS_NAME));
+            user.setSurname(resultSet.getString(USERS_SURNAME));
+            user.setRating(resultSet.getInt(USERS_RATING));
+
+            return user;
+        });
     }
 
     public List<User> filterFriendByUserId(String userSearch, int userId, String sort) {
