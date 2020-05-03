@@ -30,8 +30,8 @@ public class QuizService {
         return quizDao.findById(id);
     }
 
-    public List<Quiz> findQuizzesCreatedByUserId(int userId) {
-        return quizDao.getQuizzesCreatedByUser(userId);
+    public List<Quiz> findQuizzesCreatedByUserId(int userId, String sort) {
+        return quizDao.getQuizzesCreatedByUser(userId, sort);
     }
 
     public List<Quiz> findFavoriteQuizzes(int userId) {
@@ -108,5 +108,13 @@ public class QuizService {
 
     public List<Quiz> findPopularQuizzes(int limit) {
         return  quizDao.getPopularQuizzes(limit);
+    }
+
+    public List<Quiz> filterQuizzesByUserId(String userSearch, int userId, String sort) {
+        return quizDao.filterQuizzesByUserId(userSearch, userId, sort);
+    }
+
+    public List<Quiz> searchInFavoriteQuizzes(int userId, String userSearch) {
+        return quizDao.searchInFavoriteQuizzes(userId, userSearch);
     }
 }

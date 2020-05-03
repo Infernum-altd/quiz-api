@@ -33,8 +33,14 @@ public class ProfileController {
     }
 
     @GetMapping("/myfriends/{pageSize}/{pageNumber}/{userId}")
-    public ResponseEntity<ResponcePaginatedList<User>> getFriends(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId) {
-        List<User> friends = userRepo.findFriendByUserId(userId);
+    public ResponseEntity<ResponcePaginatedList<User>> getFriends(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId, @RequestParam(defaultValue = "", required = false, value = "sort") String sort) {
+        List<User> friends = userRepo.findFriendByUserId(userId, sort);
+        return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(friends, pageSize, pageNumber), friends.size()));
+    }
+
+    @GetMapping("/myfriends/{userSearch}/{pageSize}/{pageNumber}/{userId}")
+    public ResponseEntity<ResponcePaginatedList<User>> getFriends(@PathVariable String userSearch, @PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId, @RequestParam(defaultValue = "", required = false, value = "sort") String sort) {
+        List<User> friends = userRepo.filterFriendByUserId(userSearch, userId, sort);
         return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(friends, pageSize, pageNumber), friends.size()));
     }
 
@@ -59,14 +65,27 @@ public class ProfileController {
     }
 
     @GetMapping("/myquizzes/{pageSize}/{pageNumber}/{userId}")
-    public ResponseEntity<ResponcePaginatedList<Quiz>> getUserQuizzes(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId){
-        List<Quiz> quizzes = quizService.findQuizzesCreatedByUserId(userId);
+    public ResponseEntity<ResponcePaginatedList<Quiz>> getUserQuizzes(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId,  @RequestParam(defaultValue = "", required = false, value = "sort") String sort){
+        List<Quiz> quizzes = quizService.findQuizzesCreatedByUserId(userId, sort);
         return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
-    @GetMapping("/myfavorite/{userId}")
-    public ResponseEntity<List<Quiz>> getFavoriteQuizzes(@PathVariable int userId){
-        return ResponseEntity.ok(quizService.findFavoriteQuizzes(userId));
+    @GetMapping("/myquizzes/{userSearch}/{pageSize}/{pageNumber}/{userId}")
+    public ResponseEntity<ResponcePaginatedList<Quiz>> getUserQuizzes(@PathVariable String userSearch, @PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId,  @RequestParam(defaultValue = "", required = false, value = "sort") String sort) {
+        List<Quiz> quizzes = quizService.filterQuizzesByUserId(userSearch, userId, sort);
+        return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
+    }
+
+    @GetMapping("/myfavorite/{userId}/{pageSize}/{pageNumber}")
+    public ResponseEntity<ResponcePaginatedList<Quiz>> getFavoriteQuizzes(@PathVariable int userId, @PathVariable int pageSize, @PathVariable int pageNumber){
+        List<Quiz> quizzes = quizService.findFavoriteQuizzes(userId);
+        return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
+    }
+
+    @GetMapping("/myfavorite/{userSearch}/{userId}/{pageSize}/{pageNumber}")
+    public ResponseEntity<ResponcePaginatedList<Quiz>> getFavoriteQuizzes(@PathVariable String userSearch, @PathVariable int userId, @PathVariable int pageSize, @PathVariable int pageNumber){
+        List<Quiz> quizzes = quizService.searchInFavoriteQuizzes(userId, userSearch);
+        return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
     @GetMapping("/category/{categoryId}")

@@ -2,6 +2,7 @@ package com.quiz.service;
 
 import com.quiz.dao.UserDao;
 import com.quiz.entities.NotificationStatus;
+import com.quiz.entities.Quiz;
 import com.quiz.entities.User;
 import com.quiz.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +36,8 @@ public class UserService {
         return userDao.findProfileInfoByUserId(id);
     }
 
-    public List<User> findFriendByUserId(int id) {
-        return userDao.findFriendByUserId(id);
+    public List<User> findFriendByUserId(int id, String sort) {
+        return userDao.findFriendByUserId(id, sort);
     }
 
 
@@ -71,4 +72,10 @@ public class UserService {
     public Integer getRating(int userId) {
         return userDao.getRating(userId);
     }
+
+    public List<User> filterFriendByUserId(String userSearch, int userId, String sort) {
+        return userDao.filterFriendByUserId(userSearch, userId, sort);
+    }
+
+
 }

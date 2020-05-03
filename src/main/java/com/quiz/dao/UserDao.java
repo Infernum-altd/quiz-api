@@ -30,6 +30,7 @@ public class UserDao {
     private final static String USER_FIND_BY_ID = "SELECT id,email,password FROM users WHERE id = ?";
     private final static String USER_GET_ALL_FOR_PROFILE_BY_ID = "SELECT id, email, name, surname, birthdate, gender, city, about FROM users WHERE id = ?";
     private final static String FIND_FRIENDS_BY_USER_ID = "SELECT id, email, name, surname, rating FROM users where id in (SELECT friend_id FROM users INNER JOIN friends ON user_id = id WHERE id = ?)";
+    private final static String FIND_FRIENDS_BY_USER_ID_ORDER_BY = "SELECT id, email, name, surname, rating FROM users where id in (SELECT friend_id FROM users INNER JOIN friends ON user_id = id WHERE id = ?)";
     private final static String INSERT_USER = "INSERT INTO users (email, password) VALUES (?,?)";
     private final static String UPDATE_USER = "UPDATE users  SET name = ?, surname = ?, birthdate = ?, gender = ?::gender_type, city = ?, about = ? WHERE id = ?";
     private final static String UPDATE_USER_PASSWORD = "UPDATE users SET password = ? WHERE id = ?";
@@ -38,6 +39,7 @@ public class UserDao {
     private final static String GET_USER_IMAGE_BY_USER_ID = "SELECT image FROM users WHERE id = ?";
     private final static String UPDATE_NOTIFICATION_STATUS = "UPDATE users SET notifications = ?::user_notification_type WHERE id = ?";
     private final static String GET_NOTIFICATION = "SELECT notifications from users WHERE id = ?";
+    private final static String FILTER_FRIENDS_BY_USER_ID = "SELECT id, email, name, surname, rating FROM users where (id in (SELECT friend_id FROM users INNER JOIN friends ON user_id = id WHERE id = ?)) AND (CONCAT(name, ' ', surname) ~*?  OR rating::text ~* ?)";
 
     private final static String GET_RATING = "SELECT rowNumb FROM (SELECT id, ROW_NUMBER() OVER (ORDER BY rating) AS rowNumb FROM users) AS irN WHERE id=?";
 
@@ -145,10 +147,12 @@ public class UserDao {
         return users.get(0);
     }
 
-    public List<User> findFriendByUserId(int id) {
+    public List<User> findFriendByUserId(int id, String sort) {
+
         List<User> friends = jdbcTemplate.query(
-                FIND_FRIENDS_BY_USER_ID,
-                new Object[]{id}, (resultSet, i) -> {
+                sort.isEmpty() ? FIND_FRIENDS_BY_USER_ID: FIND_FRIENDS_BY_USER_ID + "ORDER BY " + sort,
+                new Object[]{id},
+                (resultSet, i) -> {
                     User user = new User();
                     user.setId(resultSet.getInt(USERS_ID));
                     user.setEmail(resultSet.getString(USERS_EMAIL));
@@ -217,5 +221,20 @@ public class UserDao {
 
     public Integer getRating(int userId) {
         return jdbcTemplate.queryForObject(GET_RATING, new Object[]{userId}, Integer.class);
+    }
+
+    public List<User> filterFriendByUserId(String userSearch, int userId, String sort) {
+        return jdbcTemplate.query(sort.isEmpty()? FILTER_FRIENDS_BY_USER_ID: FILTER_FRIENDS_BY_USER_ID + "ORDER BY " + sort,
+                new Object[]{userId, userSearch, userSearch},
+                (resultSet, i) -> {
+                    User user = new User();
+                    user.setId(resultSet.getInt(USERS_ID));
+                    user.setEmail(resultSet.getString(USERS_EMAIL));
+                    user.setName(resultSet.getString(USERS_NAME));
+                    user.setSurname(resultSet.getString(USERS_SURNAME));
+                    user.setRating(resultSet.getInt(USERS_RATING));
+
+                    return user;
+                });
     }
 }
