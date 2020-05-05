@@ -2,11 +2,8 @@ package com.quiz.dao;
 
 import com.quiz.dao.mapper.QuizMapper;
 import com.quiz.dto.QuizDto;
-import com.quiz.dto.UserDto;
 import com.quiz.entities.Quiz;
-import com.quiz.entities.Role;
 import com.quiz.entities.StatusType;
-import com.quiz.entities.User;
 import com.quiz.exceptions.DatabaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
