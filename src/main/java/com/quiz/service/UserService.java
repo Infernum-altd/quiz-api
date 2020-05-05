@@ -1,14 +1,15 @@
 package com.quiz.service;
 
 import com.quiz.dao.UserDao;
-import com.quiz.dto.UserDto;
+import com.quiz.entities.NotificationStatus;
 import com.quiz.entities.User;
-import com.quiz.exceptions.EmailExistException;
 import com.quiz.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
 
 @Component
@@ -44,27 +45,37 @@ public class UserService {
     }
 
     public boolean updatePasswordById(int id, String newPassword) {
-        return userDao.updatePasswordById(id, newPassword);
+        return userDao.updatePasswordById(id, passwordEncoder.encode(newPassword));
+    }
+    public boolean updateStatusById(int id) {
+        return userDao.updateStatusById(id);
     }
 
     public int getUserIdByEmail(String email){
         return userDao.getUserIdByEmail(email);
     }
+    public String getUserRoleByEmail(String email){
+        return userDao.getUserRoleByEmail(email);
+    }
+
+    public boolean updateProfileImage(MultipartFile image, int userId) {
+        return userDao.updateProfileImage(image, userId);
+    }
+
+    public byte[] getImageByUserId(int userId) {
+        return userDao.getUserImageByUserId(userId);
+    }
+
+    public boolean changeNotificationStatus(String status, int userId) {
+        return userDao.updateNotificationStatus(status, userId);
+    }
 
     public List<User> findAdminsUsers() {
         return userDao.findAdminsUsers();
     }
-
-    public UserDto createAdminUsers(User adminsUser, String role) {
-        User adminsUserdb = userDao.findByEmail(adminsUser.getEmail());
-        if (adminsUserdb != null) {
-            throw new EmailExistException("Moderator with this email already exist");
-        }
-        adminsUser.setPassword(passwordEncoder.encode(adminsUser.getPassword()));
-        userDao.createAdminUsers(adminsUser, role);
-        return new UserDto(adminsUser);
-    }
-
     public void deleteUserById(int id) { userDao.deleteUserById(id); }
 
+    public NotificationStatus getNotificationStatus(int userId) {
+        return userDao.getUserNotification(userId);
+    }
 }

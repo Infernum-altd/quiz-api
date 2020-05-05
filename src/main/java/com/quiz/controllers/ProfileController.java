@@ -35,6 +35,11 @@ public class ProfileController {
         return ResponseEntity.ok(userRepo.findFriendByUserId(userId));
     }
 
+    @GetMapping("/adminUsers")
+    public ResponseEntity<List<User>> getAdminsUsers(){
+        return ResponseEntity.ok(userRepo.findAdminsUsers());
+    }
+
     @PostMapping("/myprofile/update")
     public ResponseEntity<String> updateUserProfile(@RequestBody User user){
         boolean isRecordAffected = userRepo.updateUser(user);
@@ -83,5 +88,20 @@ public class ProfileController {
     @GetMapping("/not_checked_quizzes")
     public ResponseEntity<List<Quiz>> getNotCheckedQuizzes(){
         return ResponseEntity.ok(quizService.findNotCheckedQuizzes());
+    }
+
+    @DeleteMapping("/deleteAdminUser/{id}")
+    void deleteUserById(@PathVariable int id) {
+        userRepo.deleteUserById(id);
+    }
+
+    @PostMapping("updateActive/{userId}")
+    public ResponseEntity<String> updateStatus(@RequestBody String status, @PathVariable int userId){
+        boolean isRecordAffected = userRepo.updateStatusById(userId);
+
+        if (isRecordAffected){
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 }
