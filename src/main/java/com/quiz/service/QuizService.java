@@ -117,4 +117,5 @@ public class QuizService {
     public List<Quiz> searchInFavoriteQuizzes(int userId, String userSearch) {
         return quizDao.searchInFavoriteQuizzes(userId, userSearch);
     }
+
 }

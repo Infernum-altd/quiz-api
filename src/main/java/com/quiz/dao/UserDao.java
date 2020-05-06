@@ -41,6 +41,8 @@ public class UserDao {
     private final static String GET_NOTIFICATION = "SELECT notifications from users WHERE id = ?";
     private final static String FILTER_FRIENDS_BY_USER_ID = "SELECT id, email, name, surname, rating FROM users where (id in (SELECT friend_id FROM users INNER JOIN friends ON user_id = id WHERE id = ?)) AND (CONCAT(name, ' ', surname) ~*?  OR rating::text ~* ?)";
 
+    private final static String INSERT_GAME_SCORE = "INSERT INTO score (user_id, game_id, score) VALUES(?, ?, ?)";
+
     private final static String GET_RATING_BY_USER_ID = "SELECT rowNumb FROM (SELECT id, ROW_NUMBER() OVER (ORDER BY rating DESC) AS rowNumb FROM users) AS irN WHERE id=?";
     private final static String GET_RATING = "SELECT id, name, surname, rating, ROW_NUMBER() OVER (ORDER BY rating DESC) AS rowNumb FROM users LIMIT ? OFFSET ?";
     private static final String GET_RATING_IN_RANGE = "WITH numbereduserstable AS (SELECT id, name, surname, rating, ROW_NUMBER() OVER (ORDER BY rating DESC) AS row_number FROM users), current AS (SELECT row_number FROM numbereduserstable WHERE id = ?) SELECT numbereduserstable.* FROM numbereduserstable, current WHERE ABS(numbereduserstable.row_number - current.row_number) <= ? ORDER BY numbereduserstable.row_number";
@@ -263,5 +265,10 @@ public class UserDao {
 
                     return user;
                 });
+    }
+
+    public void insertUserScore(int userId, int gameId, int score){
+        jdbcTemplate.update(INSERT_GAME_SCORE,
+                userId, gameId, score);
     }
 }

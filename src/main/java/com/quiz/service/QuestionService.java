@@ -40,4 +40,7 @@ public class QuestionService {
         return questionDao.updateQuestionImage(image, answerId);
     }
 
+    public List<Question> getQuestionsByQuizId(int quizId) {
+        return questionDao.getQuestionsByQuizId(quizId);
+    }
 }

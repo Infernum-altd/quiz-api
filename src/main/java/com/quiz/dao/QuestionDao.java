@@ -32,6 +32,7 @@ public class QuestionDao {
 
     private static final String UPDATE_QUESTION = "UPDATE questions SET type=?, text=?, active=? WHERE id=?";
     private static final String UPDATE_QUESTION_IMAGE = "UPDATE questions SET image = ? WHERE id = ?";
+    private static final String GET_QUESTIONS_BY_QUIZ_ID = "SELECT id, type, text FROM questions WHERE quiz_id =? AND active=true";
 
     public static final String TABLE_QUESTIONS = "questions";
 
@@ -125,5 +126,20 @@ public class QuestionDao {
             e.printStackTrace();
         }
         return affectedRowsNumber > 0;
+    }
+
+    public List<Question> getQuestionsByQuizId(int quizId) {
+        return jdbcTemplate.query(
+                GET_QUESTIONS_BY_QUIZ_ID,
+                new Object[]{quizId},
+                (resultSet, i) -> {
+                    Question question = new Question();
+                    question.setId(resultSet.getInt(QUESTION_ID));
+                    question.setType(QuestionType.valueOf(resultSet.getString(QUESTION_TYPE)));
+                    question.setText(resultSet.getString(QUESTION_TEXT));
+
+                    return question;
+                }
+        );
     }
 }
