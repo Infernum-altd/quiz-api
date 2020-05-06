@@ -40,7 +40,7 @@ public class QuizDao {
     private final static String ADD_TAG_TO_QUIZ = "INSERT INTO quizzes_tags (quiz_id, tag_id) VALUES (?,?)";
     private final static String UPDATE_QUIZ = "UPDATE quizzes SET name = ?, author = ?, category_id = ?, date = ?, description = ?, status = ?::status_type, modification_time = ? WHERE id = ?";
     private final static String UPDATE_QUIZ_IMAGE = "UPDATE quizzes SET image = ? WHERE id = ?";
-    private final static String GET_FILTERED_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category, users.name AS authorName, users.surname AS authorSurname FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN users ON quizzes.author = users.id WHERE quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(name, ' ', surname) ~*? OR date::text ~* ?";
+    private final static String GET_FILTERED_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category, users.name AS authorName, users.surname AS authorSurname FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN users ON quizzes.author = users.id WHERE quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(users.name, ' ', surname) ~*? OR date::text ~* ?";
     private final static String GET_POPULAR_QUIZ = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category, COUNT(quiz_id)  AS counter FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN favorite_quizzes ON quizzes.id = favorite_quizzes.quiz_id WHERE quizzes.status = 'ACTIVE' GROUP BY quizzes.id, categories.id ORDER BY counter DESC LIMIT ?";
     private final static String FILTER_QUIZZES_CREATED_BY_USER = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE author = ? AND (status<>'DELETED' AND status<>'DEACTIVATED') AND (quizzes.name ~* ? OR categories.name ~* ? OR date::text ~* ?)";
     private final static String FILTER_FAVORITE_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN favorite_quizzes ON quizzes.id = quiz_id WHERE user_id = ? AND (quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(name, ' ', surname) ~*? OR date::text ~* ?)";
@@ -290,7 +290,7 @@ public class QuizDao {
                     quiz.setId(resultSet.getInt(QUIZ_ID));
                     quiz.setName(resultSet.getString(QUIZ_NAME));
                     quiz.setAuthor(resultSet.getInt(QUIZ_AUTHOR));
-                    quiz.setCategory_id(resultSet.getInt(QUIZ_CATEGORY));
+                    quiz.setCategory_id(resultSet.getInt("category_id"));
                     quiz.setDate(resultSet.getDate(QUIZ_DATE));
                     quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
                     quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
@@ -392,7 +392,7 @@ public class QuizDao {
     public List<Quiz> getQuizzesByFilter(String searchByUser, int userId) {
         List<Quiz> getFilteredQuizzes = jdbcTemplate.query(
                 GET_FILTERED_QUIZZES,
-                new Object[]{searchByUser, searchByUser, searchByUser, searchByUser, searchByUser},
+                new Object[]{searchByUser, searchByUser, searchByUser, searchByUser},
                 new QuizMapper());
 
         if (getFilteredQuizzes.isEmpty()) {
