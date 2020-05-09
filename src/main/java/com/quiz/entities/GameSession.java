@@ -13,7 +13,7 @@ import java.util.TreeSet;
 public class GameSession {
     private int hostId;
     private List<Question> questions;
-    private Set<Player> playerSet = new TreeSet<>();
+    private volatile Set<Player> playerSet = new TreeSet<>();
     private int currentQuestion;
     private int collectedAnswers;
 
@@ -30,6 +30,10 @@ public class GameSession {
             this.currentQuestion++;
         }
 
+        if (currentQuestion == questions.size()) {
+            return null;
+        }
+
         return new GameQuestionsDto(this.currentQuestion ,questions.get(this.currentQuestion));
     }
 
@@ -41,5 +45,9 @@ public class GameSession {
                     }
                 }
         );
+    }
+
+    public int incrementCollectedAnswer(){
+        return ++this.collectedAnswers;
     }
 }

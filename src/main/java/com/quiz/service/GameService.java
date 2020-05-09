@@ -4,6 +4,7 @@ import com.quiz.dao.UserDao;
 import com.quiz.dao.mapper.GameDao;
 import com.quiz.dto.GameAnswersDto;
 import com.quiz.dto.GameQuestionsDto;
+import com.quiz.dto.GameSessionDto;
 import com.quiz.entities.*;
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +23,7 @@ public class GameService {
     GameDao gameDao;
     UserDao userDao;
 
-    public GameSession addGameSession(int quizId, int hostId, int questionTimer, int maxUsersNumber) {
+    public GameSessionDto addGameSession(int quizId, int hostId, int questionTimer, int maxUsersNumber) {
         User host = userDao.findById(hostId);
         GameSession gameSession = new GameSession(hostId,
                 questionService.getQuestionsByQuizId(quizId));
@@ -31,7 +32,8 @@ public class GameService {
 
         int gameId = createGame(quizId, hostId, questionTimer, maxUsersNumber);
         this.currentGames.put(gameId, gameSession);
-        return this.currentGames.get(gameId);
+        /*return this.currentGames.get(gameId);*/
+        return new GameSessionDto(gameId, this.currentGames.get(gameId).getPlayerSet());
     }
 
     private int createGame(int quizId, int hostId, int questionTimer, int max_users_number){
@@ -60,7 +62,7 @@ public class GameService {
         return this.currentGames.get(gameId).nextQuestion();
     }
 
-    public void handleAnswer(int gameId, int userId,  GameAnswersDto answer) {
+    public int handleAnswer(int gameId, int userId,  GameAnswersDto answer) {
         QuestionType questionType = this.currentGames.get(gameId).getQuestions().get(answer.getAnswers().get(0).getQuestionId()).getType();
 
         switch (questionType) {
@@ -85,6 +87,7 @@ public class GameService {
                 }
                 break;
         }
+        return this.currentGames.get(gameId).incrementCollectedAnswer();
     }
 
     private boolean isRightAnswer(String text, int questionNumber, int gameId) {
