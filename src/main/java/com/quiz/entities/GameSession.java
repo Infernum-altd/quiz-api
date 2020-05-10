@@ -45,7 +45,13 @@ public class GameSession {
     }
 
     public int incrementCollectedAnswer() {
-        this.collectedAnswers.increment();
+
         return this.collectedAnswers.intValue();
     }
+
+    public boolean isAllAnswerCollected() {
+        this.collectedAnswers.increment();
+        return this.collectedAnswers.intValue() == this.playerSet.size();
+    }
 }
+

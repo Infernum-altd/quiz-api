@@ -32,7 +32,7 @@ public class GameService {
 
         int gameId = createGame(quizId, hostId, questionTimer, maxUsersNumber);
         this.currentGames.put(gameId, gameSession);
-        /*return this.currentGames.get(gameId);*/
+
         return new GameSessionDto(gameId, this.currentGames.get(gameId).getPlayerSet());
     }
 
@@ -43,6 +43,10 @@ public class GameService {
 
     public GameSessionDto addUserInSession(int gameId, int userId){
         User user = userDao.findById(userId);
+        if (this.currentGames.get(gameId).getPlayerSet().size() == this.gameDao.getUserNumberByGameId(gameId)) {
+            throw new RuntimeException("The session is already full");
+        }
+
         this.currentGames.get(gameId).getPlayerSet().add(new Player(user.getId(),user.getName() + " " + user.getSurname()));
         return new GameSessionDto(gameId, this.currentGames.get(gameId).getPlayerSet());
     }
@@ -61,7 +65,7 @@ public class GameService {
         return this.currentGames.get(gameId).nextQuestion();
     }
 
-    public int handleAnswer(int gameId, int userId,  GameAnswersDto answer) {
+    public boolean handleAnswer(int gameId, int userId,  GameAnswersDto answer) {
         QuestionType questionType = this.currentGames.get(gameId).getQuestions().get(answer.getAnswers().get(0).getQuestionId()).getType();
 
         switch (questionType) {
@@ -86,7 +90,7 @@ public class GameService {
                 }
                 break;
         }
-        return this.currentGames.get(gameId).incrementCollectedAnswer();
+        return this.currentGames.get(gameId).isAllAnswerCollected();
     }
 
     private boolean isRightAnswer(String text, int questionNumber, int gameId) {
@@ -113,5 +117,11 @@ public class GameService {
             }
         }
         return true;
+    }
+
+    public void onUserDisconnection(int userId, int gameId) {
+        Player DisconnectedPlayer = this.currentGames.get(gameId).getPlayerSet().stream().filter(player -> player.getUserId()==userId).findFirst().get();
+        this.gameDao.saveScore(userId, gameId, DisconnectedPlayer.getUserScore());
+        this.currentGames.get(gameId).getPlayerSet().remove(DisconnectedPlayer);
     }
 }
