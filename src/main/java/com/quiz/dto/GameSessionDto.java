@@ -2,10 +2,12 @@ package com.quiz.dto;
 
 import com.quiz.entities.Player;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Set;
 
 @Data
+@RequiredArgsConstructor
 public class GameSessionDto {
     private int quizId;
     private int hostId;

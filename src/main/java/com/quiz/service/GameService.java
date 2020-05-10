@@ -8,6 +8,7 @@ import com.quiz.dto.GameSessionDto;
 import com.quiz.entities.*;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,13 +18,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @RequiredArgsConstructor
 public class GameService {
-    private ConcurrentHashMap<Integer, GameSession> currentGames;
-
+    private ConcurrentHashMap<Integer, GameSession> currentGames = new ConcurrentHashMap<>();
+    @Autowired
     QuestionService questionService;
+    @Autowired
     GameDao gameDao;
+    @Autowired
     UserDao userDao;
 
-    public GameSessionDto addGameSession(int quizId, int hostId, int questionTimer, int maxUsersNumber) {
+    public int addGameSession(int quizId, int hostId, int questionTimer, int maxUsersNumber) {
         User host = userDao.findById(hostId);
         GameSession gameSession = new GameSession(hostId,
                 questionService.getQuestionsByQuizId(quizId));
@@ -32,8 +35,8 @@ public class GameService {
 
         int gameId = createGame(quizId, hostId, questionTimer, maxUsersNumber);
         this.currentGames.put(gameId, gameSession);
-
-        return new GameSessionDto(gameId, this.currentGames.get(gameId).getPlayerSet());
+        return gameId;
+        //return new GameSessionDto(gameId, this.currentGames.get(gameId).getPlayerSet());
     }
 
     private int createGame(int quizId, int hostId, int questionTimer, int max_users_number){

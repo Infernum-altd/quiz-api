@@ -4,10 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 
-import java.util.Date;
+
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.time.LocalDate;
+
 
 @RequiredArgsConstructor
+@Repository
 public class GameDao {
     private final JdbcTemplate jdbcTemplate;
 
@@ -18,8 +24,16 @@ public class GameDao {
     public int insetGame(int quizId, int hostId, int questionTimer, int max_users_number) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        return jdbcTemplate.update(INSERT_GAME,
-                    new Object[]{quizId, hostId, questionTimer, new Date(), max_users_number}, keyHolder);
+        return jdbcTemplate.update(
+                connection -> {
+                    PreparedStatement ps = connection.prepareStatement(INSERT_GAME, new String[]{"id"});
+                    ps.setInt(1, quizId);
+                    ps.setInt(2, hostId);
+                    ps.setInt(3, questionTimer);
+                    ps.setDate(4, Date.valueOf(LocalDate.now()));
+                    ps.setInt(5, max_users_number);
+                    return ps;
+                }, keyHolder);
     }
 
     public int getUserNumberByGameId(int gameId){
