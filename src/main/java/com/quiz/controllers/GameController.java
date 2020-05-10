@@ -10,10 +10,13 @@ import com.quiz.service.GameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.Set;
 
@@ -23,7 +26,7 @@ import java.util.Set;
 public class GameController {
     private GameService gameService;
     //private SimpMessageSendingOperations messagingTemplate;
-    //private SimpMessagingTemplate template;
+    private SimpMessagingTemplate template;
 
 
 
@@ -40,15 +43,14 @@ public class GameController {
         this.template.convertAndSend("/message",  message);
     }*/
 
-    @MessageMapping("/play/addSession")
+    @PostMapping("/play/addSession")
     public GameSessionDto addGameSession(GameSessionDto gameSessionDto) {
         return gameService.addGameSession(gameSessionDto.getQuizId(), gameSessionDto.getHostId(),
                 gameSessionDto.getQuestionTimer(), gameSessionDto.getMaxUsersNumber());
     }
 
-    @MessageMapping("/play/{gameId}/join/{userId}")
-    public GameSession userJoinGameSession(@DestinationVariable int gameId, @DestinationVariable int userId, SimpMessageHeaderAccessor headerAccessor) {
-        String username = (String) headerAccessor.getSessionAttributes().put("userId", userId);
+    @SubscribeMapping("/play/{gameId}")
+    public GameSessionDto userJoinGameSession(@DestinationVariable int gameId, int userId) {
         return gameService.addUserInSession(gameId, userId);
     }
 
@@ -58,6 +60,7 @@ public class GameController {
     }*/
 
     @MessageMapping("play/{gameId}/{userId}/getAnswer")
+    @SendTo("/play/{gameId}")
     public GameQuestionsDto getAnswer(@DestinationVariable int gameId, @DestinationVariable int userId, GameAnswersDto answers) {
         this.gameService.handleAnswer(gameId, userId, answers);
         return this.gameService.nextQuestion(gameId);

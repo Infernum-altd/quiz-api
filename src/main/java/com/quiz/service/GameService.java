@@ -41,12 +41,11 @@ public class GameService {
     }
 
 
-    public GameSession addUserInSession(int gameId, int userId){
+    public GameSessionDto addUserInSession(int gameId, int userId){
         User user = userDao.findById(userId);
         this.currentGames.get(gameId).getPlayerSet().add(new Player(user.getId(),user.getName() + " " + user.getSurname()));
-        return this.currentGames.get(gameId);
+        return new GameSessionDto(gameId, this.currentGames.get(gameId).getPlayerSet());
     }
-
 
 
     public Set<Player> deleteGameSession(int gameId) {
