@@ -2,6 +2,7 @@ package com.quiz.service;
 
 import com.quiz.dao.UserDao;
 import com.quiz.entities.NotificationStatus;
+import com.quiz.entities.Quiz;
 import com.quiz.entities.User;
 import com.quiz.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +36,8 @@ public class UserService {
         return userDao.findProfileInfoByUserId(id);
     }
 
-    public List<User> findFriendByUserId(int id) {
-        return userDao.findFriendByUserId(id);
+    public List<User> findFriendByUserId(int id, String sort) {
+        return userDao.findFriendByUserId(id, sort);
     }
 
 
@@ -51,7 +52,7 @@ public class UserService {
         return userDao.updateStatusById(id);
     }
 
-    public int getUserIdByEmail(String email){
+    public int getUserIdByEmail(String email) {
         return userDao.getUserIdByEmail(email);
     }
     public String getUserRoleByEmail(String email){
@@ -78,4 +79,20 @@ public class UserService {
     public NotificationStatus getNotificationStatus(int userId) {
         return userDao.getUserNotification(userId);
     }
+    public Integer getRatingByUser(int userId) {
+        return userDao.getRatingByUser(userId);
+    }
+
+    public List<User> getRating(int from, int to) {
+        return userDao.getRating(from, to);
+    }
+
+    public List<User> getRatingInRange(int userId, int range) {
+        return userDao.getRatingInRange(userId, range);
+    }
+
+    public List<User> filterFriendByUserId(String userSearch, int userId, String sort) {
+        return userDao.filterFriendByUserId(userSearch, userId, sort);
+    }
 }
+

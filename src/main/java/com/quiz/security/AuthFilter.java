@@ -42,6 +42,7 @@ public class AuthFilter extends OncePerRequestFilter {
 
     // TODO: 09.04.2020 create const
     private String getToken(HttpServletRequest request) {
+
         String token = request.getHeader("authorization");
         if (!StringUtils.isEmpty(token) && token.startsWith("Bearer ")) {
             return token.replace("Bearer ", "");
