@@ -1,7 +1,7 @@
 package com.quiz.service;
 
 import com.quiz.dao.UserDao;
-import com.quiz.dao.mapper.GameDao;
+import com.quiz.dao.GameDao;
 import com.quiz.dto.GameAnswersDto;
 import com.quiz.dto.GameQuestionsDto;
 import com.quiz.dto.GameSessionDto;
@@ -31,7 +31,7 @@ public class GameService {
         GameSession gameSession = new GameSession(hostId,
                 questionService.getQuestionsByQuizId(quizId));
 
-        gameSession.getPlayerSet().add(new Player(host.getId(),host.getName() + " " + host.getSurname()));
+        gameSession.getPlayerSet().add(new Player(host.getId(), host.getName() + " " + host.getSurname()));
 
         int gameId = createGame(quizId, hostId, questionTimer, maxUsersNumber);
         this.currentGames.put(gameId, gameSession);
@@ -39,19 +39,23 @@ public class GameService {
         //return new GameSessionDto(gameId, this.currentGames.get(gameId).getPlayerSet());
     }
 
-    private int createGame(int quizId, int hostId, int questionTimer, int max_users_number){
+    private int createGame(int quizId, int hostId, int questionTimer, int max_users_number) {
         return gameDao.insertGame(quizId, hostId, questionTimer, max_users_number);
     }
 
 
-    public GameSessionDto addUserInSession(int gameId, int userId){
+    public GameSessionDto addUserInSession(int gameId, int userId) {
         User user = userDao.findById(userId);
         if (this.currentGames.get(gameId).getPlayerSet().size() == this.gameDao.getUserNumberByGameId(gameId)) {
             throw new RuntimeException("The session is already full");
         }
 
-        this.currentGames.get(gameId).getPlayerSet().add(new Player(user.getId(),user.getName() + " " + user.getSurname()));
-        return new GameSessionDto(gameId, this.currentGames.get(gameId).getPlayerSet());
+        this.currentGames.get(gameId).getPlayerSet().add(new Player(user.getId(), user.getName() + " " + user.getSurname()));
+
+        GameSessionDto result = this.gameDao.getGame(gameId);
+        result.setPlayers(this.currentGames.get(gameId).getPlayerSet());
+
+        return result;
     }
 
 
@@ -68,12 +72,12 @@ public class GameService {
         return this.currentGames.get(gameId).nextQuestion();
     }
 
-    public boolean handleAnswer(int gameId, int userId,  GameAnswersDto answer) {
+    public boolean handleAnswer(int gameId, int userId, GameAnswersDto answer) {
         QuestionType questionType = this.currentGames.get(gameId).getQuestions().get(answer.getAnswers().get(0).getQuestionId()).getType();
 
         switch (questionType) {
             case ANSWER:
-                if (isRightAnswer(answer.getAnswers().get(0).getText(), answer.getAnswers().get(0).getQuestionId(),gameId)) {
+                if (isRightAnswer(answer.getAnswers().get(0).getText(), answer.getAnswers().get(0).getQuestionId(), gameId)) {
                     this.currentGames.get(gameId).addScorePoint(4, userId);
                 }
                 break;
@@ -81,12 +85,12 @@ public class GameService {
                 if (isRightOption(answer.getAnswers())) {
                     this.currentGames.get(gameId).addScorePoint(2, userId);
                 }
-                    break;
+                break;
             case BOOLEAN:
                 if (isRightBoolean(answer.getAnswers().get(0))) {
                     this.currentGames.get(gameId).addScorePoint(1, userId);
                 }
-                    break;
+                break;
             case SEQUENCE:
                 if (isRightSequence(answer.getAnswers())) {
                     this.currentGames.get(gameId).addScorePoint(3, userId);
@@ -101,7 +105,7 @@ public class GameService {
     }
 
     private boolean isRightOption(List<Answer> answers) {
-        for (Answer answer: answers) {
+        for (Answer answer : answers) {
             if (!answer.isCorrect()) {
                 return false;
             }
@@ -114,8 +118,8 @@ public class GameService {
     }
 
     private boolean isRightSequence(List<Answer> answers) {
-        for (int i = 0; i < answers.size()-1; i++) {
-            if (answers.get(i).getNextAnswerId() != answers.get(i+1).getNextAnswerId()) {
+        for (int i = 0; i < answers.size() - 1; i++) {
+            if (answers.get(i).getNextAnswerId() != answers.get(i + 1).getNextAnswerId()) {
                 return false;
             }
         }
@@ -123,7 +127,7 @@ public class GameService {
     }
 
     public void onUserDisconnection(int userId, int gameId) {
-        Player DisconnectedPlayer = this.currentGames.get(gameId).getPlayerSet().stream().filter(player -> player.getUserId()==userId).findFirst().get();
+        Player DisconnectedPlayer = this.currentGames.get(gameId).getPlayerSet().stream().filter(player -> player.getUserId() == userId).findFirst().get();
         this.gameDao.saveScore(userId, gameId, DisconnectedPlayer.getUserScore());
         this.currentGames.get(gameId).getPlayerSet().remove(DisconnectedPlayer);
     }

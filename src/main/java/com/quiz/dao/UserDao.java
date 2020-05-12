@@ -27,7 +27,7 @@ public class UserDao {
     private final JdbcTemplate jdbcTemplate;
 
     private final static String USER_FIND_BY_EMAIL = "SELECT id, email, password FROM users WHERE email = ?";
-    private final static String USER_FIND_BY_ID = "SELECT id,email,password FROM users WHERE id = ?";
+    private final static String USER_FIND_BY_ID = "SELECT id,email,name, surname,password FROM users WHERE id = ?";
     private final static String USER_GET_ALL_FOR_PROFILE_BY_ID = "SELECT id, email, name, surname, birthdate, gender, city, about FROM users WHERE id = ?";
     private final static String FIND_FRIENDS_BY_USER_ID = "SELECT id, email, name, surname, rating FROM users where id in (SELECT friend_id FROM users INNER JOIN friends ON user_id = id WHERE id = ?)";
     private final static String FIND_FRIENDS_BY_USER_ID_ORDER_BY = "SELECT id, email, name, surname, rating FROM users where id in (SELECT friend_id FROM users INNER JOIN friends ON user_id = id WHERE id = ?)";
@@ -59,6 +59,8 @@ public class UserDao {
 
                         user.setId(resultSet.getInt(USERS_ID));
                         user.setEmail(resultSet.getString(USERS_EMAIL));
+                        user.setName(resultSet.getString(USERS_NAME));
+                        user.setSurname(resultSet.getString(USERS_SURNAME));
                         user.setPassword(resultSet.getString(USERS_PASSWORD));
 
                         return user;
@@ -86,6 +88,8 @@ public class UserDao {
 
                         user.setId(resultSet.getInt(USERS_ID));
                         user.setEmail(resultSet.getString(USERS_EMAIL));
+                        user.setName(resultSet.getString(USERS_NAME));
+                        user.setSurname(resultSet.getString(USERS_SURNAME));
                         user.setPassword(resultSet.getString(USERS_PASSWORD));
                         return user;
                     }
@@ -153,7 +157,7 @@ public class UserDao {
     public List<User> findFriendByUserId(int id, String sort) {
 
         List<User> friends = jdbcTemplate.query(
-                sort.isEmpty() ? FIND_FRIENDS_BY_USER_ID: FIND_FRIENDS_BY_USER_ID + "ORDER BY " + sort,
+                sort.isEmpty() ? FIND_FRIENDS_BY_USER_ID : FIND_FRIENDS_BY_USER_ID + "ORDER BY " + sort,
                 new Object[]{id},
                 (resultSet, i) -> {
                     User user = new User();
@@ -253,7 +257,7 @@ public class UserDao {
     }
 
     public List<User> filterFriendByUserId(String userSearch, int userId, String sort) {
-        return jdbcTemplate.query(sort.isEmpty()? FILTER_FRIENDS_BY_USER_ID: FILTER_FRIENDS_BY_USER_ID + "ORDER BY " + sort,
+        return jdbcTemplate.query(sort.isEmpty() ? FILTER_FRIENDS_BY_USER_ID : FILTER_FRIENDS_BY_USER_ID + "ORDER BY " + sort,
                 new Object[]{userId, userSearch, userSearch},
                 (resultSet, i) -> {
                     User user = new User();
@@ -267,7 +271,7 @@ public class UserDao {
                 });
     }
 
-    public void insertUserScore(int userId, int gameId, int score){
+    public void insertUserScore(int userId, int gameId, int score) {
         jdbcTemplate.update(INSERT_GAME_SCORE,
                 userId, gameId, score);
     }

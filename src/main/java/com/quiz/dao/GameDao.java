@@ -1,18 +1,19 @@
-package com.quiz.dao.mapper;
+package com.quiz.dao;
 
-import com.quiz.exceptions.DatabaseException;
+import com.quiz.dao.mapper.GameSessionMapper;
+import com.quiz.dto.GameSessionDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.Objects;
+
+import static com.quiz.dao.mapper.GameSessionMapper.*;
 
 
 @RequiredArgsConstructor
@@ -23,6 +24,8 @@ public class GameDao {
     private final static String INSERT_GAME = "INSERT INTO games (quiz_id, host_id, question_timer, date, max_users_number) VALUES (?, ?, ?, ?, ?)";
     private final static String GET_PLAYER_LIMIT = "SELECT max_users_number FROM games WHERE id =?";
     private final static String SAVE_SCORE = "INSERT INTO score (user_id, game_id, score) VALUES (?, ?, ?)";
+
+    public static final String GET_GAME = "SELECT quiz_id, host_id, question_timer,max_users_number FROM games WHERE id = ?";
 
     public int insertGame(int quizId, int hostId, int questionTimer, int max_users_number) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -49,5 +52,9 @@ public class GameDao {
 
     public void saveScore(int userId, int gameId, int score) {
         jdbcTemplate.update(SAVE_SCORE, userId, gameId, score);
+    }
+
+    public GameSessionDto getGame(int gameId) {
+        return jdbcTemplate.queryForObject(GET_GAME, new Object[]{gameId}, new GameSessionMapper());
     }
 }
