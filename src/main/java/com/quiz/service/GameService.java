@@ -40,7 +40,7 @@ public class GameService {
     }
 
     private int createGame(int quizId, int hostId, int questionTimer, int max_users_number){
-        return gameDao.insetGame(quizId, hostId, questionTimer, max_users_number);
+        return gameDao.insertGame(quizId, hostId, questionTimer, max_users_number);
     }
 
 
