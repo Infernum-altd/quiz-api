@@ -50,7 +50,7 @@ public class GameService {
             throw new RuntimeException("The session is already full");
         }
 
-        this.currentGames.get(gameId).getPlayerSet().add(new Player(user.getId(), user.getName() + " " + user.getSurname()));
+        this.currentGames.get(gameId).addPlayer(new Player(user.getId(), user.getName() + " " + user.getSurname()));
 
         GameSessionDto result = this.gameDao.getGame(gameId);
         result.setPlayers(this.currentGames.get(gameId).getPlayerSet());

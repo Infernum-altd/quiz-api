@@ -20,7 +20,7 @@ import java.util.Set;
 
 
 @RestController
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 @CrossOrigin
 public class GameController {
 

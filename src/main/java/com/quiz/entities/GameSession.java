@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.LongAdder;
 public class GameSession {
     private final int hostId;
     private final List<Question> questions;
-    private Set<Player> playerSet = new ConcurrentSkipListSet<>();
+    private Set<Player> playerSet;
     private int currentQuestion;
     private LongAdder collectedAnswers;
 
@@ -20,6 +20,7 @@ public class GameSession {
         this.hostId = hostId;
         this.questions = questions;
         this.currentQuestion = 0;
+        this.playerSet = new ConcurrentSkipListSet<>();
         this.collectedAnswers = new LongAdder();
     }
 
@@ -42,6 +43,10 @@ public class GameSession {
                 player.setUserScore(player.getUserScore() + score);
             }
         }
+    }
+
+    public void addPlayer(Player player) {
+        this.playerSet.add(player);
     }
 
     public int incrementCollectedAnswer() {
