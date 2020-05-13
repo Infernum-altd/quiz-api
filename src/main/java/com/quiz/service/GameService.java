@@ -49,7 +49,7 @@ public class GameService {
             throw new RuntimeException("The session is already full");
         }
 
-        if (player.getRole().equals(PlayerRole.valueOf("AUTHORIZE"))) {
+        if (player.isAuthorize()) {
             User user = userDao.findById(player.getUserId());
             this.currentGames.get(gameId).addPlayer(new Player(user.getId(), user.getName() + " " + user.getSurname()));
         } else {
@@ -69,7 +69,7 @@ public class GameService {
         Set<Player> players = finishSession.getPlayerSet();
 
         players.forEach(user -> userDao.insertUserScore(user.getUserId(), gameId, user.getUserScore()));
-        players.stream().filter(player -> player.getRole().equals(PlayerRole.valueOf("AUTHORIZE")))
+        players.stream().filter(Player::isAuthorize)
                 .forEach(user -> userDao.insertUserScore(user.getUserId(), gameId, user.getUserScore()));
         this.currentGames.remove(gameId);
         return players;
@@ -135,7 +135,7 @@ public class GameService {
 
     public void onUserDisconnection(int userId, int gameId) {
         Player disconnectedPlayer = this.currentGames.get(gameId).getPlayerSet().stream().filter(player -> player.getUserId() == userId).findFirst().get();
-        if (!disconnectedPlayer.getRole().equals(PlayerRole.valueOf("AUTHORIZE"))) {
+        if (!disconnectedPlayer.isAuthorize()) {
             this.gameDao.saveScore(userId, gameId, disconnectedPlayer.getUserScore());
         }
         this.currentGames.get(gameId).getPlayerSet().remove(disconnectedPlayer);

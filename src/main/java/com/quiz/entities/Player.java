@@ -8,7 +8,7 @@ public class Player implements Comparable<Player> {
     int userId;
     int userScore;
     String userName;
-    PlayerRole role;
+    boolean isAuthorize;
 
     public Player(int userId, String userName) {
         this.userId = userId;
