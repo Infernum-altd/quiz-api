@@ -36,7 +36,6 @@ public class GameService {
         int gameId = createGame(quizId, hostId, questionTimer, maxUsersNumber);
         this.currentGames.put(gameId, gameSession);
         return gameId;
-        //return new GameSessionDto(gameId, this.currentGames.get(gameId).getPlayerSet());
     }
 
     private int createGame(int quizId, int hostId, int questionTimer, int max_users_number) {
@@ -44,13 +43,19 @@ public class GameService {
     }
 
 
-    public GameSessionDto addUserInSession(int gameId, int userId) {
-        User user = userDao.findById(userId);
+    public GameSessionDto addUserInSession(int gameId, Player player) {
+
         if (this.currentGames.get(gameId).getPlayerSet().size() == this.gameDao.getUserNumberByGameId(gameId)) {
             throw new RuntimeException("The session is already full");
         }
 
-        this.currentGames.get(gameId).addPlayer(new Player(user.getId(), user.getName() + " " + user.getSurname()));
+        if (player.getRole().equals(PlayerRole.valueOf("AUTHORIZE"))) {
+            User user = userDao.findById(player.getUserId());
+            this.currentGames.get(gameId).addPlayer(new Player(user.getId(), user.getName() + " " + user.getSurname()));
+        } else {
+            player.setUserName("Player " + currentGames.get(gameId).getPlayerSet().size());
+            this.currentGames.get(gameId).addPlayer(player);
+        }
 
         GameSessionDto result = this.gameDao.getGame(gameId);
         result.setPlayers(this.currentGames.get(gameId).getPlayerSet());
@@ -64,6 +69,8 @@ public class GameService {
         Set<Player> players = finishSession.getPlayerSet();
 
         players.forEach(user -> userDao.insertUserScore(user.getUserId(), gameId, user.getUserScore()));
+        players.stream().filter(player -> player.getRole().equals(PlayerRole.valueOf("AUTHORIZE")))
+                .forEach(user -> userDao.insertUserScore(user.getUserId(), gameId, user.getUserScore()));
         this.currentGames.remove(gameId);
         return players;
     }
@@ -127,8 +134,10 @@ public class GameService {
     }
 
     public void onUserDisconnection(int userId, int gameId) {
-        Player DisconnectedPlayer = this.currentGames.get(gameId).getPlayerSet().stream().filter(player -> player.getUserId() == userId).findFirst().get();
-        this.gameDao.saveScore(userId, gameId, DisconnectedPlayer.getUserScore());
-        this.currentGames.get(gameId).getPlayerSet().remove(DisconnectedPlayer);
+        Player disconnectedPlayer = this.currentGames.get(gameId).getPlayerSet().stream().filter(player -> player.getUserId() == userId).findFirst().get();
+        if (!disconnectedPlayer.getRole().equals(PlayerRole.valueOf("AUTHORIZE"))) {
+            this.gameDao.saveScore(userId, gameId, disconnectedPlayer.getUserScore());
+        }
+        this.currentGames.get(gameId).getPlayerSet().remove(disconnectedPlayer);
     }
 }

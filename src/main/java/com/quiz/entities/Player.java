@@ -8,6 +8,7 @@ public class Player implements Comparable<Player> {
     int userId;
     int userScore;
     String userName;
+    PlayerRole role;
 
     public Player(int userId, String userName) {
         this.userId = userId;
@@ -17,6 +18,7 @@ public class Player implements Comparable<Player> {
 
     @Override
     public int compareTo(Player player) {
-        return Integer.compare(this.userId, player.getUserId());
+        int result = Integer.compare(this.userScore, player.userScore);
+        return result == 0 ? Integer.compare(this.userId, player.getUserId()) : result;
     }
 }

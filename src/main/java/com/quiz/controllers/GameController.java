@@ -5,7 +5,6 @@ import com.quiz.dto.GameQuestionsDto;
 import com.quiz.dto.GameSessionDto;
 import com.quiz.entities.Player;
 import com.quiz.service.GameService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -20,10 +19,8 @@ import java.util.Set;
 
 
 @RestController
-//@RequiredArgsConstructor
 @CrossOrigin
 public class GameController {
-
 
     @Autowired
     private GameService gameService;
@@ -36,10 +33,10 @@ public class GameController {
                 gameSessionDto.getQuestionTimer(), gameSessionDto.getMaxUsersNumber());
     }
 
-    @MessageMapping("/play/game/{gameId}/user/{userId}")
-    public void userJoinGameSession(@DestinationVariable int gameId, @DestinationVariable int userId, SimpMessageHeaderAccessor headerAccessor) {
-//        String userHeaderAccessor = (String) headerAccessor.getSessionAttributes().put("userId", new int[]{userId, gameId});
-        template.convertAndSend("/play/game/" + gameId, gameService.addUserInSession(gameId, userId));
+    @MessageMapping("/play/game/{gameId}/user")
+    public void userJoinGameSession(@DestinationVariable int gameId, @RequestBody Player player, SimpMessageHeaderAccessor headerAccessor) {
+        String userHeaderAccessor = (String) headerAccessor.getSessionAttributes().put("userId", new int[]{player.getUserId(), gameId});
+        template.convertAndSend("/play/game/" + gameId, gameService.addUserInSession(gameId, player));
     }
 
     @MessageMapping("/play/game/{gameId}/start")

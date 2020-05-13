@@ -50,7 +50,6 @@ public class GameSession {
     }
 
     public int incrementCollectedAnswer() {
-
         return this.collectedAnswers.intValue();
     }
 
