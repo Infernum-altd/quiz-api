@@ -28,8 +28,7 @@ public class GameService {
 
     public int addGameSession(int quizId, int hostId, int questionTimer, int maxUsersNumber) {
         User host = userDao.findById(hostId);
-        GameSession gameSession = new GameSession(hostId,
-                questionService.getQuestionsByQuizId(quizId));
+        GameSession gameSession = new GameSession(hostId, questionService.getQuestionsByQuizId(quizId), questionTimer);
 
         gameSession.getPlayerSet().add(new Player(host.getId(), host.getName() + " " + host.getSurname()));
 
@@ -63,6 +62,9 @@ public class GameService {
         return result;
     }
 
+    public int getQuestionTimer(int gameId) {
+        return this.currentGames.get(gameId).getQuestionTimer();
+    }
 
     public Set<Player> deleteGameSession(int gameId) {
         GameSession finishSession = this.currentGames.get(gameId);

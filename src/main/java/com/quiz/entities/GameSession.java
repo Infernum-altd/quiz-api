@@ -15,13 +15,15 @@ public class GameSession {
     private Set<Player> playerSet;
     private int currentQuestion;
     private LongAdder collectedAnswers;
+    private int questionTimer;
 
-    public GameSession(int hostId, List<Question> questions) {
+    public GameSession(int hostId, List<Question> questions, int questionTimer) {
         this.hostId = hostId;
         this.questions = questions;
         this.currentQuestion = 0;
         this.playerSet = new ConcurrentSkipListSet<>();
         this.collectedAnswers = new LongAdder();
+        this.questionTimer = questionTimer;
     }
 
     public synchronized GameQuestionsDto nextQuestion() {
@@ -34,7 +36,7 @@ public class GameSession {
             return null;
         }
 
-        return new GameQuestionsDto(this.currentQuestion, questions.get(this.currentQuestion));
+        return new GameQuestionsDto(this.currentQuestion, this.questionTimer, questions.get(this.currentQuestion));
     }
 
     public void addScorePoint(int score, int userId) {
