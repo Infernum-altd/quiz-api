@@ -1,8 +1,10 @@
 package com.quiz.service;
 
+import com.quiz.dao.AnswerDao;
 import com.quiz.dao.QuestionDao;
 import com.quiz.dto.QuestionDto;
 import com.quiz.entities.Question;
+import com.quiz.entities.QuestionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +16,7 @@ import java.util.List;
 public class QuestionService {
 
     private final QuestionDao questionDao;
+    private final AnswerDao answerDao;
 
     public Question findById(int id) {
         return questionDao.findById(id);
@@ -41,6 +44,13 @@ public class QuestionService {
     }
 
     public List<Question> getQuestionsByQuizId(int quizId) {
-        return questionDao.getQuestionsByQuizId(quizId);
+        List<Question> questions = questionDao.getQuestionsByQuizId(quizId);
+
+        questions.stream()
+                .filter(question -> question.getType() != QuestionType.ANSWER)
+                .forEach(question -> {
+                    question.setAnswerList(answerDao.findAnswersByQuestionId(question.getId()));
+                });
+        return questions;
     }
 }

@@ -1,12 +1,12 @@
 package com.quiz.service;
 
+import com.quiz.dao.AnswerDao;
 import com.quiz.dao.UserDao;
 import com.quiz.dao.GameDao;
 import com.quiz.dto.GameAnswersDto;
 import com.quiz.dto.GameQuestionsDto;
 import com.quiz.dto.GameSessionDto;
 import com.quiz.entities.*;
-import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-@RequiredArgsConstructor
 public class GameService {
     private ConcurrentHashMap<Integer, GameSession> currentGames = new ConcurrentHashMap<>();
     @Autowired
@@ -25,6 +24,8 @@ public class GameService {
     GameDao gameDao;
     @Autowired
     UserDao userDao;
+    @Autowired
+    AnswerDao answerDao;
 
     public int addGameSession(int quizId, int hostId, int questionTimer, int maxUsersNumber) {
         User host = userDao.findById(hostId);
@@ -110,20 +111,20 @@ public class GameService {
     }
 
     private boolean isRightAnswer(String text, int questionNumber, int gameId) {
-        return this.currentGames.get(gameId).getQuestions().get(questionNumber).getText().toLowerCase().equals(text.toLowerCase());
+        return this.answerDao.findById(this.currentGames.get(gameId).getQuestions().get(questionNumber).getId()).getText().toLowerCase().equals(text.toLowerCase());
     }
 
     private boolean isRightOption(List<Answer> answers) {
         for (Answer answer : answers) {
-            if (!answer.isCorrect()) {
+            if (!this.answerDao.findById(answer.getId()).isCorrect()) {
                 return false;
             }
         }
-        return false;
+        return true;
     }
 
     private boolean isRightBoolean(Answer answer) {
-        return answer.isCorrect();
+        return this.answerDao.findById(answer.getId()).isCorrect();
     }
 
     private boolean isRightSequence(List<Answer> answers) {
