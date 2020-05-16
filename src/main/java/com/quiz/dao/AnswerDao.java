@@ -65,7 +65,7 @@ public class AnswerDao {
                     answer.setQuestionId(resultSet.getInt(ANSWER_QUESTION_ID));
                     answer.setText(resultSet.getString(ANSWER_TEXT));
                     //answer.setCorrect(resultSet.getBoolean(ANSWER_CORRECT));
-                    answer.setNextAnswerId(resultSet.getInt(ANSWER_NEXT_ANSWER_ID));
+                    //answer.setNextAnswerId(resultSet.getInt(ANSWER_NEXT_ANSWER_ID));
 
                     return answer;
                 }

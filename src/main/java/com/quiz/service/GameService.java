@@ -129,7 +129,7 @@ public class GameService {
 
     private boolean isRightSequence(List<Answer> answers) {
         for (int i = 0; i < answers.size() - 1; i++) {
-            if (answers.get(i).getNextAnswerId() != answers.get(i + 1).getNextAnswerId()) {
+            if (this.answerDao.findById(answers.get(i).getId()).getNextAnswerId() != this.answerDao.findById(answers.get(i + 1).getId()).getNextAnswerId()) {
                 return false;
             }
         }
