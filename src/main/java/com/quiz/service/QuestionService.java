@@ -3,12 +3,15 @@ package com.quiz.service;
 import com.quiz.dao.AnswerDao;
 import com.quiz.dao.QuestionDao;
 import com.quiz.dto.QuestionDto;
+import com.quiz.entities.Answer;
 import com.quiz.entities.Question;
 import com.quiz.entities.QuestionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -49,7 +52,9 @@ public class QuestionService {
         questions.stream()
                 .filter(question -> question.getType() != QuestionType.ANSWER)
                 .forEach(question -> {
-                    question.setAnswerList(answerDao.findAnswersByQuestionId(question.getId()));
+                    List<Answer> answerList = answerDao.findAnswersByQuestionId(question.getId());
+                    Collections.shuffle(answerList);
+                    question.setAnswerList(answerList);
                 });
         return questions;
     }
