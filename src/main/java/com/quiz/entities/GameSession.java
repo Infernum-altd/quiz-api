@@ -3,7 +3,9 @@ package com.quiz.entities;
 import com.quiz.dto.GameQuestionsDto;
 import lombok.Data;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.LongAdder;
@@ -11,19 +13,22 @@ import java.util.concurrent.atomic.LongAdder;
 @Data
 public class GameSession {
     private final int hostId;
-    private final List<Question> questions;
+    private final Map<Integer, Question> questions;
     private Set<Player> playerSet;
     private int currentQuestion;
     private LongAdder collectedAnswers;
     private int questionTimer;
 
-    public GameSession(int hostId, List<Question> questions, int questionTimer) {
+    private Iterator<Question> mapIterator;
+
+    public GameSession(int hostId, Map<Integer, Question> questions, int questionTimer) {
         this.hostId = hostId;
         this.questions = questions;
         this.currentQuestion = 0;
         this.playerSet = new ConcurrentSkipListSet<>();
         this.collectedAnswers = new LongAdder();
         this.questionTimer = questionTimer;
+        this.mapIterator = questions.values().iterator();
     }
 
     public synchronized GameQuestionsDto nextQuestion() {
@@ -32,11 +37,11 @@ public class GameSession {
             this.currentQuestion++;
         }
 
-        if (currentQuestion == questions.size()) {
-            return null;
+        if (this.mapIterator.hasNext()) {
+            return new GameQuestionsDto(this.currentQuestion, this.questionTimer, this.mapIterator.next());
         }
 
-        return new GameQuestionsDto(this.currentQuestion, this.questionTimer, questions.get(this.currentQuestion));
+        return null;
     }
 
     public void addScorePoint(int score, int userId) {
@@ -49,10 +54,6 @@ public class GameSession {
 
     public void addPlayer(Player player) {
         this.playerSet.add(player);
-    }
-
-    public int incrementCollectedAnswer() {
-        return this.collectedAnswers.intValue();
     }
 
     public boolean isAllAnswerCollected() {

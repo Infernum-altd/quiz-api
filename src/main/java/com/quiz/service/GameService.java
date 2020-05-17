@@ -11,9 +11,10 @@ import com.quiz.entities.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class GameService {
@@ -29,7 +30,7 @@ public class GameService {
 
     public int addGameSession(int quizId, int hostId, int questionTimer, int maxUsersNumber) {
         User host = userDao.findById(hostId);
-        GameSession gameSession = new GameSession(hostId, questionService.getQuestionsByQuizId(quizId), questionTimer);
+        GameSession gameSession = new GameSession(hostId, questionsToMap(questionService.getQuestionsByQuizId(quizId)), questionTimer);
 
         gameSession.getPlayerSet().add(new Player(host.getId(), host.getName() + " " + host.getSurname()));
 
@@ -40,6 +41,13 @@ public class GameService {
 
     private int createGame(int quizId, int hostId, int questionTimer, int max_users_number) {
         return gameDao.insertGame(quizId, hostId, questionTimer, max_users_number);
+    }
+
+    private Map<Integer, Question> questionsToMap(List<Question> questions) {
+        return Collections.synchronizedMap(questions.stream().collect(Collectors.toMap(Question::getId, Function.identity(),(u, v) -> {
+                    throw new IllegalStateException(String.format("Duplicate key %s", u));
+                },
+                LinkedHashMap::new)));
     }
 
 
