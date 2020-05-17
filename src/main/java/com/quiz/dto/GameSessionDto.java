@@ -4,7 +4,7 @@ import com.quiz.entities.Player;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Set;
+import java.util.List;
 
 @Data
 @RequiredArgsConstructor
@@ -13,10 +13,5 @@ public class GameSessionDto {
     private int hostId;
     private int questionTimer;
     private int maxUsersNumber;
-    private Set<Player> players;
-
-    public GameSessionDto(int quizId, Set<Player> players) {
-        this.quizId = quizId;
-        this.players = players;
-    }
+    private List<Player> players;
 }

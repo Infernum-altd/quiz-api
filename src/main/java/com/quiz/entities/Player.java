@@ -10,10 +10,11 @@ public class Player implements Comparable<Player> {
     String userName;
     boolean authorize;
 
-    public Player(int userId, String userName) {
+    public Player(int userId, String userName, boolean authorize) {
         this.userId = userId;
         this.userScore = 0;
         this.userName = userName;
+        this.authorize = authorize;
     }
 
     @Override

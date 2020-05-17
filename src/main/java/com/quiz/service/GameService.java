@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class GameService {
-    private ConcurrentHashMap<Integer, GameSession> currentGames = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, GameSession> currentGames = new ConcurrentHashMap<>();
     @Autowired
     QuestionService questionService;
     @Autowired
@@ -30,9 +30,10 @@ public class GameService {
 
     public int addGameSession(int quizId, int hostId, int questionTimer, int maxUsersNumber) {
         User host = userDao.findById(hostId);
+        
         GameSession gameSession = new GameSession(hostId, questionsToMap(questionService.getQuestionsByQuizId(quizId)), questionTimer);
 
-        gameSession.getPlayerSet().add(new Player(host.getId(), host.getName() + " " + host.getSurname()));
+        gameSession.getPlayerSet().add(new Player(host.getId(), host.getName() + " " + host.getSurname(), true));
 
         int gameId = createGame(quizId, hostId, questionTimer, maxUsersNumber);
         this.currentGames.put(gameId, gameSession);
@@ -44,7 +45,7 @@ public class GameService {
     }
 
     private Map<Integer, Question> questionsToMap(List<Question> questions) {
-        return Collections.synchronizedMap(questions.stream().collect(Collectors.toMap(Question::getId, Function.identity(),(u, v) -> {
+        return Collections.synchronizedMap(questions.stream().collect(Collectors.toMap(Question::getId, Function.identity(), (u, v) -> {
                     throw new IllegalStateException(String.format("Duplicate key %s", u));
                 },
                 LinkedHashMap::new)));
@@ -59,31 +60,33 @@ public class GameService {
 
         if (player.isAuthorize()) {
             User user = userDao.findById(player.getUserId());
-            this.currentGames.get(gameId).addPlayer(new Player(user.getId(), user.getName() + " " + user.getSurname()));
+            this.currentGames.get(gameId).addPlayer(new Player(user.getId(), user.getName() + " " + user.getSurname(), player.isAuthorize()));
         } else {
-            player.setUserName("Player " + currentGames.get(gameId).getPlayerSet().size());
             this.currentGames.get(gameId).addPlayer(player);
         }
 
         GameSessionDto result = this.gameDao.getGame(gameId);
-        result.setPlayers(this.currentGames.get(gameId).getPlayerSet());
+        result.setPlayers(new ArrayList<>(this.currentGames.get(gameId).getPlayerSet()));
 
         return result;
     }
 
-    public int getQuestionTimer(int gameId) {
-        return this.currentGames.get(gameId).getQuestionTimer();
-    }
-
-    public Set<Player> deleteGameSession(int gameId) {
+    public GameSessionDto deleteGameSession(int gameId) {
         GameSession finishSession = this.currentGames.get(gameId);
-        Set<Player> players = finishSession.getPlayerSet();
 
-        players.forEach(user -> userDao.insertUserScore(user.getUserId(), gameId, user.getUserScore()));
-        players.stream().filter(Player::isAuthorize)
-                .forEach(user -> userDao.insertUserScore(user.getUserId(), gameId, user.getUserScore()));
-        this.currentGames.remove(gameId);
-        return players;
+        if (finishSession != null) {
+            Set<Player> players = finishSession.getPlayerSet();
+
+            players.stream().filter(Player::isAuthorize)
+                    .forEach(user -> userDao.insertUserScore(user.getUserId(), gameId, user.getUserScore()));
+            this.currentGames.remove(gameId);
+
+            GameSessionDto result = this.gameDao.getGame(gameId);
+            result.setPlayers(players.stream().sorted(Comparator.comparingInt(Player::getUserScore).reversed()).collect(Collectors.toList()));
+
+            return result;
+        }
+        return null;
     }
 
     public GameQuestionsDto nextQuestion(int gameId) {
@@ -91,29 +94,31 @@ public class GameService {
     }
 
     public boolean handleAnswer(int gameId, Player player, GameAnswersDto answer) {
-        QuestionType questionType = this.currentGames.get(gameId).getQuestions().get(answer.getAnswers().get(0).getQuestionId()).getType();
+        if (answer.getAnswers() != null && !answer.getAnswers().isEmpty()) {
+            QuestionType questionType = this.currentGames.get(gameId).getQuestions().get(answer.getAnswers().get(0).getQuestionId()).getType();
 
-        switch (questionType) {
-            case ANSWER:
-                if (isRightAnswer(answer.getAnswers().get(0).getText(), answer.getAnswers().get(0).getQuestionId(), gameId)) {
-                    this.currentGames.get(gameId).addScorePoint(4, player.getUserId(), player.isAuthorize());
-                }
-                break;
-            case OPTION:
-                if (isRightOption(answer.getAnswers())) {
-                    this.currentGames.get(gameId).addScorePoint(2, player.getUserId(), player.isAuthorize());
-                }
-                break;
-            case BOOLEAN:
-                if (isRightBoolean(answer.getAnswers().get(0))) {
-                    this.currentGames.get(gameId).addScorePoint(1, player.getUserId(), player.isAuthorize());
-                }
-                break;
-            case SEQUENCE:
-                if (isRightSequence(answer.getAnswers())) {
-                    this.currentGames.get(gameId).addScorePoint(3, player.getUserId(), player.isAuthorize());
-                }
-                break;
+            switch (questionType) {
+                case ANSWER:
+                    if (isRightAnswer(answer.getAnswers().get(0).getText(), answer.getAnswers().get(0).getQuestionId(), gameId)) {
+                        this.currentGames.get(gameId).addScorePoint(4, player.getUserId(), player.isAuthorize());
+                    }
+                    break;
+                case OPTION:
+                    if (isRightOption(answer.getAnswers())) {
+                        this.currentGames.get(gameId).addScorePoint(2, player.getUserId(), player.isAuthorize());
+                    }
+                    break;
+                case BOOLEAN:
+                    if (isRightBoolean(answer.getAnswers().get(0))) {
+                        this.currentGames.get(gameId).addScorePoint(1, player.getUserId(), player.isAuthorize());
+                    }
+                    break;
+                case SEQUENCE:
+                    if (isRightSequence(answer.getAnswers())) {
+                        this.currentGames.get(gameId).addScorePoint(3, player.getUserId(), player.isAuthorize());
+                    }
+                    break;
+            }
         }
         return this.currentGames.get(gameId).isAllAnswerCollected();
     }
@@ -132,7 +137,7 @@ public class GameService {
     }
 
     private boolean isRightBoolean(Answer answer) {
-        return this.answerDao.findById(answer.getId()).isCorrect();
+        return this.answerDao.findAnswersByQuestionId(answer.getQuestionId()).get(0).getText().equals(answer.getText());
     }
 
     private boolean isRightSequence(List<Answer> answers) {

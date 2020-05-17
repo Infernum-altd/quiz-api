@@ -15,8 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Set;
-
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -52,8 +51,11 @@ public class GameController {
     }
 
     @MessageMapping("/play/game/{gameId}/finish")
-    public Set<Player> finishGame(@DestinationVariable int gameId) {
-        return gameService.deleteGameSession(gameId);
+    public void finishGame(@DestinationVariable int gameId) {
+        GameSessionDto rating = gameService.deleteGameSession(gameId);
+        if (rating != null) {
+            template.convertAndSend("/play/game/" + gameId, rating);
+        }
     }
 
     private void sendQuestion(int gameId, GameQuestionsDto gameQuestionsDto) {
