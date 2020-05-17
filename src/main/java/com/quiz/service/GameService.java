@@ -90,28 +90,28 @@ public class GameService {
         return this.currentGames.get(gameId).nextQuestion();
     }
 
-    public boolean handleAnswer(int gameId, int userId, GameAnswersDto answer) {
+    public boolean handleAnswer(int gameId, Player player, GameAnswersDto answer) {
         QuestionType questionType = this.currentGames.get(gameId).getQuestions().get(answer.getAnswers().get(0).getQuestionId()).getType();
 
         switch (questionType) {
             case ANSWER:
                 if (isRightAnswer(answer.getAnswers().get(0).getText(), answer.getAnswers().get(0).getQuestionId(), gameId)) {
-                    this.currentGames.get(gameId).addScorePoint(4, userId);
+                    this.currentGames.get(gameId).addScorePoint(4, player.getUserId(), player.isAuthorize());
                 }
                 break;
             case OPTION:
                 if (isRightOption(answer.getAnswers())) {
-                    this.currentGames.get(gameId).addScorePoint(2, userId);
+                    this.currentGames.get(gameId).addScorePoint(2, player.getUserId(), player.isAuthorize());
                 }
                 break;
             case BOOLEAN:
                 if (isRightBoolean(answer.getAnswers().get(0))) {
-                    this.currentGames.get(gameId).addScorePoint(1, userId);
+                    this.currentGames.get(gameId).addScorePoint(1, player.getUserId(), player.isAuthorize());
                 }
                 break;
             case SEQUENCE:
                 if (isRightSequence(answer.getAnswers())) {
-                    this.currentGames.get(gameId).addScorePoint(3, userId);
+                    this.currentGames.get(gameId).addScorePoint(3, player.getUserId(), player.isAuthorize());
                 }
                 break;
         }

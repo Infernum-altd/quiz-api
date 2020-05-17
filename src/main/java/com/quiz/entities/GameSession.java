@@ -41,12 +41,12 @@ public class GameSession {
             return new GameQuestionsDto(this.currentQuestion, this.questionTimer, this.mapIterator.next());
         }
 
-        return null;
+        return new GameQuestionsDto();
     }
 
-    public void addScorePoint(int score, int userId) {
+    public void addScorePoint(int score, int userId, boolean isAuthorize) {
         for (Player player : this.playerSet) {
-            if (player.getUserId() == userId) {
+            if (player.getUserId() == userId && player.isAuthorize() == isAuthorize) {
                 player.setUserScore(player.getUserScore() + score);
             }
         }

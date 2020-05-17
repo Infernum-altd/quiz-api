@@ -44,9 +44,9 @@ public class GameController {
         this.sendQuestion(gameId, this.gameService.nextQuestion(gameId));
     }
 
-    @MessageMapping("play/game/{gameId}/user/{userId}/sendAnswer")
-    public void receiveAnswer(@DestinationVariable int gameId, @DestinationVariable int userId, @RequestBody GameAnswersDto answers) {
-        if (this.gameService.handleAnswer(gameId, userId, answers)) {
+    @MessageMapping("play/game/{gameId}/user/sendAnswer")
+    public void receiveAnswer(@DestinationVariable int gameId, @RequestBody GameAnswersDto answers) {
+        if (this.gameService.handleAnswer(gameId, answers.getPlayer(), answers)) {
             this.sendQuestion(gameId, this.gameService.nextQuestion(gameId));
         }
     }
