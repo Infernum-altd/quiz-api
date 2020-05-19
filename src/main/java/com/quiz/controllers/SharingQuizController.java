@@ -37,7 +37,7 @@ public class SharingQuizController {
     }
 
     @GetMapping("/{quizId}")
-    public ResponseEntity<QuizDto> getQuiz(@PathVariable int quizId) {
+    public ResponseEntity<Quiz> getQuiz(@PathVariable int quizId) {
         return ResponseEntity.ok(quizService.findQuizById(quizId));
     }
     @GetMapping("/info/{quizId}")
