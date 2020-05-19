@@ -87,11 +87,11 @@ public class ProfileController {
         return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
-    @GetMapping("/myfavorite/{userSearch}/{userId}/{pageSize}/{pageNumber}")
-    public ResponseEntity<ResponcePaginatedList<Quiz>> getFavoriteQuizzes(@PathVariable String userSearch, @PathVariable int userId, @PathVariable int pageSize, @PathVariable int pageNumber){
-        List<Quiz> quizzes = quizService.searchInFavoriteQuizzes(userId, userSearch);
-        return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
-    }
+//    @GetMapping("/myfavorite/{userSearch}/{userId}/{pageSize}/{pageNumber}")
+//    public ResponseEntity<ResponcePaginatedList<Quiz>> getFavoriteQuizzes(@PathVariable String userSearch, @PathVariable int userId, @PathVariable int pageSize, @PathVariable int pageNumber){
+//        List<Quiz> quizzes = quizService.searchInFavoriteQuizzes(userId, userSearch);
+//        return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
+//    }
 
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<ResponseText> getCategoryNameByCategoryId(@PathVariable int categoryId){

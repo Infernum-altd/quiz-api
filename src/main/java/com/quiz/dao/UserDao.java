@@ -28,7 +28,7 @@ import static com.quiz.dao.mapper.UserMapper.*;
 public class UserDao {
 
     private final JdbcTemplate jdbcTemplate;
-
+    private final static String GET_USER_ROLE_BY_EMAIL = "SELECT role FROM users WHERE email = ?";
     private final static String USER_FIND_BY_EMAIL = "SELECT id, email, password FROM users WHERE email = ?";
     private final static String USER_FIND_BY_ID = "SELECT id,email,password FROM users WHERE id = ?";
     private final static String USER_GET_ALL_FOR_PROFILE_BY_ID = "SELECT id, email, name, surname, birthdate, gender, city, about, role FROM users WHERE id = ?";

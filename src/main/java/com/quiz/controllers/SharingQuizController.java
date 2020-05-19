@@ -1,12 +1,14 @@
 package com.quiz.controllers;
 
 
+import com.quiz.dto.QuizCheckDto;
 import com.quiz.dto.QuizDto;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.ResponcePaginatedList;
 import com.quiz.entities.ResponseText;
 import com.quiz.service.PaginationService;
 import com.quiz.entities.StatusType;
+import com.quiz.service.QuizCheckService;
 import com.quiz.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,15 +27,22 @@ public class SharingQuizController {
     @Autowired
     QuizService quizService;
     @Autowired
+    QuizCheckService quizCheckService;
+    @Autowired
     PaginationService paginationService;
+
+    @GetMapping("/quizCheck/{quizId}")
+    public ResponseEntity<QuizCheckDto> getQuizCheck(@PathVariable int quizId) {
+        return ResponseEntity.ok(quizCheckService.getQuizCheck(quizId));
+    }
 
     @GetMapping("/{quizId}")
     public ResponseEntity<Quiz> getQuiz(@PathVariable int quizId) {
         return ResponseEntity.ok(quizService.findQuizById(quizId));
     }
-    @GetMapping("/{quizId}")
-    public ResponseEntity<QuizDto> getQuiz(@PathVariable int quizId){
-        return ResponseEntity.ok(quizService.findQuizById(quizId));
+    @GetMapping("/info/{quizId}")
+    public ResponseEntity<QuizDto> getQuizInfo(@PathVariable int quizId) {
+        return ResponseEntity.ok(quizService.findQuizInfoById(quizId));
     }
 
     @GetMapping("/{pageSize}/{pageNumber}/{userId}")
@@ -135,10 +144,10 @@ public class SharingQuizController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-    @GetMapping("/recommendations/{userId}")
-    public ResponseEntity<List<Quiz>> getRecommendations(@PathVariable int userId, @RequestParam(value = "limit") int limit) {
-        return ResponseEntity.ok(quizService.findRecommendations(userId, limit));
-    }
+//    @GetMapping("/recommendations/{userId}")
+//    public ResponseEntity<List<Quiz>> getRecommendations(@PathVariable int userId, @RequestParam(value = "limit") int limit) {
+//        return ResponseEntity.ok(quizService.findRecommendations(userId, limit));
+//    }
 
     @GetMapping("/recommendations/friends/{userId}")
     public ResponseEntity<List<Quiz>> getRecommendationsByFriends(@PathVariable int userId, @RequestParam(value = "limit") int limit) {
@@ -153,5 +162,25 @@ public class SharingQuizController {
     @GetMapping("/status/{status}")
     public ResponseEntity<List<QuizDto>> getQuizzesByStatus(@PathVariable StatusType status){
         return ResponseEntity.ok(quizService.findQuizzesByStatus(status));
+    }
+
+    @PostMapping("updateActive/{quizId}")
+    public ResponseEntity<String> updateStatus(@RequestBody String status, @PathVariable int quizId){
+        boolean isRecordAffected = quizCheckService.updateStatusById(quizId, status);
+
+        if (isRecordAffected){
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    @PostMapping("updateComment/{quizId}")
+    public ResponseEntity<String> updateComment(@RequestBody String comment, @PathVariable int quizId){
+        boolean isRecordAffected = quizCheckService.updateCommentById(quizId, comment);
+
+        if (isRecordAffected){
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 }
