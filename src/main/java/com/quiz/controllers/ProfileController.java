@@ -131,21 +131,10 @@ public class ProfileController {
         return ResponseEntity.ok(userRepo.getNotificationStatus(userId));
     }
 
-//    @PostMapping("myprofile/create_moderator/{role}")
-//    public ResponseEntity<UserDto> createAdminUsers(@RequestBody User adminUsers,@PathVariable String role){
-//        return ResponseEntity.status(HttpStatus.CREATED)
-//                .body(userRepo.createAdminUsers(adminUsers, role));
-//    }
-
     @DeleteMapping("/delete/{id}")
     void deleteUserById(@PathVariable int id) {
         userRepo.deleteUserById(id);
     }
-
-//    @GetMapping("/not_checked_quizzes")
-//    public ResponseEntity<List<Quiz>> getNotCheckedQuizzes(){
-//        return ResponseEntity.ok(quizService.findNotCheckedQuizzes());
-//    }
 
     @PostMapping("updateActive/{userId}")
     public ResponseEntity<String> updateStatus(@RequestBody String status, @PathVariable int userId){

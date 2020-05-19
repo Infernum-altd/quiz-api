@@ -29,10 +29,10 @@ public class UserDao {
 
     private final static String USER_FIND_BY_EMAIL = "SELECT id, email, password FROM users WHERE email = ?";
     private final static String USER_FIND_BY_ID = "SELECT id,email,name, surname,password FROM users WHERE id = ?";
-    private final static String USER_GET_ALL_FOR_PROFILE_BY_ID = "SELECT id, email, name, surname, birthdate, gender, city, about FROM users WHERE id = ?";
+    private final static String USER_GET_ALL_FOR_PROFILE_BY_ID = "SELECT id, email, name, surname, birthdate, gender, city, about, role FROM users WHERE id = ?";
     private final static String FIND_FRIENDS_BY_USER_ID = "SELECT id, email, name, surname, rating FROM users where id in (SELECT friend_id FROM users INNER JOIN friends ON user_id = id WHERE id = ?)";
     private final static String FIND_FRIENDS_BY_USER_ID_ORDER_BY = "SELECT id, email, name, surname, rating FROM users where id in (SELECT friend_id FROM users INNER JOIN friends ON user_id = id WHERE id = ?)";
-    private final static String INSERT_USER = "INSERT INTO users (email, password) VALUES (?,?)";
+    private final static String INSERT_USER = "INSERT INTO users (email, password, role) VALUES (?,?,?::role_type)";
     private final static String UPDATE_USER = "UPDATE users  SET name = ?, surname = ?, birthdate = ?, gender = ?::gender_type, city = ?, about = ? WHERE id = ?";
     private final static String UPDATE_USER_PASSWORD = "UPDATE users SET password = ? WHERE id = ?";
     private final static String UPDATE_USER_IMAGE = "UPDATE users SET image = ? WHERE id = ?";
@@ -110,8 +110,6 @@ public class UserDao {
 
     @Transactional
     public User insert(User entity) {
-        int id;
-
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getDataSource())
                 .withTableName(TABLE_USERS)
                 .usingGeneratedKeyColumns(UserMapper.USERS_ID);
@@ -125,9 +123,9 @@ public class UserDao {
 
         try {
             jdbcTemplate.update(INSERT_USER, entity.getEmail(), entity.getPassword(), entity.getRole().toString());
-            //entity.setId(id);
         } catch (DataAccessException e) {
-            throw new DatabaseException("Database access exception while user insert");
+            e.printStackTrace();
+            //throw new DatabaseException("Database access exception while user insert");
         }
 
         return entity;
@@ -308,5 +306,11 @@ public class UserDao {
 
     public void deleteUserById(int id) {
         jdbcTemplate.update(DELETE_USER,id);
+    }
+
+    public String getUserRoleByEmail(String email) {
+        List<String> role = jdbcTemplate.query(GET_USER_ROLE_BY_EMAIL, new Object[]{email}, (resultSet, i) -> resultSet.getString("role"));
+
+        return role.get(0);
     }
 }

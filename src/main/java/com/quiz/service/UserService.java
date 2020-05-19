@@ -5,6 +5,7 @@ import com.quiz.entities.NotificationStatus;
 import com.quiz.entities.User;
 import com.quiz.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 

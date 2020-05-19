@@ -27,7 +27,7 @@ public class AuthService {
         }
         user.setPassword(user.getPassword());
         user.setRole(user.getRole());
-//        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userDao.insert(user);
         return new UserDto(user);
     }
@@ -37,12 +37,9 @@ public class AuthService {
         if (userdb == null) {
             throw new NotFoundException("user", "email", user.getEmail());
         }
-        if(!user.getPassword().equals(userdb.getPassword())){
+        if(!passwordEncoder.matches(user.getPassword(), userdb.getPassword())){
             throw new PasswordException();
         }
-//        if(!passwordEncoder.matches(user.getPassword(), userdb.getPassword())){
-//            throw new PasswordException();
-//        }
         return tokenProvider.createToken(userdb.getEmail());
     }
 }

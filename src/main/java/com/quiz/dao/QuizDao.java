@@ -82,7 +82,7 @@ public class QuizDao {
         return quizzesCreatedByUser;
     }
 
-    public List<Quiz> getQuizzesByStatus(StatusType status) {
+/*    public List<Quiz> getQuizzesByStatus(StatusType status) {
 
         List<Quiz> quizzesByStatus = jdbcTemplate.query(GET_QUIZZES_BY_STATUS, new Object[]{status}, new QuizMapper());
 
@@ -91,7 +91,7 @@ public class QuizDao {
         }
 
         return quizzesByStatus;
-    }
+    }*/
 
     public List<QuizDto> getQuizzesByStatus(StatusType status) {
 
@@ -139,7 +139,7 @@ public class QuizDao {
         return quizzes;
     }
 
-    public Quiz findById(int id) {
+/*    public Quiz findById(int id) {
         List<Quiz> quizzes;
 
         try {
@@ -168,7 +168,7 @@ public class QuizDao {
         }
 
         return quizzes.get(0);
-    }
+    }*/
 
     public QuizDto findById(int id) {
         List<QuizDto> quizzes;

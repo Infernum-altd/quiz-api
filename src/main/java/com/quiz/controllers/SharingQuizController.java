@@ -25,10 +25,12 @@ public class SharingQuizController {
     @Autowired
     QuizService quizService;
     @Autowired
+    QuizCheckService quizCheckService;
+    @Autowired
     PaginationService paginationService;
 
     @GetMapping("/{quizId}")
-    public ResponseEntity<Quiz> getQuiz(@PathVariable int quizId) {
+    public ResponseEntity<QuizDto> getQuiz(@PathVariable int quizId) {
         return ResponseEntity.ok(quizService.findQuizById(quizId));
     }
 
@@ -144,5 +146,30 @@ public class SharingQuizController {
     @GetMapping("/popular/{limit}")
     public ResponseEntity<List<Quiz>> getPopularQuizzes(@PathVariable int limit) {
         return ResponseEntity.ok(quizService.findPopularQuizzes(limit));
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<QuizDto>> getQuizzesByStatus(@PathVariable StatusType status){
+        return ResponseEntity.ok(quizService.findQuizzesByStatus(status));
+    }
+
+    @PostMapping("updateActive/{quizId}")
+    public ResponseEntity<String> updateStatus(@RequestBody String status, @PathVariable int quizId){
+        boolean isRecordAffected = quizCheckService.updateStatusById(quizId, status);
+
+        if (isRecordAffected){
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    @PostMapping("updateComment/{quizId}")
+    public ResponseEntity<String> updateComment(@RequestBody String comment, @PathVariable int quizId){
+        boolean isRecordAffected = quizCheckService.updateCommentById(quizId, comment);
+
+        if (isRecordAffected){
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 }
