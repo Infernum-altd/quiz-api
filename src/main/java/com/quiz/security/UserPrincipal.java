@@ -1,5 +1,6 @@
 package com.quiz.security;
 
+import com.quiz.entities.Role;
 import com.quiz.entities.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,10 +18,13 @@ public class UserPrincipal implements UserDetails {
 
     private String email;
 
+    private Role role;
+
     public UserPrincipal(User user) {
         id = user.getId();
         password = user.getPassword();
         email = user.getEmail();
+        role=user.getRole();
     }
 
     @Override

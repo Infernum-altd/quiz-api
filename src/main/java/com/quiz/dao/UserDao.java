@@ -3,6 +3,7 @@ package com.quiz.dao;
 import com.quiz.dao.mapper.UserMapper;
 import com.quiz.entities.Gender;
 import com.quiz.entities.NotificationStatus;
+import com.quiz.entities.Role;
 import com.quiz.exceptions.DatabaseException;
 import com.quiz.entities.User;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,10 @@ public class UserDao {
     private final static String GET_RATING = "SELECT id, name, surname, rating, ROW_NUMBER() OVER (ORDER BY rating DESC) AS rowNumb FROM users LIMIT ? OFFSET ?";
     private static final String GET_RATING_IN_RANGE = "WITH numbereduserstable AS (SELECT id, name, surname, rating, ROW_NUMBER() OVER (ORDER BY rating DESC) AS row_number FROM users), current AS (SELECT row_number FROM numbereduserstable WHERE id = ?) SELECT numbereduserstable.* FROM numbereduserstable, current WHERE ABS(numbereduserstable.row_number - current.row_number) <= ? ORDER BY numbereduserstable.row_number";
     public static final String TABLE_USERS = "users";
+    private final static String UPDATE_USER_ACTIVE_STATUS = "UPDATE users SET active= NOT active WHERE id = ?";
+    private final static String FIND_ADMINS_USERS = "SELECT id,email,name,surname,role,active FROM users WHERE role = 'ADMIN' OR role = 'MODERATOR' OR role = 'SUPER_ADMIN'";
+    private final static String DELETE_USER="DELETE FROM users WHERE id = ?";
+    private final static String GET_USER_ROLE_BY_EMAIL = "SELECT role FROM users WHERE email = ?";
 
     public User findByEmail(String email) {
         List<User> users;
@@ -116,10 +121,10 @@ public class UserDao {
         parameters.put(UserMapper.USERS_ID, entity.getId());
         parameters.put(UserMapper.USERS_EMAIL, entity.getEmail());
         parameters.put(UserMapper.USERS_PASSWORD, entity.getPassword());
-
+        parameters.put(UserMapper.USERS_ROLE, entity.getRole());
 
         try {
-            jdbcTemplate.update(INSERT_USER, entity.getEmail(), entity.getPassword());
+            jdbcTemplate.update(INSERT_USER, entity.getEmail(), entity.getPassword(), entity.getRole().toString());
             //entity.setId(id);
         } catch (DataAccessException e) {
             throw new DatabaseException("Database access exception while user insert");
@@ -141,6 +146,7 @@ public class UserDao {
                     user.setGender(Gender.valueOf(resultSet.getString(USERS_GENDER)));
                     user.setCity(resultSet.getString(USERS_CITY));
                     user.setAbout(resultSet.getString(USERS_ABOUT));
+                    user.setRole(Role.valueOf(resultSet.getString(USERS_ROLE)));
 
                     return user;
                 });
@@ -175,6 +181,27 @@ public class UserDao {
         return friends;
     }
 
+    public List<User> findAdminsUsers() {
+        List<User> adminsUsers = jdbcTemplate.query(
+                FIND_ADMINS_USERS, (resultSet, i) -> {
+                    User user = new User();
+                    user.setId(resultSet.getInt(USERS_ID));
+                    user.setEmail(resultSet.getString(USERS_EMAIL));
+                    user.setName(resultSet.getString(USERS_NAME));
+                    user.setSurname(resultSet.getString(USERS_SURNAME));
+                    user.setRole(Role.valueOf(resultSet.getString(USERS_ROLE).trim()));
+                    user.setActive(resultSet.getBoolean(USERS_ACTIVE));
+
+                    return user;
+                });
+
+        if (adminsUsers.isEmpty()) {
+            return null;
+        }
+
+        return adminsUsers;
+    }
+
     public boolean updateUser(User user) {
         int affectedRowNumber = jdbcTemplate.update(UPDATE_USER, user.getName(),
                 user.getSurname(), user.getBirthdate(),
@@ -186,6 +213,11 @@ public class UserDao {
 
     public boolean updatePasswordById(int id, String newPassword) {
         int affectedNumberOfRows = jdbcTemplate.update(UPDATE_USER_PASSWORD, newPassword, id);
+        return affectedNumberOfRows > 0;
+    }
+
+    public boolean updateStatusById(int id) {
+        int affectedNumberOfRows = jdbcTemplate.update(UPDATE_USER_ACTIVE_STATUS, id);
         return affectedNumberOfRows > 0;
     }
 
@@ -272,5 +304,9 @@ public class UserDao {
     public void insertUserScore(int userId, int gameId, int score) {
         jdbcTemplate.update(INSERT_GAME_SCORE,
                 userId, gameId, score);
+    }
+
+    public void deleteUserById(int id) {
+        jdbcTemplate.update(DELETE_USER,id);
     }
 }

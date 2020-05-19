@@ -25,7 +25,9 @@ public class AuthService {
         if(userdb != null){
             throw new EmailExistException("User with this email already exist");
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(user.getPassword());
+        user.setRole(user.getRole());
+//        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userDao.insert(user);
         return new UserDto(user);
     }
@@ -35,9 +37,12 @@ public class AuthService {
         if (userdb == null) {
             throw new NotFoundException("user", "email", user.getEmail());
         }
-        if(!passwordEncoder.matches(user.getPassword(), userdb.getPassword())){
+        if(!user.getPassword().equals(userdb.getPassword())){
             throw new PasswordException();
         }
+//        if(!passwordEncoder.matches(user.getPassword(), userdb.getPassword())){
+//            throw new PasswordException();
+//        }
         return tokenProvider.createToken(userdb.getEmail());
     }
 }

@@ -31,6 +31,6 @@ public class AuthController {
     @PostMapping(value ="/login",  produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseToken login(@RequestBody User user) {
-        return new ResponseToken(authService.login(user), String.valueOf(userService.getUserIdByEmail(user.getEmail())), user.getEmail());
+        return new ResponseToken(authService.login(user), String.valueOf(userService.getUserIdByEmail(user.getEmail())), user.getEmail(), String.valueOf(userService.getUserRoleByEmail(user.getEmail())));
     }
 }

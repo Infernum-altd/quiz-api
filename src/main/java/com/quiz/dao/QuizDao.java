@@ -1,6 +1,7 @@
 package com.quiz.dao;
 
 import com.quiz.dao.mapper.QuizMapper;
+import com.quiz.dto.QuizDto;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.StatusType;
 import com.quiz.exceptions.DatabaseException;
@@ -13,13 +14,16 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+
 import java.io.IOException;
 import java.sql.PreparedStatement;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.quiz.dao.mapper.QuizMapper.*;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -63,6 +67,9 @@ public class QuizDao {
     private final static String GET_GAMES_CREATED_BY_USER_ID = "SELECT * FROM quizzes WHERE author = ?";
     private final static String GET_FAVORITE_GAMES_BY_USER_ID = "SELECT * FROM quizzes INNER JOIN favorite_quizzes ON id = quiz_id WHERE user_id = ?";
     private final static String GET_QUIZ_CATEGORY_BY_CATEGORY_ID = "SELECT name FROM categories WHERE id = ?";
+    private final static String GET_QUIZZES_BY_STATUS_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.status = ?::status_type) sq INNER JOIN users u on sq.qauthor = u.id";
+    private final static String GET_QUIZ_BY_ID_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.id = ?) sq INNER JOIN users u on sq.qauthor = u.id";
+
 
     public List<Quiz> getGamesCreatedByUser(int userId) {
 
@@ -84,6 +91,35 @@ public class QuizDao {
         }
 
         return quizzesByStatus;
+    }
+
+    public List<QuizDto> getQuizzesByStatus(StatusType status) {
+
+        List<QuizDto> quizDtos = jdbcTemplate.query(
+                GET_QUIZZES_BY_STATUS_NAME,
+                new Object[]{status.toString()}, (resultSet, i) -> {
+                    QuizDto quiz = new QuizDto();
+                    quiz.setName(resultSet.getString("qname"));
+                    quiz.setCategory_id(resultSet.getInt("qcategoryid"));
+                    quiz.setStatus(StatusType.valueOf(resultSet.getString("qstatus")));
+                    quiz.setCategory(resultSet.getString("cname"));
+                    quiz.setId(resultSet.getInt("qid"));
+                    quiz.setAuthor(resultSet.getInt("qauthor"));
+                    quiz.setAuthorName(resultSet.getString("uname"));
+                    quiz.setAuthorSurname(resultSet.getString("usurname"));
+                    quiz.setAuthorEmail(resultSet.getString("uemail"));
+                    quiz.setDate(resultSet.getDate("qdate"));
+                    quiz.setDescription(resultSet.getString("qdescription"));
+                    quiz.setModificationTime(resultSet.getTimestamp("qmodificationtime"));
+
+                    return quiz;
+                });
+
+        if (quizDtos.isEmpty()) {
+            return null;
+        }
+
+        return quizDtos;
     }
 
     public List<Quiz> getAllQuizzes(int userId) {
@@ -134,6 +170,40 @@ public class QuizDao {
         return quizzes.get(0);
     }
 
+    public QuizDto findById(int id) {
+        List<QuizDto> quizzes;
+
+        try {
+            quizzes = jdbcTemplate.query(
+                    GET_QUIZ_BY_ID_NAME,
+                    new Object[]{id}, (resultSet, i) -> {
+                        QuizDto quiz = new QuizDto();
+                        quiz.setName(resultSet.getString("qname"));
+                        quiz.setCategory_id(resultSet.getInt("qcategoryid"));
+                        quiz.setStatus(StatusType.valueOf(resultSet.getString("qstatus")));
+                        quiz.setCategory(resultSet.getString("cname"));
+                        quiz.setId(resultSet.getInt("qid"));
+                        quiz.setAuthor(resultSet.getInt("qauthor"));
+                        quiz.setAuthorName(resultSet.getString("uname"));
+                        quiz.setAuthorSurname(resultSet.getString("usurname"));
+                        quiz.setAuthorEmail(resultSet.getString("uemail"));
+                        quiz.setDate(resultSet.getDate("qdate"));
+                        quiz.setDescription(resultSet.getString("qdescription"));
+                        quiz.setModificationTime(resultSet.getTimestamp("qmodificationtime"));
+
+                        return quiz;
+                    }
+            );
+            if (quizzes.isEmpty()) {
+                return null;
+            }
+        } catch (DataAccessException e) {
+            throw new DatabaseException(String.format("Find quiz by id '%s' database error occured", id));
+        }
+
+        return quizzes.get(0);
+    }
+
     public List<Quiz> getQuizzesCreatedByUser(int userId, String sort) {
 
         List<Quiz> quizzesCreatedByUser = jdbcTemplate.query(
@@ -141,7 +211,7 @@ public class QuizDao {
                 new Object[]{userId},
                 new QuizMapper());
 
-        if (quizzesCreatedByUser.isEmpty()) {
+        if (quizzesCreatedByUser.isEmpty()){
             return null;
         }
 

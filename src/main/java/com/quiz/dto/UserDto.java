@@ -31,6 +31,7 @@ public class UserDto {
     public UserDto(User user) {
         id = user.getId();
         email = user.getEmail();
+        role=user.getRole();
     }
 
     public UserDto(int id, String email, Role role, String name, String surname, Date birthdate, Gender gender, int country_id, String city, int rating, String about, boolean active, NotificationStatus notification, int languageId) {

@@ -6,6 +6,7 @@ import com.quiz.entities.Quiz;
 import com.quiz.entities.ResponcePaginatedList;
 import com.quiz.entities.ResponseText;
 import com.quiz.service.PaginationService;
+import com.quiz.entities.StatusType;
 import com.quiz.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

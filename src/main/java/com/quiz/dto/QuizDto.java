@@ -20,6 +20,10 @@ public class QuizDto {
     private String description;
     private StatusType status;
     private Timestamp modificationTime;
+    private String category;
+    private String authorName;
+    private String authorSurname;
+    private String authorEmail;
 
     public QuizDto(int id, String name, int author, int category_id, Date date, String description, StatusType status, Timestamp modificationTime) {
         this.id = id;
@@ -30,6 +34,20 @@ public class QuizDto {
         this.description = description;
         this.status = status;
         this.modificationTime = modificationTime;
+    }
+    public QuizDto(int id, String name, int author, int category_id, Date date, String description, StatusType status, Timestamp modificationTime, String category,String authorName,String authorSurname, String authorEmail) {
+        this.id = id;
+        this.name = name;
+        this.author = author;
+        this.category_id = category_id;
+        this.date = date;
+        this.description = description;
+        this.status = status;
+        this.modificationTime = modificationTime;
+        this.category=category;
+        this.authorName=authorName;
+        this.authorSurname=authorSurname;
+        this.authorEmail=authorEmail;
     }
 
     public QuizDto(Quiz quiz){
@@ -42,4 +60,5 @@ public class QuizDto {
         this.status = quiz.getStatus();
         this.modificationTime = quiz.getModificationTime();
     }
+
 }

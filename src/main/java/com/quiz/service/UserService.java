@@ -2,11 +2,9 @@ package com.quiz.service;
 
 import com.quiz.dao.UserDao;
 import com.quiz.entities.NotificationStatus;
-import com.quiz.entities.Quiz;
 import com.quiz.entities.User;
 import com.quiz.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -48,6 +46,10 @@ public class UserService {
         return userDao.updatePasswordById(id, passwordEncoder.encode(newPassword));
     }
 
+    public boolean updateStatusById(int id) {
+        return userDao.updateStatusById(id);
+    }
+
     public int getUserIdByEmail(String email) {
         return userDao.getUserIdByEmail(email);
     }
@@ -84,5 +86,15 @@ public class UserService {
         return userDao.filterFriendByUserId(userSearch, userId, sort);
     }
 
+    public String getUserRoleByEmail(String email){
+        return userDao.getUserRoleByEmail(email);
+    }
+
+
+
+    public List<User> findAdminsUsers() {
+        return userDao.findAdminsUsers();
+    }
+    public void deleteUserById(int id) { userDao.deleteUserById(id); }
 
 }

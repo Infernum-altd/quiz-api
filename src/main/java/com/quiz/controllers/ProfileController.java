@@ -2,6 +2,9 @@ package com.quiz.controllers;
 
 import com.quiz.entities.*;
 import com.quiz.service.PaginationService;
+import com.quiz.dto.UserDto;
+import com.quiz.entities.Quiz;
+import com.quiz.entities.User;
 import com.quiz.service.QuizService;
 import com.quiz.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/profile")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class ProfileController {
 
     @Autowired
@@ -42,6 +45,11 @@ public class ProfileController {
     public ResponseEntity<ResponcePaginatedList<User>> getFriends(@PathVariable String userSearch, @PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId, @RequestParam(defaultValue = "", required = false, value = "sort") String sort) {
         List<User> friends = userRepo.filterFriendByUserId(userSearch, userId, sort);
         return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(friends, pageSize, pageNumber), friends.size()));
+    }
+
+    @GetMapping("/adminUsers")
+    public ResponseEntity<List<User>> getAdminsUsers(){
+        return ResponseEntity.ok(userRepo.findAdminsUsers());
     }
 
     @PostMapping("/myprofile/update")
@@ -121,5 +129,31 @@ public class ProfileController {
     @GetMapping("status/{userId}")
     public ResponseEntity<NotificationStatus> getUserNotificationStatus(@PathVariable int userId){
         return ResponseEntity.ok(userRepo.getNotificationStatus(userId));
+    }
+
+//    @PostMapping("myprofile/create_moderator/{role}")
+//    public ResponseEntity<UserDto> createAdminUsers(@RequestBody User adminUsers,@PathVariable String role){
+//        return ResponseEntity.status(HttpStatus.CREATED)
+//                .body(userRepo.createAdminUsers(adminUsers, role));
+//    }
+
+    @DeleteMapping("/delete/{id}")
+    void deleteUserById(@PathVariable int id) {
+        userRepo.deleteUserById(id);
+    }
+
+//    @GetMapping("/not_checked_quizzes")
+//    public ResponseEntity<List<Quiz>> getNotCheckedQuizzes(){
+//        return ResponseEntity.ok(quizService.findNotCheckedQuizzes());
+//    }
+
+    @PostMapping("updateActive/{userId}")
+    public ResponseEntity<String> updateStatus(@RequestBody String status, @PathVariable int userId){
+        boolean isRecordAffected = userRepo.updateStatusById(userId);
+
+        if (isRecordAffected){
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 }
