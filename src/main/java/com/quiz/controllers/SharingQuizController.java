@@ -37,7 +37,7 @@ public class SharingQuizController {
     }
 
     @GetMapping("/{quizId}")
-    public ResponseEntity<Quiz> getQuiz(@PathVariable int quizId) {
+    public ResponseEntity<QuizDto> getQuiz(@PathVariable int quizId) {
         return ResponseEntity.ok(quizService.findQuizById(quizId));
     }
     @GetMapping("/info/{quizId}")
@@ -144,10 +144,10 @@ public class SharingQuizController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-//    @GetMapping("/recommendations/{userId}")
-//    public ResponseEntity<List<Quiz>> getRecommendations(@PathVariable int userId, @RequestParam(value = "limit") int limit) {
-//        return ResponseEntity.ok(quizService.findRecommendations(userId, limit));
-//    }
+    @GetMapping("/recommendations/{userId}")
+    public ResponseEntity<List<Quiz>> getRecommendations(@PathVariable int userId, @RequestParam(value = "limit") int limit) {
+        return ResponseEntity.ok(quizService.findRecommendations(userId, limit));
+    }
 
     @GetMapping("/recommendations/friends/{userId}")
     public ResponseEntity<List<Quiz>> getRecommendationsByFriends(@PathVariable int userId, @RequestParam(value = "limit") int limit) {

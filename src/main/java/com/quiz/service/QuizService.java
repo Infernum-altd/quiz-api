@@ -18,7 +18,7 @@ public class QuizService {
     @Autowired
     private final QuizDao quizDao;
 
-    public List<QuizDto> findQuizzesByStatus(StatusType status){
+    public List<QuizDto> findQuizzesByStatus(StatusType status) {
         return quizDao.getQuizzesByStatus(status);
     }
 
@@ -101,9 +101,9 @@ public class QuizService {
     public boolean unmarkQuizAsFavorite(int quizId, int userId) {
         return quizDao.unmarkQuizAsFavorite(quizId, userId);
     }
-//    public List<Quiz> findRecommendations(int userId, int limit){
-//        return quizDao.getRecommendations(userId,limit);
-//    }
+    public List<Quiz> findRecommendations(int userId, int limit){
+        return quizDao.getRecommendations(userId,limit);
+    }
 
     public List<Quiz> findRecommendationsByFriends(int userId, int limit){
         return quizDao.getRecommendationsByFriends(userId,limit);
@@ -117,9 +117,8 @@ public class QuizService {
         return quizDao.filterQuizzesByUserId(userSearch, userId, sort);
     }
 
-//    public List<Quiz> searchInFavoriteQuizzes(int userId, String userSearch) {
-//        return quizDao.searchInFavoriteQuizzes(userId, userSearch);
-//    }
-
+    public List<Quiz> searchInFavoriteQuizzes(int userId, String userSearch) {
+        return quizDao.searchInFavoriteQuizzes(userId, userSearch);
+    }
 
 }

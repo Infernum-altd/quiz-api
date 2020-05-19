@@ -18,9 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.io.IOException;
 import java.sql.PreparedStatement;
-import java.sql.PreparedStatement;
+
 import java.util.List;
 
 import static com.quiz.dao.mapper.QuizMapper.*;
@@ -43,6 +44,7 @@ public class QuizDao {
     private final static String GET_QUIZZES_BY_STATUS_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.status = ?::status_type) sq INNER JOIN users u on sq.qauthor = u.id";
     private final static String GET_QUIZ_BY_ID_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.id = ?) sq INNER JOIN users u on sq.qauthor = u.id";
 
+    private final static String GET_QUIZZES_BY_STATUS = "SELECT * FROM quizzes WHERE status = ?::status_type";
     private final static String GET_ALL_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE quizzes.status = 'ACTIVE'";
     private final static String GET_QUIZ_BY_ID = "SELECT * FROM quizzes WHERE id = ?";
     private final static String GET_QUIZZES_CREATED_BY_USER_ID = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE author = ? AND (status<>'DELETED' AND status<>'DEACTIVATED')";
@@ -55,17 +57,17 @@ public class QuizDao {
     private final static String ADD_TAG_TO_QUIZ = "INSERT INTO quizzes_tags (quiz_id, tag_id) VALUES (?,?)";
     private final static String UPDATE_QUIZ = "UPDATE quizzes SET name = ?, author = ?, category_id = ?, date = ?, description = ?, status = ?::status_type, modification_time = ? WHERE id = ?";
     private final static String UPDATE_QUIZ_IMAGE = "UPDATE quizzes SET image = ? WHERE id = ?";
-    private final static String GET_FILTERED_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category, users.name AS authorName, users.surname AS authorSurname FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN users ON quizzes.author = users.id WHERE quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(name, ' ', surname) ~*? OR date::text ~* ?";
+    private final static String GET_FILTERED_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category, users.name AS authorName, users.surname AS authorSurname FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN users ON quizzes.author = users.id WHERE quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(users.name, ' ', surname) ~*? OR date::text ~* ?";
     private final static String GET_POPULAR_QUIZ = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category, COUNT(quiz_id)  AS counter FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN favorite_quizzes ON quizzes.id = favorite_quizzes.quiz_id WHERE quizzes.status = 'ACTIVE' GROUP BY quizzes.id, categories.id ORDER BY counter DESC LIMIT ?";
     private final static String FILTER_QUIZZES_CREATED_BY_USER = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE author = ? AND (status<>'DELETED' AND status<>'DEACTIVATED') AND (quizzes.name ~* ? OR categories.name ~* ? OR date::text ~* ?)";
-    //private final static String FILTER_FAVORITE_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN favorite_quizzes ON quizzes.id = quiz_id WHERE user_id = ? AND (quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(name, ' ', surname) ~*? OR date::text ~* ?)";
+    private final static String FILTER_FAVORITE_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN favorite_quizzes ON quizzes.id = quiz_id WHERE user_id = ? AND (quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(name, ' ', surname) ~*? OR date::text ~* ?)";
 
     private final static String IS_FAVORITE_QUIZ = "select * from favorite_quizzes WHERE quiz_id = ? AND user_id = ?";
     private final static String MARK_QUIZ_AS_FAVORITE = "INSERT INTO favorite_quizzes (user_id, quiz_id) VALUES(?, ?) ";
     private final static String UNMARK_QUIZ_AS_FAVORITE = "DELETE FROM favorite_quizzes where user_id = ? AND quiz_id = ?";
     private final static String GET_TAGS_BY_QUIZ_Id = "select name from tags INNER JOIN quizzes_tags ON tags.id = quizzes_tags.tag_id WHERE quizzes_tags.quiz_id = ?";
 
-    //private static final String GET_QUIZ_RECOMMENDATIONS = "SELECT quizzes.id, quizzes.name, quizzes.image, quizzes.author, quizzes.category_id, quizzes.date,quizzes.description, quizzes.status, quizzes.modification_time, categories.name AS category, COUNT(games.id) AS count_games_general, count_games FROM quizzes INNER JOIN games ON quizzes.id = games.quiz_id INNER JOIN favorite_categories(?) ON quizzes.category_id=favorite_categories.category_id INNER JOIN categories ON quizzes.category_id = categories.id WHERE quizzes.status='ACTIVE' GROUP BY quizzes.id,favorite_categories.count_games, categories.name ORDER BY count_games_general DESC , count_games DESC LIMIT ?";
+    private static final String GET_QUIZ_RECOMMENDATIONS = "SELECT quizzes.id, quizzes.name, quizzes.image, quizzes.author, quizzes.category_id, quizzes.date,quizzes.description, quizzes.status, quizzes.modification_time, categories.name AS category, COUNT(games.id) AS count_games_general, count_games FROM quizzes INNER JOIN games ON quizzes.id = games.quiz_id INNER JOIN favorite_categories(?) ON quizzes.category_id=favorite_categories.category_id INNER JOIN categories ON quizzes.category_id = categories.id WHERE quizzes.status='ACTIVE' GROUP BY quizzes.id,favorite_categories.count_games, categories.name ORDER BY count_games_general DESC , count_games DESC LIMIT ?";
     private static final String GET_QUIZ_RECOMMENDATIONS_BY_FRIENDS = "SELECT quizzes.id, quizzes.name, quizzes.author, quizzes.category_id, quizzes.date, quizzes.description, quizzes.status, quizzes.modification_time, COUNT(games.id) AS gamescount FROM games INNER JOIN quizzes on games.quiz_id=quizzes.id WHERE games.id IN(SELECT games.quiz_id FROM games WHERE games.id IN (SELECT games.id FROM score WHERE score.user_id IN (SELECT friend_id FROM friends WHERE friends.user_id = ?) ) ) AND quizzes.status = 'ACTIVE' GROUP BY quizzes.id ORDER BY gamescount DESC LIMIT ?";
 
 
@@ -92,6 +94,17 @@ public class QuizDao {
 
         return quizzesCreatedByUser;
     }
+
+/*    public List<Quiz> getQuizzesByStatus(StatusType status) {
+
+        List<Quiz> quizzesByStatus = jdbcTemplate.query(GET_QUIZZES_BY_STATUS, new Object[]{status}, new QuizMapper());
+
+        if (quizzesByStatus.isEmpty()) {
+            return null;
+        }
+
+        return quizzesByStatus;
+    }*/
 
     public List<QuizDto> getQuizzesByStatus(StatusType status) {
 
@@ -211,7 +224,7 @@ public class QuizDao {
                 new Object[]{userId},
                 new QuizMapper());
 
-        if (quizzesCreatedByUser.isEmpty()) {
+        if (quizzesCreatedByUser.isEmpty()){
             return null;
         }
 
@@ -360,7 +373,7 @@ public class QuizDao {
                     quiz.setId(resultSet.getInt(QUIZ_ID));
                     quiz.setName(resultSet.getString(QUIZ_NAME));
                     quiz.setAuthor(resultSet.getInt(QUIZ_AUTHOR));
-                    quiz.setCategory_id(resultSet.getInt(QUIZ_CATEGORY));
+                    quiz.setCategory_id(resultSet.getInt("category_id"));
                     quiz.setDate(resultSet.getDate(QUIZ_DATE));
                     quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
                     quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
@@ -408,7 +421,7 @@ public class QuizDao {
                     quiz.setId(resultSet.getInt(QUIZ_ID));
                     quiz.setName(resultSet.getString(QUIZ_NAME));
                     quiz.setAuthor(resultSet.getInt(QUIZ_AUTHOR));
-                    quiz.setCategory_id(resultSet.getInt(QUIZ_CATEGORY));
+                    quiz.setCategory_id(resultSet.getInt("category_id"));
                     quiz.setDate(resultSet.getDate(QUIZ_DATE));
                     quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
                     quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
@@ -423,17 +436,17 @@ public class QuizDao {
         return quizzes;
     }
 
-//    public List<Quiz> getRecommendations(int userId, int limit) {
-//        List<Quiz> quizzes = jdbcTemplate.query(
-//                    GET_QUIZ_RECOMMENDATIONS,
-//                new Object[]{userId, limit}, new QuizMapper()
-//        );
-//        if (quizzes.isEmpty()) {
-//            return null;
-//        }
-//
-//        return quizzes;
-//    }
+    public List<Quiz> getRecommendations(int userId, int limit) {
+        List<Quiz> quizzes = jdbcTemplate.query(
+                    GET_QUIZ_RECOMMENDATIONS,
+                new Object[]{userId, limit}, new QuizMapper()
+        );
+        if (quizzes.isEmpty()) {
+            return null;
+        }
+
+        return quizzes;
+    }
 
     public List<Quiz> getRecommendationsByFriends(int userId, int limit) {
         List<Quiz> quizzes = jdbcTemplate.query(
@@ -462,7 +475,7 @@ public class QuizDao {
     public List<Quiz> getQuizzesByFilter(String searchByUser, int userId) {
         List<Quiz> getFilteredQuizzes = jdbcTemplate.query(
                 GET_FILTERED_QUIZZES,
-                new Object[]{searchByUser, searchByUser, searchByUser, searchByUser, searchByUser},
+                new Object[]{searchByUser, searchByUser, searchByUser, searchByUser},
                 new QuizMapper());
 
         if (getFilteredQuizzes.isEmpty()) {
@@ -531,19 +544,6 @@ public class QuizDao {
         return quizzes;
     }
 
-//    public List<Quiz> searchInFavoriteQuizzes(int userId, String userSearch) {
-//        List<Quiz> quizzes = jdbcTemplate.query(
-//                FILTER_FAVORITE_QUIZZES,
-//                new Object[]{userId, userSearch, userSearch, userSearch, userSearch},
-//                new QuizMapper()
-//        );
-//
-//        if (quizzes.isEmpty()) {
-//            return null;
-//        }
-//        return quizzes;
-//    }
-
     public boolean updateStatusById(int id, String status) {
         int affectedNumberOfRows = jdbcTemplate.update(UPDATE_QUIZ_STATUS, id);
         return affectedNumberOfRows > 0;
@@ -552,5 +552,18 @@ public class QuizDao {
         int affectedNumberOfRows = jdbcTemplate.update(UPDATE_QUIZ_MODERATOR_COMMENT,comment, id);
         return affectedNumberOfRows > 0;
     }
+    public List<Quiz> searchInFavoriteQuizzes(int userId, String userSearch) {
+        List<Quiz> quizzes = jdbcTemplate.query(
+                FILTER_FAVORITE_QUIZZES,
+                new Object[]{userId, userSearch, userSearch, userSearch, userSearch},
+                new QuizMapper()
+        );
+
+        if (quizzes.isEmpty()) {
+            return null;
+        }
+        return quizzes;
+    }
+
 }
 

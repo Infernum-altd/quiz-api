@@ -60,4 +60,5 @@ public class QuizDto {
         this.status = quiz.getStatus();
         this.modificationTime = quiz.getModificationTime();
     }
+
 }

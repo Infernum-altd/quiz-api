@@ -10,7 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.util.List;
 
 @Component
@@ -48,6 +47,7 @@ public class UserService {
     public boolean updatePasswordById(int id, String newPassword) {
         return userDao.updatePasswordById(id, passwordEncoder.encode(newPassword));
     }
+
     public boolean updateStatusById(int id) {
         return userDao.updateStatusById(id);
     }

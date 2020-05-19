@@ -2,6 +2,9 @@ package com.quiz.controllers;
 
 import com.quiz.entities.*;
 import com.quiz.service.PaginationService;
+import com.quiz.dto.UserDto;
+import com.quiz.entities.Quiz;
+import com.quiz.entities.User;
 import com.quiz.service.QuizService;
 import com.quiz.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/profile")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
+@CrossOrigin
 public class ProfileController {
 
     @Autowired
@@ -87,11 +90,11 @@ public class ProfileController {
         return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
-//    @GetMapping("/myfavorite/{userSearch}/{userId}/{pageSize}/{pageNumber}")
-//    public ResponseEntity<ResponcePaginatedList<Quiz>> getFavoriteQuizzes(@PathVariable String userSearch, @PathVariable int userId, @PathVariable int pageSize, @PathVariable int pageNumber){
-//        List<Quiz> quizzes = quizService.searchInFavoriteQuizzes(userId, userSearch);
-//        return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
-//    }
+    @GetMapping("/myfavorite/{userSearch}/{userId}/{pageSize}/{pageNumber}")
+    public ResponseEntity<ResponcePaginatedList<Quiz>> getFavoriteQuizzes(@PathVariable String userSearch, @PathVariable int userId, @PathVariable int pageSize, @PathVariable int pageNumber){
+        List<Quiz> quizzes = quizService.searchInFavoriteQuizzes(userId, userSearch);
+        return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
+    }
 
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<ResponseText> getCategoryNameByCategoryId(@PathVariable int categoryId){
@@ -128,21 +131,10 @@ public class ProfileController {
         return ResponseEntity.ok(userRepo.getNotificationStatus(userId));
     }
 
-//    @PostMapping("myprofile/create_moderator/{role}")
-//    public ResponseEntity<UserDto> createAdminUsers(@RequestBody User adminUsers,@PathVariable String role){
-//        return ResponseEntity.status(HttpStatus.CREATED)
-//                .body(userRepo.createAdminUsers(adminUsers, role));
-//    }
-
     @DeleteMapping("/delete/{id}")
     void deleteUserById(@PathVariable int id) {
         userRepo.deleteUserById(id);
     }
-
-//    @GetMapping("/not_checked_quizzes")
-//    public ResponseEntity<List<Quiz>> getNotCheckedQuizzes(){
-//        return ResponseEntity.ok(quizService.findNotCheckedQuizzes());
-//    }
 
     @PostMapping("updateActive/{userId}")
     public ResponseEntity<String> updateStatus(@RequestBody String status, @PathVariable int userId){
