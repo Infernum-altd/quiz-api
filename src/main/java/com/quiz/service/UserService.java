@@ -91,8 +91,6 @@ public class UserService {
         return userDao.getUserRoleByEmail(email);
     }
 
-
-
     public List<User> findAdminsUsers() {
         return userDao.findAdminsUsers();
     }

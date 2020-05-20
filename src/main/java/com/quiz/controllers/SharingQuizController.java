@@ -24,8 +24,8 @@ public class SharingQuizController {
 
     @Autowired
     QuizService quizService;
-    @Autowired
-    QuizCheckService quizCheckService;
+/*    @Autowired
+    QuizCheckService quizCheckService;*/
     @Autowired
     PaginationService paginationService;
 
@@ -153,7 +153,7 @@ public class SharingQuizController {
         return ResponseEntity.ok(quizService.findQuizzesByStatus(status));
     }
 
-    @PostMapping("updateActive/{quizId}")
+/*    @PostMapping("updateActive/{quizId}")
     public ResponseEntity<String> updateStatus(@RequestBody String status, @PathVariable int quizId){
         boolean isRecordAffected = quizCheckService.updateStatusById(quizId, status);
 
@@ -171,5 +171,5 @@ public class SharingQuizController {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
+    }*/
 }

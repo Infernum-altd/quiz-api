@@ -1,5 +1,7 @@
 package com.quiz.controllers;
 
+import com.quiz.dao.GameDao;
+import com.quiz.dto.GameDto;
 import com.quiz.entities.*;
 import com.quiz.service.PaginationService;
 import com.quiz.dto.UserDto;
@@ -29,6 +31,8 @@ public class ProfileController {
     QuizService quizService;
     @Autowired
     PaginationService paginationService;
+    @Autowired
+    GameDao gameDao;
 
     @GetMapping("/myprofile/{userId}")
     public ResponseEntity<User> getUserProfile(@PathVariable int userId){
@@ -144,5 +148,10 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    @GetMapping("/played/{pageSize}/{pageNumber}/{userId}")
+    public ResponcePaginatedList<GameDto> getPlayedGames(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId,  @RequestParam(defaultValue = "", required = false, value = "sort") String sort) {
+        return new ResponcePaginatedList<GameDto>(gameDao.getPlayedGame(userId, pageSize, pageNumber, sort), gameDao.getNumberOfRecord(userId));
     }
 }

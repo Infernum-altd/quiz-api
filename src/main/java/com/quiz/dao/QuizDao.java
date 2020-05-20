@@ -207,7 +207,7 @@ public class QuizDao {
     public List<Quiz> getQuizzesCreatedByUser(int userId, String sort) {
 
         List<Quiz> quizzesCreatedByUser = jdbcTemplate.query(
-                sort.isEmpty()? GET_QUIZZES_CREATED_BY_USER_ID: GET_QUIZZES_CREATED_BY_USER_ID + "ORDER BY " + sort,
+                sort.isEmpty() ? GET_QUIZZES_CREATED_BY_USER_ID : GET_QUIZZES_CREATED_BY_USER_ID + "ORDER BY " + sort,
                 new Object[]{userId},
                 new QuizMapper());
 
@@ -218,11 +218,12 @@ public class QuizDao {
         return quizzesCreatedByUser;
     }
 
-    public String getCategoryNameByCategoryId(int categoryId){
+    public String getCategoryNameByCategoryId(int categoryId) {
         List<String> categoryNames = jdbcTemplate.query(GET_QUIZ_CATEGORY_BY_CATEGORY_ID, new Object[]{categoryId}, (resultSet, i) -> resultSet.getString("name"));
 
         return categoryNames.get(0);
     }
+
     public List<Quiz> findQuizzesByName(String name) {
 
         List<Quiz> quizzesByName = jdbcTemplate.query(GET_QUIZZES_BY_NAME, new Object[]{"%" + name + "%"}, new QuizMapper());
@@ -261,11 +262,6 @@ public class QuizDao {
             quizzesByCategory.forEach(quiz -> quiz.setTags(getQuizTags(quiz.getId())));
             quizzesByCategory.forEach(quiz -> quiz.setFavorite(isQuizFavorite(quiz.getId(), userId)));
         }
-
-
-
-
-
 
 
         return quizzesByCategory;
@@ -425,7 +421,7 @@ public class QuizDao {
 
     public List<Quiz> getRecommendations(int userId, int limit) {
         List<Quiz> quizzes = jdbcTemplate.query(
-                    GET_QUIZ_RECOMMENDATIONS,
+                GET_QUIZ_RECOMMENDATIONS,
                 new Object[]{userId, limit}, new QuizMapper()
         );
         if (quizzes.isEmpty()) {
@@ -487,7 +483,7 @@ public class QuizDao {
         return affectedRowNumber > 0;
     }
 
-    private List<String> getQuizTags(int quizId){
+    private List<String> getQuizTags(int quizId) {
         List<String> tags = jdbcTemplate.query(
                 GET_TAGS_BY_QUIZ_Id,
                 new Object[]{quizId}, (resultSet, i) -> resultSet.getString("name")
@@ -499,8 +495,9 @@ public class QuizDao {
         return tags;
     }
 
-    private boolean isQuizFavorite(int quizId, int userId){
-        List<Integer> answer = jdbcTemplate.query(IS_FAVORITE_QUIZ, new Object[]{quizId, userId}, (resultSet, i) -> {return resultSet.getInt("quiz_id");
+    private boolean isQuizFavorite(int quizId, int userId) {
+        List<Integer> answer = jdbcTemplate.query(IS_FAVORITE_QUIZ, new Object[]{quizId, userId}, (resultSet, i) -> {
+            return resultSet.getInt("quiz_id");
         });
 
         return !answer.isEmpty();
@@ -511,7 +508,7 @@ public class QuizDao {
                 GET_POPULAR_QUIZ,
                 new Object[]{limit}, new QuizMapper());
 
-        if (quizzes.isEmpty()){
+        if (quizzes.isEmpty()) {
             return null;
         }
         quizzes.forEach(quiz -> quiz.setTags(getQuizTags(quiz.getId())));
@@ -521,7 +518,7 @@ public class QuizDao {
 
     public List<Quiz> filterQuizzesByUserId(String userSearch, int userId, String sort) {
         List<Quiz> quizzes = jdbcTemplate.query(
-                sort.isEmpty()? FILTER_QUIZZES_CREATED_BY_USER: FILTER_QUIZZES_CREATED_BY_USER + "ORDER BY " + sort,
+                sort.isEmpty() ? FILTER_QUIZZES_CREATED_BY_USER : FILTER_QUIZZES_CREATED_BY_USER + "ORDER BY " + sort,
                 new Object[]{userId, userSearch, userSearch, userSearch},
                 new QuizMapper());
 
