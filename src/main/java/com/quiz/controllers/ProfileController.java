@@ -151,8 +151,15 @@ public class ProfileController {
     }
 
     @GetMapping("/played/{pageSize}/{pageNumber}/{userId}")
-    public ResponcePaginatedList<GameDto> getPlayedGames(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId,  @RequestParam(defaultValue = "", required = false, value = "sort") String sort) {
-        return new ResponcePaginatedList<>(gameDao.getPlayedGame(userId, pageSize, pageNumber, sort), gameDao.getNumberOfRecord(userId));
+    public ResponcePaginatedList<GameDto> getPlayedGames(@PathVariable int pageSize,
+                                                         @PathVariable int pageNumber,
+                                                         @PathVariable int userId,
+                                                         @RequestParam(defaultValue = "", required = false, value = "sort") String sort,
+                                                         @RequestParam(defaultValue = "", required = false, value = "search") String search) {
+        if (search.isEmpty()) {
+            return new ResponcePaginatedList<>(gameDao.getPlayedGame(userId, pageSize, pageNumber, sort), gameDao.getNumberOfRecord(userId));
+        }
+        return new ResponcePaginatedList<>(gameDao.getFilteredPlayedGame(userId, pageSize, pageNumber, sort, search), gameDao.getNumberOfRecord(userId));
     }
 
     @GetMapping("/gameresult/{gameId}")
