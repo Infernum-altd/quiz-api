@@ -4,7 +4,6 @@ import com.quiz.dao.GameDao;
 import com.quiz.dto.GameDto;
 import com.quiz.entities.*;
 import com.quiz.service.PaginationService;
-import com.quiz.dto.UserDto;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.User;
 import com.quiz.service.QuizService;
@@ -18,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/profile")
@@ -152,6 +152,11 @@ public class ProfileController {
 
     @GetMapping("/played/{pageSize}/{pageNumber}/{userId}")
     public ResponcePaginatedList<GameDto> getPlayedGames(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId,  @RequestParam(defaultValue = "", required = false, value = "sort") String sort) {
-        return new ResponcePaginatedList<GameDto>(gameDao.getPlayedGame(userId, pageSize, pageNumber, sort), gameDao.getNumberOfRecord(userId));
+        return new ResponcePaginatedList<>(gameDao.getPlayedGame(userId, pageSize, pageNumber, sort), gameDao.getNumberOfRecord(userId));
+    }
+
+    @GetMapping("/gameresult/{gameId}")
+    public ResponseEntity<Set<Player>> getGameResult(@PathVariable int gameId) {
+        return ResponseEntity.ok(gameDao.getGameResult(gameId));
     }
 }
