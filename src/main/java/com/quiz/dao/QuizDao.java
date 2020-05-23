@@ -82,17 +82,6 @@ public class QuizDao {
         return quizzesCreatedByUser;
     }
 
-/*    public List<Quiz> getQuizzesByStatus(StatusType status) {
-
-        List<Quiz> quizzesByStatus = jdbcTemplate.query(GET_QUIZZES_BY_STATUS, new Object[]{status}, new QuizMapper());
-
-        if (quizzesByStatus.isEmpty()) {
-            return null;
-        }
-
-        return quizzesByStatus;
-    }*/
-
     public List<QuizDto> getQuizzesByStatus(StatusType status) {
 
         List<QuizDto> quizDtos = jdbcTemplate.query(
@@ -138,37 +127,6 @@ public class QuizDao {
 
         return quizzes;
     }
-
-/*    public Quiz findById(int id) {
-        List<Quiz> quizzes;
-
-        try {
-            quizzes = jdbcTemplate.query(
-                    GET_QUIZ_BY_ID,
-                    new Object[]{id}, (resultSet, i) -> {
-                        Quiz quiz = new Quiz();
-
-                        quiz.setId(resultSet.getInt(QUIZ_ID));
-                        quiz.setName(resultSet.getString(QUIZ_NAME));
-                        quiz.setAuthor(resultSet.getInt(QUIZ_AUTHOR));
-                        quiz.setCategory_id(resultSet.getInt(QUIZ_CATEGORY));
-                        quiz.setDate(resultSet.getDate(QUIZ_DATE));
-                        quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
-                        quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
-                        quiz.setModificationTime(resultSet.getTimestamp(QUIZ_MODIFICATION_TIME));
-                        return quiz;
-                    }
-            );
-            if (quizzes.isEmpty()) {
-                return null;
-            }
-        } catch (DataAccessException e) {
-            // TODO: 09.04.2020  check message
-            throw new DatabaseException(String.format("Find quiz by id '%s' database error occured", id));
-        }
-
-        return quizzes.get(0);
-    }*/
 
     public QuizDto findById(int id) {
         List<QuizDto> quizzes;

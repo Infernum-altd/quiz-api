@@ -37,7 +37,7 @@ public class SharingQuizController {
     @GetMapping("/{pageSize}/{pageNumber}/{userId}")
     public ResponseEntity<ResponcePaginatedList<Quiz>> getAllQuizzes(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId) {
         List<Quiz> quizzes = quizService.findAllQuizzes(userId);
-        return ResponseEntity.ok(new ResponcePaginatedList<Quiz>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
+        return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
     @GetMapping("/categories/{categoryId}/{pageSize}/{pageNumber}/{userId}")
@@ -152,24 +152,4 @@ public class SharingQuizController {
     public ResponseEntity<List<QuizDto>> getQuizzesByStatus(@PathVariable StatusType status){
         return ResponseEntity.ok(quizService.findQuizzesByStatus(status));
     }
-
-/*    @PostMapping("updateActive/{quizId}")
-    public ResponseEntity<String> updateStatus(@RequestBody String status, @PathVariable int quizId){
-        boolean isRecordAffected = quizCheckService.updateStatusById(quizId, status);
-
-        if (isRecordAffected){
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
-
-    @PostMapping("updateComment/{quizId}")
-    public ResponseEntity<String> updateComment(@RequestBody String comment, @PathVariable int quizId){
-        boolean isRecordAffected = quizCheckService.updateCommentById(quizId, comment);
-
-        if (isRecordAffected){
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }*/
 }

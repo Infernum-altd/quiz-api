@@ -55,11 +55,11 @@ public class UserService {
         return userDao.getUserIdByEmail(email);
     }
 
-    public boolean updateProfileImage(MultipartFile image, int userId) {
-        return userDao.updateProfileImage(image, userId);
+    public boolean updateProfileImage(String imageUrl, int userId) {
+        return userDao.updateProfileImage(imageUrl, userId);
     }
 
-    public byte[] getImageByUserId(int userId) {
+    public String getImageByUserId(int userId) {
         return userDao.getUserImageByUserId(userId);
     }
 
