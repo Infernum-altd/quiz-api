@@ -50,7 +50,7 @@ public class QuizService {
         return quizDao.findQuizzesByName(name);
     }
 
-    public byte[] getImageByQuizId(int quizId) {
+    public String getImageByQuizId(int quizId) {
         return quizDao.getQuizImageByQuizId(quizId);
     }
 

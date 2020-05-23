@@ -236,15 +236,11 @@ public class QuizDao {
         return quizzesByTag;
     }
 
-    public byte[] getQuizImageByQuizId(int quizId) {
-        List<byte[]> imageBlob = jdbcTemplate.query(
+    public String getQuizImageByQuizId(int quizId) {
+        return jdbcTemplate.queryForObject(
                 GET_QUIZ_IMAGE_BY_QUIZ_ID,
                 new Object[]{quizId},
-                (resultSet, i) -> resultSet.getBytes("image"));
-        if (imageBlob.get(0) == null) {
-            return null;
-        }
-        return imageBlob.get(0);
+                (resultSet, i) -> resultSet.getString("image"));
     }
 
     @Transactional

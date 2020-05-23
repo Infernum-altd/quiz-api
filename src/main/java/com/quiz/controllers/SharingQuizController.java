@@ -75,7 +75,7 @@ public class SharingQuizController {
 
     @GetMapping("/get_image/{quizId}")
     public ResponseEntity<ResponseText> getQuizImage(@PathVariable int quizId) {
-        return ResponseEntity.ok(new ResponseText(new String(Base64.getEncoder().encode(quizService.getImageByQuizId(quizId)))));
+        return ResponseEntity.ok(new ResponseText(quizService.getImageByQuizId(quizId)));
     }
 
     @PostMapping("/new_image/{quizId}")
