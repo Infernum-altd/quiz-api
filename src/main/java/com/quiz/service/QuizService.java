@@ -22,8 +22,8 @@ public class QuizService {
         return quizDao.getQuizzesByStatus(status);
     }
 
-    public List<Quiz> findAllQuizzes(int userId) {
-        return quizDao.getAllQuizzes(userId);
+    public List<Quiz> findAllQuizzes(int pageSize, int pageNumber, int userId) {
+        return quizDao.getAllQuizzes(pageSize, pageNumber, userId);
     }
 
     public QuizDto findQuizById(int id) {
@@ -118,4 +118,7 @@ public class QuizService {
         return quizDao.searchInFavoriteQuizzes(userId, userSearch);
     }
 
+    public int getNumberOfRecord() {
+        return quizDao.getNumberOfRecord();
+    }
 }

@@ -32,7 +32,7 @@ public class QuizDao {
     private final JdbcTemplate jdbcTemplate;
 
     private final static String GET_QUIZZES_BY_STATUS = "SELECT * FROM quizzes WHERE status = ?::status_type";
-    private final static String GET_ALL_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE quizzes.status = 'ACTIVE'";
+    private final static String GET_ALL_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE quizzes.status = 'ACTIVE' LIMIT ? OFFSET ?";
     private final static String GET_QUIZ_BY_ID = "SELECT * FROM quizzes WHERE id = ?";
     private final static String GET_QUIZZES_CREATED_BY_USER_ID = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE author = ? AND (status<>'DELETED' AND status<>'DEACTIVATED')";
     private final static String GET_FAVORITE_QUIZZES_BY_USER_ID = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN favorite_quizzes ON quizzes.id = quiz_id WHERE user_id = ?";
@@ -69,6 +69,8 @@ public class QuizDao {
     private final static String GET_QUIZ_CATEGORY_BY_CATEGORY_ID = "SELECT name FROM categories WHERE id = ?";
     private final static String GET_QUIZZES_BY_STATUS_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.status = ?::status_type) sq INNER JOIN users u on sq.qauthor = u.id";
     private final static String GET_QUIZ_BY_ID_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.id = ?) sq INNER JOIN users u on sq.qauthor = u.id";
+
+    private static final String COUNT_NUMBER_OF_PLAYED_GAMES = "SELECT COUNT(*) FROM quizzes WHERE status='ACTIVE'";
 
 
     public List<Quiz> getGamesCreatedByUser(int userId) {
@@ -111,8 +113,8 @@ public class QuizDao {
         return quizDtos;
     }
 
-    public List<Quiz> getAllQuizzes(int userId) {
-        List<Quiz> quizzes = jdbcTemplate.query(GET_ALL_QUIZZES, new QuizMapper());
+    public List<Quiz> getAllQuizzes(int pageSize, int pageNumber, int userId) {
+        List<Quiz> quizzes = jdbcTemplate.query(GET_ALL_QUIZZES, new Object[]{pageSize, pageNumber*pageSize}, new QuizMapper());
 
         if (quizzes.isEmpty()) {
             return null;
@@ -493,6 +495,11 @@ public class QuizDao {
             return null;
         }
         return quizzes;
+    }
+
+    public int getNumberOfRecord(){
+        return jdbcTemplate.queryForObject(COUNT_NUMBER_OF_PLAYED_GAMES,
+                (resultSet, i) -> resultSet.getInt("count"));
     }
 
 }

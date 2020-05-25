@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -24,8 +23,6 @@ public class SharingQuizController {
 
     @Autowired
     QuizService quizService;
-/*    @Autowired
-    QuizCheckService quizCheckService;*/
     @Autowired
     PaginationService paginationService;
 
@@ -36,8 +33,8 @@ public class SharingQuizController {
 
     @GetMapping("/{pageSize}/{pageNumber}/{userId}")
     public ResponseEntity<ResponcePaginatedList<Quiz>> getAllQuizzes(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId) {
-        List<Quiz> quizzes = quizService.findAllQuizzes(userId);
-        return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
+        List<Quiz> quizzes = quizService.findAllQuizzes(pageSize, pageNumber, userId);
+        return ResponseEntity.ok(new ResponcePaginatedList<>(quizzes, quizService.getNumberOfRecord()));
     }
 
     @GetMapping("/categories/{categoryId}/{pageSize}/{pageNumber}/{userId}")
