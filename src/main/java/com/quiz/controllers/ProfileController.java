@@ -138,7 +138,6 @@ public class ProfileController {
 
     @GetMapping("/getimage/{userId}")
     public ResponseEntity<ResponseText> getUserImage(@PathVariable int userId){
-        //return ResponseEntity.ok(new ResponseText(new String(Base64.getEncoder().encode(userRepo.getImageByUserId(userId)))));
         return ResponseEntity.ok(new ResponseText(userRepo.getImageByUserId(userId)));
     }
 

@@ -34,20 +34,4 @@ public class UserDto {
         role=user.getRole();
     }
 
-    public UserDto(int id, String email, Role role, String name, String surname, Date birthdate, Gender gender, int country_id, String city, int rating, String about, boolean active, NotificationStatus notification, int languageId) {
-        this.id = id;
-        this.email = email;
-        this.role = role;
-        this.name = name;
-        this.surname = surname;
-        this.birthdate = birthdate;
-        this.gender = gender;
-        this.country_id = country_id;
-        this.city = city;
-        this.rating = rating;
-        this.about = about;
-        this.active = active;
-        this.notification = notification;
-        this.languageId = languageId;
-    }
 }
