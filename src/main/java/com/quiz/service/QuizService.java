@@ -27,10 +27,10 @@ public class QuizService {
     }
 
     public QuizDto findQuizInfoById(int id) {
-        return quizDao.findInfoById(id);
+        return null;//quizDao.findInfoById(id);
     }
 
-    public Quiz findQuizById(int id) {
+    public QuizDto findQuizById(int id) {
         return quizDao.findById(id);
     }
 

@@ -53,8 +53,7 @@ public class UserDao {
     private final static String UPDATE_USER_ACTIVE_STATUS = "UPDATE users SET active= NOT active WHERE id = ?";
     private final static String FIND_ADMINS_USERS = "SELECT id,email,name,surname,role,active FROM users WHERE role = 'ADMIN' OR role = 'MODERATOR' OR role = 'SUPER_ADMIN'";
     private final static String DELETE_USER = "DELETE FROM users WHERE id = ?";
-    private final static String GET_USER_ROLE_BY_EMAIL = "SELECT role FROM users WHERE email = ?";
-    private final static String DELETE_USER="DELETE FROM users WHERE id = ?";
+
 
     public User findByEmail(String email) {
         List<User> users;
@@ -242,13 +241,6 @@ public class UserDao {
 
 
     public String getUserImageByUserId(int userId) {
-        //List<byte[]> imageBlob = jdbcTemplate.query(GET_USER_IMAGE_BY_USER_ID, new Object[]{userId}, (resultSet, i) -> resultSet.getBytes("image"));
-
-        //String imageUrl = jdbcTemplate.queryForObject(GET_USER_IMAGE_BY_USER_ID, new Object[]{userId}, (resultSet, i) -> resultSet.getString("image"));
-/*        if (imageBlob.get(0) == null) {
-            return null;
-        }
-        return imageBlob.get(0);*/
         return jdbcTemplate.queryForObject(GET_USER_IMAGE_BY_USER_ID, new Object[]{userId}, (resultSet, i) -> resultSet.getString("image"));
     }
 

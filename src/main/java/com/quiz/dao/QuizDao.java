@@ -5,10 +5,7 @@ import com.quiz.dto.QuizDto;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.StatusType;
 import com.quiz.exceptions.DatabaseException;
-import com.quiz.entities.StatusType;
-import com.quiz.exceptions.DatabaseException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -16,7 +13,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.transaction.annotation.Transactional;
+
 
 
 import java.io.IOException;
@@ -29,11 +26,7 @@ import static com.quiz.dao.mapper.QuizMapper.QUIZ_MODIFICATION_TIME;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.quiz.dao.mapper.QuizMapper.*;
-import java.util.Objects;
 
-import static com.quiz.dao.mapper.QuizMapper.*;
-import static com.quiz.dao.mapper.UserMapper.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -171,37 +164,6 @@ public class QuizDao {
                 return null;
             }
         } catch (DataAccessException e) {
-            throw new DatabaseException(String.format("Find quiz by id '%s' database error occured", id));
-        }
-
-        return quizzes.get(0);
-    }
-
-    public Quiz findById(int id) {
-        List<Quiz> quizzes;
-
-        try {
-            quizzes = jdbcTemplate.query(
-                    GET_QUIZ_BY_ID,
-                    new Object[]{id}, (resultSet, i) -> {
-                        Quiz quiz = new Quiz();
-
-                        quiz.setId(resultSet.getInt(QUIZ_ID));
-                        quiz.setName(resultSet.getString(QUIZ_NAME));
-                        quiz.setAuthor(resultSet.getInt(QUIZ_AUTHOR));
-                        quiz.setCategory_id(resultSet.getInt(QUIZ_CATEGORY));
-                        quiz.setDate(resultSet.getDate(QUIZ_DATE));
-                        quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
-                        quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
-                        quiz.setModificationTime(resultSet.getTimestamp(QUIZ_MODIFICATION_TIME));
-                        return quiz;
-                    }
-            );
-            if (quizzes.isEmpty()) {
-                return null;
-            }
-        } catch (DataAccessException e) {
-            // TODO: 09.04.2020  check message
             throw new DatabaseException(String.format("Find quiz by id '%s' database error occured", id));
         }
 

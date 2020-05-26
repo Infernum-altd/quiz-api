@@ -27,6 +27,8 @@ public class SharingQuizController {
     QuizService quizService;
     @Autowired
     PaginationService paginationService;
+    @Autowired
+    QuizCheckService quizCheckService;
 
     @GetMapping("/quizCheck/{quizId}")
     public ResponseEntity<QuizCheckDto> getQuizCheck(@PathVariable int quizId) {
@@ -34,7 +36,7 @@ public class SharingQuizController {
     }
 
     @GetMapping("/{quizId}")
-    public ResponseEntity<Quiz> getQuiz(@PathVariable int quizId) {
+    public ResponseEntity<QuizDto> getQuiz(@PathVariable int quizId) {
         return ResponseEntity.ok(quizService.findQuizById(quizId));
     }
     @GetMapping("/info/{quizId}")

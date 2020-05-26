@@ -55,9 +55,6 @@ public class UserService {
     public int getUserIdByEmail(String email) {
         return userDao.getUserIdByEmail(email);
     }
-    public String getUserRoleByEmail(String email){
-        return userDao.getUserRoleByEmail(email);
-    }
 
     public boolean updateProfileImage(String imageUrl, int userId) {
         return userDao.updateProfileImage(imageUrl, userId);
@@ -70,11 +67,6 @@ public class UserService {
     public boolean changeNotificationStatus(String status, int userId) {
         return userDao.updateNotificationStatus(status, userId);
     }
-
-    public List<User> findAdminsUsers() {
-        return userDao.findAdminsUsers();
-    }
-    public void deleteUserById(int id) { userDao.deleteUserById(id); }
 
     public NotificationStatus getNotificationStatus(int userId) {
         return userDao.getUserNotification(userId);
