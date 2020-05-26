@@ -34,7 +34,8 @@ public class GameController {
 
     @MessageMapping("/play/game/{gameId}/user")
     public void userJoinGameSession(@DestinationVariable int gameId, @RequestBody Player player, SimpMessageHeaderAccessor headerAccessor) {
-        String userHeaderAccessor = (String) headerAccessor.getSessionAttributes().put("userId", new int[]{player.getUserId(), gameId});
+        headerAccessor.getSessionAttributes().put("userId", player.getUserId());
+        headerAccessor.getSessionAttributes().put("gameId", gameId);
         template.convertAndSend("/play/game/" + gameId, gameService.addUserInSession(gameId, player));
     }
 

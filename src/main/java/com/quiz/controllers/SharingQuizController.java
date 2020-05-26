@@ -5,6 +5,7 @@ import com.quiz.dto.QuizCheckDto;
 import com.quiz.dto.QuizDto;
 import com.quiz.entities.*;
 import com.quiz.service.PaginationService;
+import com.quiz.entities.StatusType;
 import com.quiz.service.QuizCheckService;
 import com.quiz.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -24,9 +24,9 @@ public class SharingQuizController {
     @Autowired
     QuizService quizService;
     @Autowired
-    QuizCheckService quizCheckService;
-    @Autowired
     PaginationService paginationService;
+    @Autowired
+    QuizCheckService quizCheckService;
 
     @GetMapping("/quizCheck/{quizId}")
     public ResponseEntity<QuizCheckDto> getQuizCheck(@PathVariable int quizId) {
@@ -34,7 +34,7 @@ public class SharingQuizController {
     }
 
     @GetMapping("/{quizId}")
-    public ResponseEntity<Quiz> getQuiz(@PathVariable int quizId) {
+    public ResponseEntity<QuizDto> getQuiz(@PathVariable int quizId) {
         return ResponseEntity.ok(quizService.findQuizById(quizId));
     }
     @GetMapping("/info/{quizId}")
@@ -44,8 +44,8 @@ public class SharingQuizController {
 
     @GetMapping("/{pageSize}/{pageNumber}/{userId}")
     public ResponseEntity<ResponcePaginatedList<Quiz>> getAllQuizzes(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId) {
-        List<Quiz> quizzes = quizService.findAllQuizzes(userId);
-        return ResponseEntity.ok(new ResponcePaginatedList<Quiz>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
+        List<Quiz> quizzes = quizService.findAllQuizzes(pageSize, pageNumber, userId);
+        return ResponseEntity.ok(new ResponcePaginatedList<>(quizzes, quizService.getNumberOfRecord()));
     }
 
     @GetMapping("/categories/{categoryId}/{pageSize}/{pageNumber}/{userId}")
@@ -83,7 +83,7 @@ public class SharingQuizController {
 
     @GetMapping("/get_image/{quizId}")
     public ResponseEntity<ResponseText> getQuizImage(@PathVariable int quizId) {
-        return ResponseEntity.ok(new ResponseText(new String(Base64.getEncoder().encode(quizService.getImageByQuizId(quizId)))));
+        return ResponseEntity.ok(new ResponseText(quizService.getImageByQuizId(quizId)));
     }
 
     @PostMapping("/new_image/{quizId}")

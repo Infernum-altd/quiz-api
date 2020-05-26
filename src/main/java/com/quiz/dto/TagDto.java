@@ -14,9 +14,4 @@ public class TagDto {
         this.id = tag.getId();
         this.name = tag.getName();
     }
-
-    public TagDto(int id, String name) {
-        this.id = id;
-        this.name = name;
-    }
 }

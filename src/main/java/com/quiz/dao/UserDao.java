@@ -62,6 +62,7 @@ public class UserDao {
     private final static String USER_FIND_BY_PASSWORD ="SELECT id,email, name,surname,role,active FROM users WHERE password = ?"; ;
 
 
+
     public User findByEmail(String email) {
         List<User> users;
 
@@ -274,24 +275,16 @@ public class UserDao {
         return role.get(0);
     }
 
-    public boolean updateProfileImage(MultipartFile image, int userId) {
-        int affectedNumbersOfRows = 0;
-        try {
-            affectedNumbersOfRows = jdbcTemplate.update(UPDATE_USER_IMAGE, image.getBytes(), userId);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public boolean updateProfileImage(String imageUrl, int userId) {
+
+        int affectedNumbersOfRows = jdbcTemplate.update(UPDATE_USER_IMAGE, imageUrl, userId);
+
         return affectedNumbersOfRows > 0;
     }
 
 
-    public byte[] getUserImageByUserId(int userId) {
-        List<byte[]> imageBlob = jdbcTemplate.query(GET_USER_IMAGE_BY_USER_ID, new Object[]{userId}, (resultSet, i) -> resultSet.getBytes("image"));
-
-        if (imageBlob.get(0) == null) {
-            return null;
-        }
-        return imageBlob.get(0);
+    public String getUserImageByUserId(int userId) {
+        return jdbcTemplate.queryForObject(GET_USER_IMAGE_BY_USER_ID, new Object[]{userId}, (resultSet, i) -> resultSet.getString("image"));
     }
 
     public boolean updateNotificationStatus(String status, int userId) {
@@ -354,7 +347,7 @@ public class UserDao {
     }
 
     public void deleteUserById(int id) {
-        jdbcTemplate.update(DELETE_USER,id);
+        jdbcTemplate.update(DELETE_USER, id);
     }
 
     public User findByActivationCode(String code) {

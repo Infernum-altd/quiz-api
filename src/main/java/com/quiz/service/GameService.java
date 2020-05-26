@@ -1,5 +1,6 @@
 package com.quiz.service;
 
+import com.quiz.dao.AnnouncementDao;
 import com.quiz.dao.AnswerDao;
 import com.quiz.dao.UserDao;
 import com.quiz.dao.GameDao;
@@ -27,10 +28,12 @@ public class GameService {
     UserDao userDao;
     @Autowired
     AnswerDao answerDao;
+    @Autowired
+    AnnouncementDao announcementDao;
 
     public int addGameSession(int quizId, int hostId, int questionTimer, int maxUsersNumber) {
         User host = userDao.findById(hostId);
-        
+
         GameSession gameSession = new GameSession(hostId, questionsToMap(questionService.getQuestionsByQuizId(quizId)), questionTimer);
 
         gameSession.getPlayerSet().add(new Player(host.getId(), host.getName() + " " + host.getSurname(), true));
@@ -79,11 +82,18 @@ public class GameService {
 
             players.stream().filter(Player::isAuthorize)
                     .forEach(user -> userDao.insertUserScore(user.getUserId(), gameId, user.getUserScore()));
+
+
             this.currentGames.remove(gameId);
 
             GameSessionDto result = this.gameDao.getGame(gameId);
-            result.setPlayers(players.stream().sorted(Comparator.comparingInt(Player::getUserScore).reversed()).collect(Collectors.toList()));
 
+            result.setPlayers(players.stream()
+                    .sorted(Comparator.comparingInt(Player::getUserScore).reversed())
+                    .collect(Collectors.toList()));
+
+            result.getPlayers().stream().filter(Player::isAuthorize)
+                    .forEach(player -> announcementDao.generateGameResultAnnouncement(player, result.getPlayers().indexOf(player)));
             return result;
         }
         return null;

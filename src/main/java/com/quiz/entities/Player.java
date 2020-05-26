@@ -1,9 +1,11 @@
 package com.quiz.entities;
 
-import lombok.Data;
+import lombok.*;
 
 
 @Data
+@RequiredArgsConstructor
+@AllArgsConstructor
 public class Player implements Comparable<Player> {
     int userId;
     int userScore;
@@ -17,9 +19,14 @@ public class Player implements Comparable<Player> {
         this.authorize = authorize;
     }
 
+    public Player(int score, String userName) {
+        this.userScore = score;
+        this.userName = userName;
+    }
+
     @Override
     public int compareTo(Player player) {
-        int result = Integer.compare(this.userScore, player.userScore);
+        int result = Integer.compare(player.userScore, this.userScore);
         return result == 0 ? Integer.compare(this.userId, player.getUserId()) : result;
     }
 }
