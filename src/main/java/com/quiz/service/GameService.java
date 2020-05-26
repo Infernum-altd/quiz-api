@@ -117,6 +117,7 @@ public class GameService {
                     if (isRightOption(answer.getAnswers())) {
                         this.currentGames.get(gameId).addScorePoint(2, player.getUserId(), player.isAuthorize());
                     }
+
                     break;
                 case BOOLEAN:
                     if (isRightBoolean(answer.getAnswers().get(0))) {

@@ -33,7 +33,7 @@ public class QuizService {
         return quizDao.findInfoById(id);
     }
 
-    public QuizDto findQuizById(int id) {
+    public Quiz findQuizById(int id) {
         return quizDao.findById(id);
     }
 
