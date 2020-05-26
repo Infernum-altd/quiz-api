@@ -33,7 +33,7 @@ public class QuizCheckService {
             QuestionCheckDto questionDto = new QuestionCheckDto(question, answers);
             questionCheckDto.add(questionDto);
         }
-        QuizDto quizDto = quizDao.findInfoById(id);
+        QuizDto quizDto = null;//quizDao.findInfoById(id);
          return new QuizCheckDto(quizDto, questionCheckDto);
     }
     public boolean updateStatusById(int id, String status) {
