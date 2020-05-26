@@ -1,5 +1,6 @@
 package com.quiz.dao;
 
+import com.quiz.dao.mapper.AnswerMapper;
 import com.quiz.entities.Answer;
 import com.quiz.exceptions.DatabaseException;
 import lombok.RequiredArgsConstructor;
@@ -35,41 +36,19 @@ public class AnswerDao {
     public static final String TABLE_ANSWER = "answers";
 
     public Answer findById(int id) {
-        List<Answer> answers;
-
         try {
-            answers = getQuery(id, ANSWER_FIND_BY_ID);
-            if (answers.isEmpty()) {
-                return null;
-            }
+            return jdbcTemplate.queryForObject(ANSWER_FIND_BY_ID, new Object[]{id}, new AnswerMapper());
         } catch (DataAccessException e) {
             throw new DatabaseException(String.format("Find answer by id '%s' database error occured", id));
         }
-
-
-        return answers.get(0);
     }
 
     public List<Answer> findAnswersByQuestionId(int id) {
-        return getQuery(id, ANSWER_FIND_BY_QUESTION_ID);
-    }
-
-    public List<Answer> getQuery(int id, String answerFindByQuestionId) {
-        return jdbcTemplate.query(
-                answerFindByQuestionId,
-                new Object[]{id},
-                (resultSet, i) -> {
-                    Answer answer = new Answer();
-
-                    answer.setId(resultSet.getInt(ANSWER_ID));
-                    answer.setQuestionId(resultSet.getInt(ANSWER_QUESTION_ID));
-                    answer.setText(resultSet.getString(ANSWER_TEXT));
-                    answer.setCorrect(resultSet.getBoolean(ANSWER_CORRECT));
-                    answer.setNextAnswerId(resultSet.getInt(ANSWER_NEXT_ANSWER_ID));
-
-                    return answer;
-                }
-        );
+        try {
+            return jdbcTemplate.query(ANSWER_FIND_BY_QUESTION_ID, new Object[]{id}, new AnswerMapper());
+        } catch (DataAccessException e) {
+            throw new DatabaseException(String.format("Find answer by id '%s' database error occured", id));
+        }
     }
 
     @Transactional

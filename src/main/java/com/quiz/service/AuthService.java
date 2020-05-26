@@ -25,6 +25,8 @@ public class AuthService {
         if(userdb != null){
             throw new EmailExistException("User with this email already exist");
         }
+        user.setPassword(user.getPassword());
+        user.setRole(user.getRole());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userDao.insert(user);
         return new UserDto(user);

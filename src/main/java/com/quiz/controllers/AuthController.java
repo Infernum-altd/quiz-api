@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
+
     private final AuthService authService;
     private final UserService userService;
     // TODO: 09.04.2020 validation
@@ -30,6 +31,6 @@ public class AuthController {
     @PostMapping(value ="/login",  produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseToken login(@RequestBody User user) {
-        return new ResponseToken(authService.login(user), String.valueOf(userService.getUserIdByEmail(user.getEmail())), user.getEmail());
+        return new ResponseToken(authService.login(user), String.valueOf(userService.getUserIdByEmail(user.getEmail())), user.getEmail(), String.valueOf(userService.getUserRoleByEmail(user.getEmail())));
     }
 }

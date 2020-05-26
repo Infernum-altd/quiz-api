@@ -18,15 +18,15 @@ public class QuizService {
     @Autowired
     private final QuizDao quizDao;
 
-    public List<Quiz> findQuizzesByStatus(StatusType status) {
+    public List<QuizDto> findQuizzesByStatus(StatusType status) {
         return quizDao.getQuizzesByStatus(status);
     }
 
-    public List<Quiz> findAllQuizzes(int userId) {
-        return quizDao.getAllQuizzes(userId);
+    public List<Quiz> findAllQuizzes(int pageSize, int pageNumber, int userId) {
+        return quizDao.getAllQuizzes(pageSize, pageNumber, userId);
     }
 
-    public Quiz findQuizById(int id) {
+    public QuizDto findQuizById(int id) {
         return quizDao.findById(id);
     }
 
@@ -50,7 +50,7 @@ public class QuizService {
         return quizDao.findQuizzesByName(name);
     }
 
-    public byte[] getImageByQuizId(int quizId) {
+    public String getImageByQuizId(int quizId) {
         return quizDao.getQuizImageByQuizId(quizId);
     }
 
@@ -116,5 +116,9 @@ public class QuizService {
 
     public List<Quiz> searchInFavoriteQuizzes(int userId, String userSearch) {
         return quizDao.searchInFavoriteQuizzes(userId, userSearch);
+    }
+
+    public int getNumberOfRecord() {
+        return quizDao.getNumberOfRecord();
     }
 }

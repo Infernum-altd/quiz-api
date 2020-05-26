@@ -13,7 +13,7 @@ public class Quiz {
 
     private int id;
     private String name;
-    private byte[] image;
+    private String image;
     private int author;
     private int category_id;
     private Date date;

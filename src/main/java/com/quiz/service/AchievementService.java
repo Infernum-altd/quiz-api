@@ -18,6 +18,15 @@ public class AchievementService {
         return achievementDao.getAchievementCategories();
     }
 
+    public List<Achievement> getAchievements() {
+        return achievementDao.getAchievements();
+    }
+
+    public List<Achievement> getAchievementsByUser(int userId) {
+        return achievementDao.getAchievementsByUser(userId);
+    }
+
+
     public List<Achievement> findAchievementByCategory(int categoryId) {
         return achievementDao.getAchievementsByCategory(categoryId);
     }

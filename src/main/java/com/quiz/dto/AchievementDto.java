@@ -11,11 +11,13 @@ public class AchievementDto {
     private String name;
     private String description;
     private int categoryID;
+    private int progress;
 
     public AchievementDto(Achievement achievement) {
         this.id = achievement.getId();
         this.name = achievement.getName();
         this.description = achievement.getDescription();
         this.categoryID = achievement.getCategoryId();
+        this.progress=achievement.getProgress();
     }
 }

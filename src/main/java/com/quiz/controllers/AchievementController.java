@@ -18,6 +18,16 @@ import java.util.List;
 public class AchievementController {
     private final AchievementService achievementService;
 
+    @GetMapping
+    public ResponseEntity<List<Achievement>> getAchievements() {
+        return ResponseEntity.ok(achievementService.getAchievements());
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<Achievement>> getAchievementsByUser(@PathVariable int userId) {
+        return ResponseEntity.ok(achievementService.getAchievementsByUser(userId));
+    }
+
     @GetMapping("/categories")
     public ResponseEntity<List<AchievementCategory>> getAchievementCategories() {
         return ResponseEntity.ok(achievementService.getAchievementCategories());
