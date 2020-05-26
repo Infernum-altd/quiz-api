@@ -21,6 +21,9 @@ public class QuizService {
     public List<QuizDto> findQuizzesByStatus(StatusType status) {
         return quizDao.getQuizzesByStatus(status);
     }
+    public List<QuizDto> getModeratorQuizzes(int moderatorId) {
+        return quizDao.getModeratorQuizzes(moderatorId);
+    }
 
     public List<Quiz> findAllQuizzes(int userId){
         return quizDao.getAllQuizzes(userId);
@@ -69,7 +72,6 @@ public class QuizService {
         quizDao.insert(quiz);
         return new QuizDto(quiz);
     }
-
 
     public String getCategoryNameByCategoryId(int categoryId){
         return quizDao.getCategoryNameByCategoryId(categoryId);
@@ -121,4 +123,9 @@ public class QuizService {
         return quizDao.searchInFavoriteQuizzes(userId, userSearch);
     }
 
+    public List<QuizDto> getPendingQuizByFilter(String searchText) {
+        return quizDao.getPendingQuizzesByFilter(searchText);
+    }
+
+    public void unsignQuizById(int id) { quizDao.unsignQuizById(id); }
 }

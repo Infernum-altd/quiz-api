@@ -2,12 +2,11 @@ package com.quiz.dao;
 
 import static com.quiz.dao.mapper.UserMapper.*;
 
+import com.quiz.dao.mapper.AdminUserMapper;
+import com.quiz.dao.mapper.QuizMapper;
 import com.quiz.dao.mapper.UserMapper;
-import com.quiz.entities.Gender;
-import com.quiz.entities.NotificationStatus;
-import com.quiz.entities.Role;
+import com.quiz.entities.*;
 import com.quiz.exceptions.DatabaseException;
-import com.quiz.entities.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,6 +19,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.quiz.dao.mapper.UserMapper.*;
 
@@ -53,6 +53,14 @@ public class UserDao {
     private final static String UPDATE_USER_ACTIVE_STATUS = "UPDATE users SET active= NOT active WHERE id = ?";
     private final static String FIND_ADMINS_USERS = "SELECT id,email,name,surname,role,active FROM users WHERE role = 'ADMIN' OR role = 'MODERATOR' OR role = 'SUPER_ADMIN'";
     private final static String DELETE_USER="DELETE FROM users WHERE id = ?";
+    private final static String GET_USER_BY_ROLE="SELECT id,email, name,surname,role,active FROM users WHERE role = CAST(? AS role_type)";
+    private final static String GET_USER_BY_ROLE_STATUS="SELECT id,email, name,surname,role,active FROM users WHERE role = CAST(? AS role_type) AND active = ?";
+    private final static String GET_USER_BY_STATUS="SELECT id,email, name,surname,role,active FROM users WHERE active = ? AND NOT role='USER'";
+    private final static String GET_FILTERED_USERS = "SELECT id,email,name,surname,role,active FROM users WHERE name ~* ? OR email ~* ? OR CONCAT(name, ' ', surname) ~*? OR surname ~* ?";
+
+
+    private final static String USER_FIND_BY_PASSWORD ="SELECT id,email, name,surname,role,active FROM users WHERE password = ?"; ;
+
 
     public User findByEmail(String email) {
         List<User> users;
@@ -180,25 +188,60 @@ public class UserDao {
         return friends;
     }
 
-    public List<User> findAdminsUsers() {
-        List<User> adminsUsers = jdbcTemplate.query(
-                FIND_ADMINS_USERS, (resultSet, i) -> {
-                    User user = new User();
-                    user.setId(resultSet.getInt(USERS_ID));
-                    user.setEmail(resultSet.getString(USERS_EMAIL));
-                    user.setName(resultSet.getString(USERS_NAME));
-                    user.setSurname(resultSet.getString(USERS_SURNAME));
-                    user.setRole(Role.valueOf(resultSet.getString(USERS_ROLE).trim()));
-                    user.setActive(resultSet.getBoolean(USERS_ACTIVE));
-
-                    return user;
-                });
+    public List<User> findAdminsUsers(int userId) {
+        List<User> adminsUsers = jdbcTemplate.query(FIND_ADMINS_USERS, new AdminUserMapper());
 
         if (adminsUsers.isEmpty()) {
             return null;
         }
-
         return adminsUsers;
+    }
+    public List<User> getUsersByRoleStatus(String role, String status, int userId) {
+        boolean activeStatus;
+        if(status.equals("ACTIVE")){
+            activeStatus = true;
+        }
+        else{
+            activeStatus = false;
+        }
+        List<User> usersByRoleStatus = jdbcTemplate.query(GET_USER_BY_ROLE_STATUS, new Object[]{role,activeStatus}, new AdminUserMapper());
+        if (usersByRoleStatus.isEmpty()) {
+            return null;
+        }
+        return usersByRoleStatus;
+    }
+    public List<User> getUsersByRole(String role, int userId) {
+        List<User> usersByRoleStatus = jdbcTemplate.query(GET_USER_BY_ROLE, new Object[]{role}, new AdminUserMapper());
+        if (usersByRoleStatus.isEmpty()) {
+            return null;
+        }
+        return usersByRoleStatus;
+    }
+    public List<User> getUsersByStatus(String status, int userId) {
+        boolean activeStatus;
+        if(status.equals("ACTIVE")){
+            activeStatus = true;
+        }
+        else{
+            activeStatus = false;
+        }
+        List<User> usersByRoleStatus = jdbcTemplate.query(GET_USER_BY_STATUS, new Object[]{activeStatus}, new AdminUserMapper());
+        if (usersByRoleStatus.isEmpty()) {
+            return null;
+        }
+        return usersByRoleStatus;
+    }
+    public List<User> getUsersByFilter(String searchByUser, int userId) {
+        List<User> getFilteredUsers = jdbcTemplate.query(
+                GET_FILTERED_USERS,
+                new Object[]{searchByUser, searchByUser, searchByUser, searchByUser},
+                new AdminUserMapper());
+
+        if (getFilteredUsers.isEmpty()) {
+            return null;
+        }
+        getFilteredUsers = getFilteredUsers.stream().distinct().collect(Collectors.toList());
+        return getFilteredUsers;
     }
 
     public boolean updateUser(User user) {
@@ -312,5 +355,20 @@ public class UserDao {
 
     public void deleteUserById(int id) {
         jdbcTemplate.update(DELETE_USER,id);
+    }
+
+    public User findByActivationCode(String code) {
+        List<User> users;
+            try {
+                users = jdbcTemplate.query(
+                        USER_FIND_BY_PASSWORD,
+                        new Object[]{code}, new AdminUserMapper());
+                if (users.isEmpty()) {
+                    return null;
+                }
+            } catch (DataAccessException e) {
+                throw new DatabaseException(String.format("Find user by password '%s' database error occured", code));
+            }
+            return users.get(0);
     }
 }

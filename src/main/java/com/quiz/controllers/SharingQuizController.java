@@ -3,11 +3,8 @@ package com.quiz.controllers;
 
 import com.quiz.dto.QuizCheckDto;
 import com.quiz.dto.QuizDto;
-import com.quiz.entities.Quiz;
-import com.quiz.entities.ResponcePaginatedList;
-import com.quiz.entities.ResponseText;
+import com.quiz.entities.*;
 import com.quiz.service.PaginationService;
-import com.quiz.entities.StatusType;
 import com.quiz.service.QuizCheckService;
 import com.quiz.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,14 +156,24 @@ public class SharingQuizController {
         return ResponseEntity.ok(quizService.findPopularQuizzes(limit));
     }
 
-    @GetMapping("/status/{status}")
-    public ResponseEntity<List<QuizDto>> getQuizzesByStatus(@PathVariable StatusType status){
-        return ResponseEntity.ok(quizService.findQuizzesByStatus(status));
+    @GetMapping("/status/{status}/{pageSize}/{pageNumber}")
+    public ResponseEntity<ResponcePaginatedList<QuizDto>> getQuizzesByStatus(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable StatusType status) {
+        List<QuizDto> quizzes = quizService.findQuizzesByStatus(status);
+        return ResponseEntity.ok(new ResponcePaginatedList<QuizDto>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
     @PostMapping("updateActive/{quizId}")
     public ResponseEntity<String> updateStatus(@RequestBody String status, @PathVariable int quizId){
         boolean isRecordAffected = quizCheckService.updateStatusById(quizId, status);
+
+        if (isRecordAffected){
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+    @PostMapping("assignment/{quizId}")
+    public ResponseEntity<String> assignModerator(@RequestBody String moderatorId, @PathVariable int quizId){
+        boolean isRecordAffected = quizCheckService.assignModerator(quizId, Integer.parseInt(moderatorId));
 
         if (isRecordAffected){
             return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -182,5 +189,22 @@ public class SharingQuizController {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+    @GetMapping("/moderatorQuizzes/{moderatorId}/{pageSize}/{pageNumber}")
+    public ResponseEntity<ResponcePaginatedList<QuizDto>> getModeratorQuizzes(@PathVariable int moderatorId, @PathVariable int pageSize, @PathVariable int pageNumber){
+        List<QuizDto> quizzes = quizService.getModeratorQuizzes(moderatorId);
+        return ResponseEntity.ok(new ResponcePaginatedList<QuizDto>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
+    }
+
+    @GetMapping("/filter/{searchText}/{pageSize}/{pageNumber}")
+    public ResponseEntity<ResponcePaginatedList<QuizDto>> getFilteredPendingQuizzes(@PathVariable String searchText, @PathVariable int pageSize, @PathVariable int pageNumber){
+        List<QuizDto> quizzes =  quizService.getPendingQuizByFilter(searchText);
+        return ResponseEntity.ok(new ResponcePaginatedList<QuizDto>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
+    }
+
+    @DeleteMapping("/unsign/{quizId}")
+    void unsignQuizById(@PathVariable int quizId) {
+        quizService.unsignQuizById(quizId);
     }
 }

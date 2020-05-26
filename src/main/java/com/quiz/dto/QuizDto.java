@@ -24,6 +24,7 @@ public class QuizDto {
     private String authorName;
     private String authorSurname;
     private String authorEmail;
+    private String moderatorComment;
 
     public QuizDto(int id, String name, int author, int category_id, Date date, String description, StatusType status, Timestamp modificationTime) {
         this.id = id;
@@ -35,7 +36,7 @@ public class QuizDto {
         this.status = status;
         this.modificationTime = modificationTime;
     }
-    public QuizDto(int id, String name, int author, int category_id, Date date, String description, StatusType status, Timestamp modificationTime, String category,String authorName,String authorSurname, String authorEmail) {
+    public QuizDto(int id, String name, int author, int category_id, Date date, String description, StatusType status, Timestamp modificationTime, String category,String authorName,String authorSurname, String authorEmail, String moderatorComment) {
         this.id = id;
         this.name = name;
         this.author = author;
@@ -48,6 +49,7 @@ public class QuizDto {
         this.authorName=authorName;
         this.authorSurname=authorSurname;
         this.authorEmail=authorEmail;
+        this.moderatorComment=moderatorComment;
     }
 
     public QuizDto(Quiz quiz){

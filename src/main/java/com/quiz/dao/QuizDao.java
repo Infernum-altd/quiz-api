@@ -1,9 +1,11 @@
 package com.quiz.dao;
 
+import com.quiz.dao.mapper.AdminUserMapper;
 import com.quiz.dao.mapper.QuizMapper;
 import com.quiz.dto.QuizDto;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.StatusType;
+import com.quiz.entities.User;
 import com.quiz.exceptions.DatabaseException;
 import com.quiz.entities.StatusType;
 import com.quiz.exceptions.DatabaseException;
@@ -22,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import static com.quiz.dao.mapper.QuizMapper.*;
@@ -40,9 +44,9 @@ import static com.quiz.dao.mapper.UserMapper.*;
 public class QuizDao {
 
     private final JdbcTemplate jdbcTemplate;
-
-    private final static String GET_QUIZZES_BY_STATUS_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.status = ?::status_type) sq INNER JOIN users u on sq.qauthor = u.id";
-    private final static String GET_QUIZ_BY_ID_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.id = ?) sq INNER JOIN users u on sq.qauthor = u.id";
+    private static final String DELETE_MODERATOR_QUIZ = "DELETE FROM moderators_quizzes WHERE quiz_id = ?" ;
+    private final static String GET_QUIZZES_BY_STATUS_NAME = "SELECT * FROM (SELECT quizzes.category_id quizCategoryId, quizzes.modification_time quizModTime, quizzes.date quizDate, quizzes.description quizDescription, quizzes.status quizStatus, quizzes.id id, quizzes.name quizName, date quizDate, categories.name AS category, users.name AS authorName,users.id authorId, users.surname AS authorSurname, users.email AS authorEmail FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN users ON quizzes.author = users.id WHERE quizzes.status = ?::status_type) quizzes WHERE id NOT IN (SELECT quiz_id FROM moderators_quizzes)";
+    private final static String GET_QUIZ_BY_ID_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus, sq.qcomment qcomment FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname, q.moderator_comment qcomment FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.id = ?) sq INNER JOIN users u on sq.qauthor = u.id";
 
     private final static String GET_QUIZZES_BY_STATUS = "SELECT * FROM quizzes WHERE status = ?::status_type";
     private final static String GET_ALL_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE quizzes.status = 'ACTIVE'";
@@ -60,7 +64,8 @@ public class QuizDao {
     private final static String GET_FILTERED_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category, users.name AS authorName, users.surname AS authorSurname FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN users ON quizzes.author = users.id WHERE quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(users.name, ' ', surname) ~*? OR date::text ~* ?";
     private final static String GET_POPULAR_QUIZ = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category, COUNT(quiz_id)  AS counter FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN favorite_quizzes ON quizzes.id = favorite_quizzes.quiz_id WHERE quizzes.status = 'ACTIVE' GROUP BY quizzes.id, categories.id ORDER BY counter DESC LIMIT ?";
     private final static String FILTER_QUIZZES_CREATED_BY_USER = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE author = ? AND (status<>'DELETED' AND status<>'DEACTIVATED') AND (quizzes.name ~* ? OR categories.name ~* ? OR date::text ~* ?)";
-    private final static String FILTER_FAVORITE_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN favorite_quizzes ON quizzes.id = quiz_id WHERE user_id = ? AND (quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(name, ' ', surname) ~*? OR date::text ~* ?)";
+    private final static String FILTER_FAVORITE_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN favorite_quizzes ON quizzes.id = quiz_id WHERE user_id = ? AND (quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(name, ' ') ~*? OR date::text ~* ?)";
+//    private final static String FILTER_FAVORITE_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN favorite_quizzes ON quizzes.id = quiz_id WHERE user_id = ? AND (quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(name, ' ', surname) ~*? OR date::text ~* ?)";
 
     private final static String IS_FAVORITE_QUIZ = "select * from favorite_quizzes WHERE quiz_id = ? AND user_id = ?";
     private final static String MARK_QUIZ_AS_FAVORITE = "INSERT INTO favorite_quizzes (user_id, quiz_id) VALUES(?, ?) ";
@@ -84,6 +89,14 @@ public class QuizDao {
 
     private final static String UPDATE_QUIZ_STATUS = "UPDATE quizzes SET status='ACTIVE' WHERE id = ?";
     private final static String UPDATE_QUIZ_MODERATOR_COMMENT = "UPDATE quizzes SET moderator_comment = ? where id = ?";
+
+    private final static String ADD_MODERATOR_QUIZ = "INSERT INTO moderators_quizzes (moderator_id, quiz_id, assignment_date) VALUES (?,?,CURRENT_DATE)";
+    private final static String GET_MODERATORS_QUIZZES= "SELECT quiz.date quizDate, quiz.authorName authorName, quiz.authorEmail authorEmail, quiz.authorSurname authorSurname, quiz.quizId id, quiz.quizName quizName, quiz.category category\n" +
+            "FROM (SELECT users.name authorName, users.surname authorSurname, users.email authorEmail, q.id quizId, q.name quizName, q.date, category\n" +
+            "      FROM (SELECT q.id, q.name, q.author, q.date, c.name category\n" +
+            "            FROM quizzes q INNER JOIN categories c ON q.category_id = c.id) q\n" +
+            "               INNER JOIN users ON users.id=q.author) quiz INNER JOIN moderators_quizzes on quiz_id=quiz.quizId where moderator_id = ?";
+    private final static String GET_FILTERED_PENDING_QUIZZES ="SELECT quizzes.id id, quizzes.name quizName, date quizDate, categories.name AS category, users.name AS authorName, users.surname AS authorSurname, users.email AS authorEmail FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN users ON quizzes.author = users.id WHERE quizzes.status='PENDING' and (quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(users.name, ' ', surname) ~*? OR date::text ~* ?)";
     public List<Quiz> getGamesCreatedByUser(int userId) {
 
         List<Quiz> quizzesCreatedByUser = jdbcTemplate.query(GET_GAMES_CREATED_BY_USER_ID, new Object[]{userId}, new QuizMapper());
@@ -112,18 +125,18 @@ public class QuizDao {
                 GET_QUIZZES_BY_STATUS_NAME,
                 new Object[]{status.toString()}, (resultSet, i) -> {
                     QuizDto quiz = new QuizDto();
-                    quiz.setName(resultSet.getString("qname"));
-                    quiz.setCategory_id(resultSet.getInt("qcategoryid"));
-                    quiz.setStatus(StatusType.valueOf(resultSet.getString("qstatus")));
-                    quiz.setCategory(resultSet.getString("cname"));
-                    quiz.setId(resultSet.getInt("qid"));
-                    quiz.setAuthor(resultSet.getInt("qauthor"));
-                    quiz.setAuthorName(resultSet.getString("uname"));
-                    quiz.setAuthorSurname(resultSet.getString("usurname"));
-                    quiz.setAuthorEmail(resultSet.getString("uemail"));
-                    quiz.setDate(resultSet.getDate("qdate"));
-                    quiz.setDescription(resultSet.getString("qdescription"));
-                    quiz.setModificationTime(resultSet.getTimestamp("qmodificationtime"));
+                    quiz.setName(resultSet.getString("quizName"));
+                    quiz.setCategory_id(resultSet.getInt("quizCategoryId"));
+                    quiz.setStatus(StatusType.valueOf(resultSet.getString("quizStatus")));
+                    quiz.setCategory(resultSet.getString("category"));
+                    quiz.setId(resultSet.getInt("id"));
+                    quiz.setAuthor(resultSet.getInt("authorId"));
+                    quiz.setAuthorName(resultSet.getString("authorName"));
+                    quiz.setAuthorSurname(resultSet.getString("authorSurname"));
+                    quiz.setAuthorEmail(resultSet.getString("authorEmail"));
+                    quiz.setDate(resultSet.getDate("quizDate"));
+                    quiz.setDescription(resultSet.getString("quizDescription"));
+                    quiz.setModificationTime(resultSet.getTimestamp("quizModTime"));
 
                     return quiz;
                 });
@@ -172,6 +185,7 @@ public class QuizDao {
                         quiz.setDate(resultSet.getDate("qdate"));
                         quiz.setDescription(resultSet.getString("qdescription"));
                         quiz.setModificationTime(resultSet.getTimestamp("qmodificationtime"));
+                        quiz.setModeratorComment((resultSet.getString("qcomment")));
 
                         return quiz;
                     }
@@ -274,13 +288,6 @@ public class QuizDao {
             quizzesByCategory.forEach(quiz -> quiz.setTags(getQuizTags(quiz.getId())));
             quizzesByCategory.forEach(quiz -> quiz.setFavorite(isQuizFavorite(quiz.getId(), userId)));
         }
-
-
-
-
-
-
-
         return quizzesByCategory;
     }
 
@@ -552,6 +559,7 @@ public class QuizDao {
         int affectedNumberOfRows = jdbcTemplate.update(UPDATE_QUIZ_MODERATOR_COMMENT,comment, id);
         return affectedNumberOfRows > 0;
     }
+
     public List<Quiz> searchInFavoriteQuizzes(int userId, String userSearch) {
         List<Quiz> quizzes = jdbcTemplate.query(
                 FILTER_FAVORITE_QUIZZES,
@@ -565,5 +573,58 @@ public class QuizDao {
         return quizzes;
     }
 
-}
+    public boolean assignModeratorById(int quizId, int moderatorId) {
+        int affectedNumberOfRows = jdbcTemplate.update(ADD_MODERATOR_QUIZ,moderatorId, quizId);
+        return affectedNumberOfRows > 0;
+    }
 
+    public List<QuizDto> getModeratorQuizzes(int moderatorId) {
+        List<QuizDto> quizDtos = jdbcTemplate.query(
+                GET_MODERATORS_QUIZZES,
+                new Object[]{moderatorId}, (resultSet, i) -> {
+                    QuizDto quiz = new QuizDto();
+                    quiz.setName(resultSet.getString("quizName"));
+                    quiz.setId(resultSet.getInt("id"));
+                    quiz.setDate(resultSet.getDate("quizDate"));
+                    quiz.setAuthorName(resultSet.getString("authorName"));
+                    quiz.setAuthorSurname(resultSet.getString("authorSurname"));
+                    quiz.setAuthorEmail(resultSet.getString("authorEmail"));
+                    quiz.setCategory(resultSet.getString("category"));
+
+                    return quiz;
+                });
+
+        if (quizDtos.isEmpty()) {
+            return null;
+        }
+
+        return quizDtos;
+    }
+
+    public List<QuizDto> getPendingQuizzesByFilter(String searchText) {
+        List<QuizDto> getFilteredQuizzes = jdbcTemplate.query(
+                GET_FILTERED_PENDING_QUIZZES,
+                new Object[]{searchText, searchText, searchText, searchText}, (resultSet, i) -> {
+                    QuizDto quiz = new QuizDto();
+                    quiz.setName(resultSet.getString("quizName"));
+                    quiz.setId(resultSet.getInt("id"));
+                    quiz.setDate(resultSet.getDate("quizDate"));
+                    quiz.setAuthorName(resultSet.getString("authorName"));
+                    quiz.setAuthorSurname(resultSet.getString("authorSurname"));
+                    quiz.setAuthorEmail(resultSet.getString("authorEmail"));
+                    quiz.setCategory(resultSet.getString("category"));
+
+                    return quiz;
+                });
+        if (getFilteredQuizzes.isEmpty()) {
+            return null;
+        }
+        getFilteredQuizzes = getFilteredQuizzes.stream().distinct().collect(Collectors.toList());
+
+        return getFilteredQuizzes;
+    }
+
+    public void unsignQuizById(int id) {
+        jdbcTemplate.update(DELETE_MODERATOR_QUIZ,id);
+    }
+}

@@ -42,4 +42,8 @@ public class QuizCheckService {
     public boolean updateCommentById(int id, String comment) {
         return quizDao.updateCommentById(id, comment);
     }
+
+    public boolean assignModerator(int quizId, int moderatorId) {
+        return quizDao.assignModeratorById(quizId, moderatorId);
+    }
 }

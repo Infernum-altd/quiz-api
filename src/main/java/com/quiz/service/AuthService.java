@@ -37,7 +37,11 @@ public class AuthService {
         if (userdb == null) {
             throw new NotFoundException("user", "email", user.getEmail());
         }
-        if(!passwordEncoder.matches(user.getPassword(), userdb.getPassword())){
+//        if(!passwordEncoder.matches(user.getPassword(), userdb.getPassword())){
+//            throw new PasswordException();
+//        }
+
+        if(!user.getPassword().equals(userdb.getPassword())){
             throw new PasswordException();
         }
         return tokenProvider.createToken(userdb.getEmail());

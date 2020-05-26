@@ -23,4 +23,5 @@ public class Quiz {
     private String category;
     private boolean isFavorite;
     private List<String> tags;
+
 }
