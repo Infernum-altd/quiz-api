@@ -5,7 +5,10 @@ import com.quiz.dto.QuizDto;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.StatusType;
 import com.quiz.exceptions.DatabaseException;
+import com.quiz.entities.StatusType;
+import com.quiz.exceptions.DatabaseException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -13,23 +16,33 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
 
 import java.util.List;
+
+import static com.quiz.dao.mapper.QuizMapper.*;
+import static com.quiz.dao.mapper.QuizMapper.QUIZ_MODIFICATION_TIME;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.quiz.dao.mapper.QuizMapper.*;
+import java.util.Objects;
 
+import static com.quiz.dao.mapper.QuizMapper.*;
+import static com.quiz.dao.mapper.UserMapper.*;
 
 @Repository
 @RequiredArgsConstructor
 public class QuizDao {
 
     private final JdbcTemplate jdbcTemplate;
+
+    private final static String GET_QUIZZES_BY_STATUS_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.status = ?::status_type) sq INNER JOIN users u on sq.qauthor = u.id";
+    private final static String GET_QUIZ_BY_ID_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.id = ?) sq INNER JOIN users u on sq.qauthor = u.id";
 
     private final static String GET_QUIZZES_BY_STATUS = "SELECT * FROM quizzes WHERE status = ?::status_type";
     private final static String GET_ALL_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE quizzes.status = 'ACTIVE' LIMIT ? OFFSET ?";
@@ -40,7 +53,7 @@ public class QuizDao {
     private final static String GET_QUIZZES_BY_TAG = "SELECT * FROM quizzes INNER JOIN quizzes_tags on id = quiz_id where tag_id = ?";
     private final static String GET_QUIZZES_BY_NAME = "SELECT * FROM quizzes WHERE name LIKE ?";
     private final static String GET_QUIZ_IMAGE_BY_QUIZ_ID = "SELECT image FROM quizzes WHERE id = ?";
-    private final static String INSERT_QUIZ = "INSERT INTO quizzes (name , author, category_id, date, description,status, modification_time) VALUES (?,?,?,?,?,?::status_type,?)";
+    private final static String INSERT_QUIZ = "INSERT INTO quizzes (name , author, category_id, date, description,status, modification_time) VALUES (?,?,?,?,?,CAST(? AS status_type),?)";
     private final static String ADD_TAG_TO_QUIZ = "INSERT INTO quizzes_tags (quiz_id, tag_id) VALUES (?,?)";
     private final static String UPDATE_QUIZ = "UPDATE quizzes SET name = ?, author = ?, category_id = ?, date = ?, description = ?, status = ?::status_type, modification_time = ? WHERE id = ?";
     private final static String UPDATE_QUIZ_IMAGE = "UPDATE quizzes SET image = ? WHERE id = ?";
@@ -67,12 +80,12 @@ public class QuizDao {
     private final static String GET_GAMES_CREATED_BY_USER_ID = "SELECT * FROM quizzes WHERE author = ?";
     private final static String GET_FAVORITE_GAMES_BY_USER_ID = "SELECT * FROM quizzes INNER JOIN favorite_quizzes ON id = quiz_id WHERE user_id = ?";
     private final static String GET_QUIZ_CATEGORY_BY_CATEGORY_ID = "SELECT name FROM categories WHERE id = ?";
-    private final static String GET_QUIZZES_BY_STATUS_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.status = ?::status_type) sq INNER JOIN users u on sq.qauthor = u.id";
-    private final static String GET_QUIZ_BY_ID_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.id = ?) sq INNER JOIN users u on sq.qauthor = u.id";
 
     private static final String COUNT_NUMBER_OF_PLAYED_GAMES = "SELECT COUNT(*) FROM quizzes WHERE status='ACTIVE'";
 
 
+    private final static String UPDATE_QUIZ_STATUS = "UPDATE quizzes SET status='ACTIVE' WHERE id = ?";
+    private final static String UPDATE_QUIZ_MODERATOR_COMMENT = "UPDATE quizzes SET moderator_comment = ? where id = ?";
     public List<Quiz> getGamesCreatedByUser(int userId) {
 
         List<Quiz> quizzesCreatedByUser = jdbcTemplate.query(GET_GAMES_CREATED_BY_USER_ID, new Object[]{userId}, new QuizMapper());
@@ -158,6 +171,37 @@ public class QuizDao {
                 return null;
             }
         } catch (DataAccessException e) {
+            throw new DatabaseException(String.format("Find quiz by id '%s' database error occured", id));
+        }
+
+        return quizzes.get(0);
+    }
+
+    public Quiz findById(int id) {
+        List<Quiz> quizzes;
+
+        try {
+            quizzes = jdbcTemplate.query(
+                    GET_QUIZ_BY_ID,
+                    new Object[]{id}, (resultSet, i) -> {
+                        Quiz quiz = new Quiz();
+
+                        quiz.setId(resultSet.getInt(QUIZ_ID));
+                        quiz.setName(resultSet.getString(QUIZ_NAME));
+                        quiz.setAuthor(resultSet.getInt(QUIZ_AUTHOR));
+                        quiz.setCategory_id(resultSet.getInt(QUIZ_CATEGORY));
+                        quiz.setDate(resultSet.getDate(QUIZ_DATE));
+                        quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
+                        quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
+                        quiz.setModificationTime(resultSet.getTimestamp(QUIZ_MODIFICATION_TIME));
+                        return quiz;
+                    }
+            );
+            if (quizzes.isEmpty()) {
+                return null;
+            }
+        } catch (DataAccessException e) {
+            // TODO: 09.04.2020  check message
             throw new DatabaseException(String.format("Find quiz by id '%s' database error occured", id));
         }
 
@@ -483,6 +527,14 @@ public class QuizDao {
         return quizzes;
     }
 
+    public boolean updateStatusById(int id, String status) {
+        int affectedNumberOfRows = jdbcTemplate.update(UPDATE_QUIZ_STATUS, id);
+        return affectedNumberOfRows > 0;
+    }
+    public boolean updateCommentById(int id, String comment) {
+        int affectedNumberOfRows = jdbcTemplate.update(UPDATE_QUIZ_MODERATOR_COMMENT,comment, id);
+        return affectedNumberOfRows > 0;
+    }
     public List<Quiz> searchInFavoriteQuizzes(int userId, String userSearch) {
         List<Quiz> quizzes = jdbcTemplate.query(
                 FILTER_FAVORITE_QUIZZES,

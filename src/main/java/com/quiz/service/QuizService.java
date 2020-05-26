@@ -26,7 +26,11 @@ public class QuizService {
         return quizDao.getAllQuizzes(pageSize, pageNumber, userId);
     }
 
-    public QuizDto findQuizById(int id) {
+    public QuizDto findQuizInfoById(int id) {
+        return quizDao.findInfoById(id);
+    }
+
+    public Quiz findQuizById(int id) {
         return quizDao.findById(id);
     }
 

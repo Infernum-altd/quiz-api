@@ -1,12 +1,14 @@
 package com.quiz.controllers;
 
 
+import com.quiz.dto.QuizCheckDto;
 import com.quiz.dto.QuizDto;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.ResponcePaginatedList;
 import com.quiz.entities.ResponseText;
 import com.quiz.service.PaginationService;
 import com.quiz.entities.StatusType;
+import com.quiz.service.QuizCheckService;
 import com.quiz.service.QuizService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,9 +28,18 @@ public class SharingQuizController {
     @Autowired
     PaginationService paginationService;
 
+    @GetMapping("/quizCheck/{quizId}")
+    public ResponseEntity<QuizCheckDto> getQuizCheck(@PathVariable int quizId) {
+        return ResponseEntity.ok(quizCheckService.getQuizCheck(quizId));
+    }
+
     @GetMapping("/{quizId}")
-    public ResponseEntity<QuizDto> getQuiz(@PathVariable int quizId) {
+    public ResponseEntity<Quiz> getQuiz(@PathVariable int quizId) {
         return ResponseEntity.ok(quizService.findQuizById(quizId));
+    }
+    @GetMapping("/info/{quizId}")
+    public ResponseEntity<QuizDto> getQuizInfo(@PathVariable int quizId) {
+        return ResponseEntity.ok(quizService.findQuizInfoById(quizId));
     }
 
     @GetMapping("/{pageSize}/{pageNumber}/{userId}")

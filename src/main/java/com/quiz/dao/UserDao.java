@@ -1,5 +1,7 @@
 package com.quiz.dao;
 
+import static com.quiz.dao.mapper.UserMapper.*;
+
 import com.quiz.dao.mapper.UserMapper;
 import com.quiz.entities.Gender;
 import com.quiz.entities.NotificationStatus;
@@ -26,7 +28,7 @@ import static com.quiz.dao.mapper.UserMapper.*;
 public class UserDao {
 
     private final JdbcTemplate jdbcTemplate;
-
+    private final static String GET_USER_ROLE_BY_EMAIL = "SELECT role FROM users WHERE email = ?";
     private final static String USER_FIND_BY_EMAIL = "SELECT id, email, password FROM users WHERE email = ?";
     private final static String USER_FIND_BY_ID = "SELECT id,email,name, surname,password FROM users WHERE id = ?";
     private final static String USER_GET_ALL_FOR_PROFILE_BY_ID = "SELECT id, email, name, surname, birthdate, gender, city, about, role FROM users WHERE id = ?";
@@ -52,6 +54,7 @@ public class UserDao {
     private final static String FIND_ADMINS_USERS = "SELECT id,email,name,surname,role,active FROM users WHERE role = 'ADMIN' OR role = 'MODERATOR' OR role = 'SUPER_ADMIN'";
     private final static String DELETE_USER = "DELETE FROM users WHERE id = ?";
     private final static String GET_USER_ROLE_BY_EMAIL = "SELECT role FROM users WHERE email = ?";
+    private final static String DELETE_USER="DELETE FROM users WHERE id = ?";
 
     public User findByEmail(String email) {
         List<User> users;
@@ -224,6 +227,11 @@ public class UserDao {
 
         return id.get(0);
     }
+    public String getUserRoleByEmail(String email) {
+        List<String> role = jdbcTemplate.query(GET_USER_ROLE_BY_EMAIL, new Object[]{email}, (resultSet, i) -> resultSet.getString("role"));
+
+        return role.get(0);
+    }
 
     public boolean updateProfileImage(String imageUrl, int userId) {
 
@@ -305,11 +313,5 @@ public class UserDao {
 
     public void deleteUserById(int id) {
         jdbcTemplate.update(DELETE_USER, id);
-    }
-
-    public String getUserRoleByEmail(String email) {
-        List<String> role = jdbcTemplate.query(GET_USER_ROLE_BY_EMAIL, new Object[]{email}, (resultSet, i) -> resultSet.getString("role"));
-
-        return role.get(0);
     }
 }
