@@ -3,6 +3,7 @@ package com.quiz.service;
 import com.quiz.dao.QuizDao;
 import com.quiz.dto.QuizDto;
 import com.quiz.entities.Quiz;
+import com.quiz.entities.RejectMessage;
 import com.quiz.entities.StatusType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,4 +133,12 @@ public class QuizService {
     }
 
     public void unsignQuizById(int id) { quizDao.unsignQuizById(id); }
+
+    public List<Quiz> getRejectedQuizzesByUserId(int userId, String sort) {
+        return quizDao.getRejectedQuizzesByUserId(userId, sort);
+    }
+
+    public List<RejectMessage> getRejectMessages(int quizId) {
+        return quizDao.getRejectMessages(quizId);
+    }
 }

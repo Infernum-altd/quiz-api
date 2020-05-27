@@ -4,6 +4,7 @@ import com.quiz.dao.mapper.AdminUserMapper;
 import com.quiz.dao.mapper.QuizMapper;
 import com.quiz.dto.QuizDto;
 import com.quiz.entities.Quiz;
+import com.quiz.entities.RejectMessage;
 import com.quiz.entities.StatusType;
 import com.quiz.entities.User;
 import com.quiz.exceptions.DatabaseException;
@@ -44,7 +45,9 @@ public class QuizDao {
     private final static String GET_QUIZZES_BY_STATUS = "SELECT * FROM quizzes WHERE status = ?::status_type";
     private final static String GET_ALL_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE quizzes.status = 'ACTIVE' LIMIT ? OFFSET ?";
     private final static String GET_QUIZ_BY_ID = "SELECT * FROM quizzes WHERE id = ?";
-    private final static String GET_QUIZZES_CREATED_BY_USER_ID = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE author = ? AND (status<>'DELETED' AND status<>'DEACTIVATED')";
+    private final static String GET_QUIZZES_CREATED_BY_USER_ID = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category " +
+            "FROM quizzes INNER JOIN categories ON categories.id = category_id " +
+            "WHERE author = ? AND (status<>'DELETED' AND status<>'DEACTIVATED')";
     private final static String GET_FAVORITE_QUIZZES_BY_USER_ID = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN favorite_quizzes ON quizzes.id = quiz_id WHERE user_id = ?";
     private final static String GET_QUIZZES_BY_CATEGORY_ID = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE (category_id = ?) AND (quizzes.status = 'ACTIVE')";
     private final static String GET_QUIZZES_BY_TAG = "SELECT * FROM quizzes INNER JOIN quizzes_tags on id = quiz_id where tag_id = ?";
@@ -91,6 +94,12 @@ public class QuizDao {
             "            FROM quizzes q INNER JOIN categories c ON q.category_id = c.id) q\n" +
             "               INNER JOIN users ON users.id=q.author) quiz INNER JOIN moderators_quizzes on quiz_id=quiz.quizId where moderator_id = ?";
     private final static String GET_FILTERED_PENDING_QUIZZES ="SELECT quizzes.id id, quizzes.name quizName, date quizDate, categories.name AS category, users.name AS authorName, users.surname AS authorSurname, users.email AS authorEmail FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN users ON quizzes.author = users.id WHERE quizzes.status='PENDING' and (quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(users.name, ' ', surname) ~*? OR date::text ~* ?)";
+
+    private final static String GET_REJECTED_QUIZZES_CREATED_BY_USER_ID = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category " +
+            "FROM quizzes INNER JOIN categories ON categories.id = category_id " +
+            "WHERE author = ? AND status = 'DEACTIVATED'";
+    private final static String GET_REJECTED_MESSAGES = "SELECT comment, date FROM rejected_message WHERE quiz_id = ? ORDER BY date desc";
+
     public List<Quiz> getGamesCreatedByUser(int userId) {
 
         List<Quiz> quizzesCreatedByUser = jdbcTemplate.query(GET_GAMES_CREATED_BY_USER_ID, new Object[]{userId}, new QuizMapper());
@@ -610,5 +619,24 @@ public class QuizDao {
 
     public void unsignQuizById(int id) {
         jdbcTemplate.update(DELETE_MODERATOR_QUIZ,id);
+    }
+
+    public List<Quiz> getRejectedQuizzesByUserId(int userId, String sort) {
+        List<Quiz> quizzesCreatedByUser = jdbcTemplate.query(
+                sort.isEmpty() ? GET_REJECTED_QUIZZES_CREATED_BY_USER_ID : GET_REJECTED_QUIZZES_CREATED_BY_USER_ID + "ORDER BY " + sort,
+                new Object[]{userId},
+                new QuizMapper());
+
+        if (quizzesCreatedByUser.isEmpty()){
+            return null;
+        }
+
+        return quizzesCreatedByUser;
+    }
+
+    public List<RejectMessage> getRejectMessages(int quizId) {
+        return jdbcTemplate.query(GET_REJECTED_MESSAGES,
+                new Object[]{quizId},
+                ((resultSet, i) -> new RejectMessage(resultSet.getString("comment"), resultSet.getDate("date"))));
     }
 }

@@ -43,8 +43,8 @@ public class GameService {
         return gameId;
     }
 
-    private int createGame(int quizId, int hostId, int questionTimer, int max_users_number) {
-        return gameDao.insertGame(quizId, hostId, questionTimer, max_users_number);
+    private int createGame(int quizId, int hostId, int questionTimer, int maxUsersNumber) {
+        return gameDao.insertGame(quizId, hostId, questionTimer, maxUsersNumber);
     }
 
     private Map<Integer, Question> questionsToMap(List<Question> questions) {
