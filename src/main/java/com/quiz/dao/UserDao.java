@@ -134,8 +134,7 @@ public class UserDao {
         try {
             jdbcTemplate.update(INSERT_USER, entity.getEmail(), entity.getPassword(), entity.getRole().toString());
         } catch (DataAccessException e) {
-            e.printStackTrace();
-            //throw new DatabaseException("Database access exception while user insert");
+            throw new DatabaseException("Database access exception while user insert");
         }
 
         return entity;
