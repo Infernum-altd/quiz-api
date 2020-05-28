@@ -51,9 +51,7 @@ public class UserService {
                     user.getPassword()
             );
             mailSender.send(user.getEmail(),"Activation code",message);
-
         }
-
         return new UserDto(user);
     }
 

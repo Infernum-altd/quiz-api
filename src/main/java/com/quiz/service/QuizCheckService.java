@@ -6,12 +6,12 @@ import com.quiz.dao.QuizDao;
 import com.quiz.dto.QuestionCheckDto;
 import com.quiz.dto.QuizCheckDto;
 import com.quiz.dto.QuizDto;
+import com.quiz.dto.ModeratorCommentDto;
 import com.quiz.entities.Answer;
+import com.quiz.entities.ModeratorComment;
 import com.quiz.entities.Question;
-import com.quiz.entities.Quiz;
+import com.quiz.entities.StatusType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -33,17 +33,20 @@ public class QuizCheckService {
             QuestionCheckDto questionDto = new QuestionCheckDto(question, answers);
             questionCheckDto.add(questionDto);
         }
-        QuizDto quizDto = null;//quizDao.findInfoById(id);
+        QuizDto quizDto = quizDao.findInfoById(id);
          return new QuizCheckDto(quizDto, questionCheckDto);
     }
-    public boolean updateStatusById(int id, String status) {
+    public boolean updateStatusById(int id, StatusType status) {
         return quizDao.updateStatusById(id, status);
     }
-    public boolean updateCommentById(int id, String comment) {
-        return quizDao.updateCommentById(id, comment);
+    public ModeratorComment addCommentByQuizId(ModeratorComment comment) {
+        return quizDao.addCommentByQuizId(comment);
     }
 
     public boolean assignModerator(int quizId, int moderatorId) {
         return quizDao.assignModeratorById(quizId, moderatorId);
+    }
+    public List<ModeratorCommentDto> getCommentHistory(int quizId) {
+        return quizDao.getCommentHistory(quizId);
     }
 }

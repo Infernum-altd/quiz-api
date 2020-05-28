@@ -3,6 +3,7 @@ package com.quiz.controllers;
 
 import com.quiz.dto.QuizCheckDto;
 import com.quiz.dto.QuizDto;
+import com.quiz.dto.ModeratorCommentDto;
 import com.quiz.entities.*;
 import com.quiz.service.PaginationService;
 import com.quiz.entities.StatusType;
@@ -34,7 +35,7 @@ public class SharingQuizController {
     }
 
     @GetMapping("/{quizId}")
-    public ResponseEntity<QuizDto> getQuiz(@PathVariable int quizId) {
+    public ResponseEntity<Quiz> getQuiz(@PathVariable int quizId) {
         return ResponseEntity.ok(quizService.findQuizById(quizId));
     }
     @GetMapping("/info/{quizId}")
@@ -162,8 +163,8 @@ public class SharingQuizController {
         return ResponseEntity.ok(new ResponcePaginatedList<QuizDto>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
-    @PostMapping("updateActive/{quizId}")
-    public ResponseEntity<String> updateStatus(@RequestBody String status, @PathVariable int quizId){
+    @PostMapping("update/status/{quizId}")
+    public ResponseEntity<String> updateStatus(@RequestBody StatusType status, @PathVariable int quizId){
         boolean isRecordAffected = quizCheckService.updateStatusById(quizId, status);
 
         if (isRecordAffected){
@@ -181,14 +182,11 @@ public class SharingQuizController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-    @PostMapping("updateComment/{quizId}")
-    public ResponseEntity<String> updateComment(@RequestBody String comment, @PathVariable int quizId){
-        boolean isRecordAffected = quizCheckService.updateCommentById(quizId, comment);
-
-        if (isRecordAffected){
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    @PostMapping("/addComment")
+    public ResponseEntity<ModeratorComment> addComment(@RequestBody ModeratorComment comment){
+        quizCheckService.updateStatusById(comment.getQuizId(),StatusType.DEACTIVATED);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(quizCheckService.addCommentByQuizId(comment));
     }
 
     @GetMapping("/moderatorQuizzes/{moderatorId}/{pageSize}/{pageNumber}")
@@ -206,5 +204,10 @@ public class SharingQuizController {
     @DeleteMapping("/unsign/{quizId}")
     void unsignQuizById(@PathVariable int quizId) {
         quizService.unsignQuizById(quizId);
+    }
+
+    @GetMapping("comments/{quizId}")
+    public ResponseEntity<List<ModeratorCommentDto>> getCommentHistory(@PathVariable int quizId){
+        return ResponseEntity.ok(quizCheckService.getCommentHistory(quizId));
     }
 }

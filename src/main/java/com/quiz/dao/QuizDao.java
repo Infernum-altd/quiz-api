@@ -1,11 +1,11 @@
 package com.quiz.dao;
 
-import com.quiz.dao.mapper.AdminUserMapper;
 import com.quiz.dao.mapper.QuizMapper;
 import com.quiz.dto.QuizDto;
+import com.quiz.dto.ModeratorCommentDto;
+import com.quiz.entities.ModeratorComment;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.StatusType;
-import com.quiz.entities.User;
 import com.quiz.exceptions.DatabaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
@@ -21,8 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import static com.quiz.dao.mapper.QuizMapper.*;
@@ -81,8 +79,8 @@ public class QuizDao {
     private static final String COUNT_NUMBER_OF_PLAYED_GAMES = "SELECT COUNT(*) FROM quizzes WHERE status='ACTIVE'";
 
 
-    private final static String UPDATE_QUIZ_STATUS = "UPDATE quizzes SET status='ACTIVE' WHERE id = ?";
-    private final static String UPDATE_QUIZ_MODERATOR_COMMENT = "UPDATE quizzes SET moderator_comment = ? where id = ?";
+    private final static String UPDATE_QUIZ_STATUS = "UPDATE quizzes SET status=?::status_type WHERE id = ?";
+    private final static String ADD_MODERATOR_COMMENT = "INSERT INTO rejected_message (quiz_id, moderator_id, comment, date)  VALUES(?,?,?,?)";
 
     private final static String ADD_MODERATOR_QUIZ = "INSERT INTO moderators_quizzes (moderator_id, quiz_id, assignment_date) VALUES (?,?,CURRENT_DATE)";
     private final static String GET_MODERATORS_QUIZZES= "SELECT quiz.date quizDate, quiz.authorName authorName, quiz.authorEmail authorEmail, quiz.authorSurname authorSurname, quiz.quizId id, quiz.quizName quizName, quiz.category category\n" +
@@ -91,6 +89,8 @@ public class QuizDao {
             "            FROM quizzes q INNER JOIN categories c ON q.category_id = c.id) q\n" +
             "               INNER JOIN users ON users.id=q.author) quiz INNER JOIN moderators_quizzes on quiz_id=quiz.quizId where moderator_id = ?";
     private final static String GET_FILTERED_PENDING_QUIZZES ="SELECT quizzes.id id, quizzes.name quizName, date quizDate, categories.name AS category, users.name AS authorName, users.surname AS authorSurname, users.email AS authorEmail FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN users ON quizzes.author = users.id WHERE quizzes.status='PENDING' and (quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(users.name, ' ', surname) ~*? OR date::text ~* ?)";
+    private final static String GET_COMMENTS = "SELECT r.comment commentText, r.date commentDate, r.quiz_id quizId,r.moderator_id moderatorId, u.email moderatorEmail, u.name moderatorName, u.surname moderatorSurname from rejected_message r inner join users u on r.moderator_id = u.id where r.quiz_id = ?";
+
     public List<Quiz> getGamesCreatedByUser(int userId) {
 
         List<Quiz> quizzesCreatedByUser = jdbcTemplate.query(GET_GAMES_CREATED_BY_USER_ID, new Object[]{userId}, new QuizMapper());
@@ -531,13 +531,27 @@ public class QuizDao {
         return quizzes;
     }
 
-    public boolean updateStatusById(int id, String status) {
-        int affectedNumberOfRows = jdbcTemplate.update(UPDATE_QUIZ_STATUS, id);
+    public boolean updateStatusById(int id, StatusType status) {
+        int affectedNumberOfRows = jdbcTemplate.update(UPDATE_QUIZ_STATUS, status.toString(),id);
         return affectedNumberOfRows > 0;
     }
-    public boolean updateCommentById(int id, String comment) {
-        int affectedNumberOfRows = jdbcTemplate.update(UPDATE_QUIZ_MODERATOR_COMMENT,comment, id);
-        return affectedNumberOfRows > 0;
+    public ModeratorComment addCommentByQuizId(ModeratorComment comment) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        try {
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection
+                        .prepareStatement(ADD_MODERATOR_COMMENT, new String[]{"id"});
+                ps.setInt(1, comment.getQuizId());
+                ps.setInt(2, comment.getModeratorId());
+                ps.setString(3, comment.getComment());
+                ps.setDate(4, comment.getCommentDate());
+                return ps;
+            }, keyHolder);
+        } catch (DataAccessException e) {
+            throw new DatabaseException("Database access exception while comment insert");
+        }
+        comment.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
+        return comment;
     }
     public List<Quiz> searchInFavoriteQuizzes(int userId, String userSearch) {
         List<Quiz> quizzes = jdbcTemplate.query(
@@ -610,5 +624,25 @@ public class QuizDao {
 
     public void unsignQuizById(int id) {
         jdbcTemplate.update(DELETE_MODERATOR_QUIZ,id);
+    }
+
+    public List<ModeratorCommentDto> getCommentHistory (int quizId) {
+        List<ModeratorCommentDto> comments = jdbcTemplate.query(
+                    GET_COMMENTS,
+                    new Object[]{quizId}, (resultSet, i) -> {
+                    ModeratorCommentDto comment = new ModeratorCommentDto();
+                    comment.setQuizId(resultSet.getInt("quizId"));
+                    comment.setComment(resultSet.getString("commentText"));
+                    comment.setCommentDate(resultSet.getDate("commentDate"));
+                    comment.setModeratorId(resultSet.getInt("moderatorId"));
+                    comment.setModeratorName(resultSet.getString("moderatorName"));
+                    comment.setModeratorSurname(resultSet.getString("moderatorSurname"));
+                    comment.setModeratorEmail(resultSet.getString("moderatorEmail"));
+                    return comment;
+                });
+        if (comments.isEmpty()) {
+                return null;
+            }
+        return comments;
     }
 }

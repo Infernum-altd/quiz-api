@@ -40,7 +40,6 @@ public class AuthFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    // TODO: 09.04.2020 create const
     private String getToken(HttpServletRequest request) {
 
         String token = request.getHeader("authorization");
