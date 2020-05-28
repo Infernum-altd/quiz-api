@@ -85,7 +85,6 @@ public class TagDao {
     @Transactional
     public Tag insert(Tag entity) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-
         try {
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection

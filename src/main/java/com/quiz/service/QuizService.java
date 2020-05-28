@@ -141,4 +141,8 @@ public class QuizService {
     public List<RejectMessage> getRejectMessages(int quizId) {
         return quizDao.getRejectMessages(quizId);
     }
+
+    public void unsignAllModeratorQuizById(int moderatorId) {
+        quizDao.unsignAllQuizById(moderatorId);
+    }
 }

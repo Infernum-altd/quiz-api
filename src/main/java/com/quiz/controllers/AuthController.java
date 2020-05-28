@@ -28,7 +28,6 @@ public class AuthController {
                 .body(authService.register(user));
     }
 
-    // TODO: 09.04.2020 dto for login
     @PostMapping(value ="/login",  produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseToken login(@RequestBody User user) {

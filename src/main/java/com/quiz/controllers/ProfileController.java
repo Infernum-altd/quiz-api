@@ -2,6 +2,7 @@ package com.quiz.controllers;
 
 import com.quiz.dao.GameDao;
 import com.quiz.dto.GameDto;
+import com.quiz.dto.QuizDto;
 import com.quiz.entities.*;
 import com.quiz.service.PaginationService;
 import com.quiz.entities.Quiz;
@@ -220,5 +221,10 @@ public class ProfileController {
     @GetMapping("/rejectMessage/{quizId}")
     public ResponseEntity<List<RejectMessage>> getRejectMessage(@PathVariable int quizId) {
         return ResponseEntity.ok(quizService.getRejectMessages(quizId));
+    }
+
+    @GetMapping("/moderatorQuizzes/{moderatorId}")
+    public ResponseEntity<List<QuizDto>> getModeratorAssignment(@PathVariable int moderatorId){
+        return ResponseEntity.ok(quizService.getModeratorQuizzes(moderatorId));
     }
 }
