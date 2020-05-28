@@ -195,6 +195,8 @@ public class SharingQuizController {
         return ResponseEntity.ok(new ResponcePaginatedList<QuizDto>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
+
+
     @GetMapping("/filter/{searchText}/{pageSize}/{pageNumber}")
     public ResponseEntity<ResponcePaginatedList<QuizDto>> getFilteredPendingQuizzes(@PathVariable String searchText, @PathVariable int pageSize, @PathVariable int pageNumber){
         List<QuizDto> quizzes =  quizService.getPendingQuizByFilter(searchText);
@@ -204,6 +206,11 @@ public class SharingQuizController {
     @DeleteMapping("/unsign/{quizId}")
     void unsignQuizById(@PathVariable int quizId) {
         quizService.unsignQuizById(quizId);
+    }
+
+    @DeleteMapping("/unsignAll/{moderatorId}")
+    void unsignAllModeratorQuizById(@PathVariable int moderatorId) {
+        quizService.unsignAllModeratorQuizById(moderatorId);
     }
 
     @GetMapping("comments/{quizId}")

@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 public class QuizDao {
 
     private final JdbcTemplate jdbcTemplate;
-    private static final String DELETE_MODERATOR_QUIZ = "DELETE FROM moderators_quizzes WHERE quiz_id = ?" ;
     private final static String GET_QUIZZES_BY_STATUS_NAME = "SELECT * FROM (SELECT quizzes.category_id quizCategoryId, quizzes.modification_time quizModTime, quizzes.date quizDate, quizzes.description quizDescription, quizzes.status quizStatus, quizzes.id id, quizzes.name quizName, date quizDate, categories.name AS category, users.name AS authorName,users.id authorId, users.surname AS authorSurname, users.email AS authorEmail FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN users ON quizzes.author = users.id WHERE quizzes.status = ?::status_type) quizzes WHERE id NOT IN (SELECT quiz_id FROM moderators_quizzes)";
     private final static String GET_QUIZ_BY_ID_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus, sq.qcomment qcomment FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname, q.moderator_comment qcomment FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.id = ?) sq INNER JOIN users u on sq.qauthor = u.id";
 
@@ -90,6 +89,8 @@ public class QuizDao {
             "               INNER JOIN users ON users.id=q.author) quiz INNER JOIN moderators_quizzes on quiz_id=quiz.quizId where moderator_id = ?";
     private final static String GET_FILTERED_PENDING_QUIZZES ="SELECT quizzes.id id, quizzes.name quizName, date quizDate, categories.name AS category, users.name AS authorName, users.surname AS authorSurname, users.email AS authorEmail FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN users ON quizzes.author = users.id WHERE quizzes.status='PENDING' and (quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(users.name, ' ', surname) ~*? OR date::text ~* ?)";
     private final static String GET_COMMENTS = "SELECT r.comment commentText, r.date commentDate, r.quiz_id quizId,r.moderator_id moderatorId, u.email moderatorEmail, u.name moderatorName, u.surname moderatorSurname from rejected_message r inner join users u on r.moderator_id = u.id where r.quiz_id = ?";
+    private static final String DELETE_ALL_MODERATOR_QUIZ = "DELETE FROM moderators_quizzes WHERE moderator_id = ?";
+    private static final String DELETE_MODERATOR_QUIZ = "DELETE FROM moderators_quizzes WHERE quiz_id = ?" ;
 
     public List<Quiz> getGamesCreatedByUser(int userId) {
 
@@ -622,9 +623,7 @@ public class QuizDao {
         return getFilteredQuizzes;
     }
 
-    public void unsignQuizById(int id) {
-        jdbcTemplate.update(DELETE_MODERATOR_QUIZ,id);
-    }
+
 
     public List<ModeratorCommentDto> getCommentHistory (int quizId) {
         List<ModeratorCommentDto> comments = jdbcTemplate.query(
@@ -644,5 +643,13 @@ public class QuizDao {
                 return null;
             }
         return comments;
+    }
+
+    public void unsignQuizById(int id) {
+        jdbcTemplate.update(DELETE_MODERATOR_QUIZ,id);
+    }
+
+    public void unsignAllQuizById(int moderatorId) {
+        jdbcTemplate.update(DELETE_ALL_MODERATOR_QUIZ,moderatorId);
     }
 }

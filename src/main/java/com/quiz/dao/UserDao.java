@@ -146,7 +146,7 @@ public class UserDao {
                 USER_GET_ALL_FOR_PROFILE_BY_ID,
                 new Object[]{id}, (resultSet, i) -> {
                     User user = new User();
-
+                    user.setId(resultSet.getInt(USERS_ID));
                     user.setEmail(resultSet.getString(USERS_EMAIL));
                     user.setName(resultSet.getString(USERS_NAME));
                     user.setSurname(resultSet.getString(USERS_SURNAME));
@@ -232,7 +232,7 @@ public class UserDao {
         }
         return usersByRoleStatus;
     }
-    public List<User> getUsersByFilter(String searchByUser, int userId) {
+    public List<User> getUsersByFilter(String searchByUser) {
         List<User> getFilteredUsers = jdbcTemplate.query(
                 GET_FILTERED_USERS,
                 new Object[]{searchByUser, searchByUser, searchByUser, searchByUser},

@@ -132,4 +132,8 @@ public class QuizService {
     }
 
     public void unsignQuizById(int id) { quizDao.unsignQuizById(id); }
+
+    public void unsignAllModeratorQuizById(int moderatorId) {
+        quizDao.unsignAllQuizById(moderatorId);
+    }
 }

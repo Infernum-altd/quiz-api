@@ -2,6 +2,7 @@ package com.quiz.controllers;
 
 import com.quiz.dao.GameDao;
 import com.quiz.dto.GameDto;
+import com.quiz.dto.QuizDto;
 import com.quiz.entities.*;
 import com.quiz.service.PaginationService;
 import com.quiz.entities.Quiz;
@@ -66,9 +67,9 @@ public class ProfileController {
         return ResponseEntity.ok(new ResponcePaginatedList<User>(paginationService.paginate(users, pageSize, pageNumber), users.size()));
     }
 
-    @GetMapping("/adminUsers/filter/{searchByUser}/{pageSize}/{pageNumber}/{userId}")
-    public ResponseEntity<ResponcePaginatedList<User>> getFilteredUsers(@PathVariable String searchByUser, @PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId){
-        List<User> users =  userRepo.getUsersByFilter(searchByUser, userId);
+    @GetMapping("/adminUsers/filter/{searchByUser}/{pageSize}/{pageNumber}")
+    public ResponseEntity<ResponcePaginatedList<User>> getFilteredUsers(@PathVariable String searchByUser, @PathVariable int pageSize, @PathVariable int pageNumber){
+        List<User> users =  userRepo.getUsersByFilter(searchByUser);
         return ResponseEntity.ok(new ResponcePaginatedList<User>(paginationService.paginate(users, pageSize, pageNumber), users.size()));
     }
 
@@ -199,5 +200,9 @@ public class ProfileController {
     @GetMapping("/gameresult/{gameId}")
     public ResponseEntity<Set<Player>> getGameResult(@PathVariable int gameId) {
         return ResponseEntity.ok(gameDao.getGameResult(gameId));
+    }
+    @GetMapping("/moderatorQuizzes/{moderatorId}")
+    public ResponseEntity<List<QuizDto>> getModeratorAssignment(@PathVariable int moderatorId){
+        return ResponseEntity.ok(quizService.getModeratorQuizzes(moderatorId));
     }
 }
