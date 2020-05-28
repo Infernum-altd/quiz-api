@@ -40,10 +40,6 @@ public class AuthService {
         if(!passwordEncoder.matches(user.getPassword(), userdb.getPassword())){
             throw new PasswordException();
         }
-
-/*        if(!user.getPassword().equals(userdb.getPassword())){
-            throw new PasswordException();
-        }*/
         return tokenProvider.createToken(userdb.getEmail());
     }
 }

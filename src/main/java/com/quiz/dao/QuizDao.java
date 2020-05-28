@@ -37,7 +37,14 @@ public class QuizDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final static String GET_QUIZZES_BY_STATUS_NAME = "SELECT * FROM (SELECT quizzes.category_id quizCategoryId, quizzes.modification_time quizModTime, quizzes.date quizDate, quizzes.description quizDescription, quizzes.status quizStatus, quizzes.id id, quizzes.name quizName, date quizDate, categories.name AS category, users.name AS authorName,users.id authorId, users.surname AS authorSurname, users.email AS authorEmail FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN users ON quizzes.author = users.id WHERE quizzes.status = ?::status_type) quizzes WHERE id NOT IN (SELECT quiz_id FROM moderators_quizzes)";
-    private final static String GET_QUIZ_BY_ID_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname, u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage, sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid, sq.qstatus qstatus, sq.qcomment qcomment FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage, q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid, q.status qstatus, c.name cname, q.moderator_comment qcomment FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.id = ?) sq INNER JOIN users u on sq.qauthor = u.id";
+    private final static String GET_QUIZ_BY_ID_NAME = "SELECT sq.qid qid,sq.qauthor qauthor, u.id uid, u.name uname," +
+            " u.surname usurname, u.email uemail, sq.qdate qdate,sq.qdescription qdescription,sq.qimage qimage," +
+            " sq.qmodificationtime qmodificationtime, sq.qname qname, sq.cname cname, sq.qcategoryid qcategoryid," +
+            " sq.qstatus qstatus" +
+            " FROM (SELECT q.id qid,q.author qauthor,q.date qdate,q.description qdescription,q.image qimage," +
+            " q.modification_time qmodificationtime, q.name qname, q.category_id qcategoryid," +
+            " q.status qstatus, c.name cname " +
+            "FROM quizzes q INNER JOIN categories c on q.category_id = c.id where q.id = ?) sq INNER JOIN users u on sq.qauthor = u.id";
 
     private final static String GET_QUIZZES_BY_STATUS = "SELECT * FROM quizzes WHERE status = ?::status_type";
     private final static String GET_ALL_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE quizzes.status = 'ACTIVE' LIMIT ? OFFSET ?";
@@ -178,7 +185,6 @@ public class QuizDao {
                         quiz.setDate(resultSet.getDate("qdate"));
                         quiz.setDescription(resultSet.getString("qdescription"));
                         quiz.setModificationTime(resultSet.getTimestamp("qmodificationtime"));
-                        quiz.setModeratorComment((resultSet.getString("qcomment")));
 
                         return quiz;
                     }
@@ -187,6 +193,7 @@ public class QuizDao {
                 return null;
             }
         } catch (DataAccessException e) {
+            e.printStackTrace();
             throw new DatabaseException(String.format("Find quiz by id '%s' database error occured", id));
         }
 

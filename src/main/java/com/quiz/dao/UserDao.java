@@ -232,7 +232,7 @@ public class UserDao {
         }
         return usersByRoleStatus;
     }
-    public List<User> getUsersByFilter(String searchByUser) {
+    public List<User> getUsersByFilter(String searchByUser, int userId) {
         List<User> getFilteredUsers = jdbcTemplate.query(
                 GET_FILTERED_USERS,
                 new Object[]{searchByUser, searchByUser, searchByUser, searchByUser},
