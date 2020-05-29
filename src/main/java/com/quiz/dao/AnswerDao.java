@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
+import java.sql.Types;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,7 +31,7 @@ public class AnswerDao {
     private static final String ANSWER_FIND_BY_QUESTION_ID = "SELECT id, question_id, text, correct, next_answer_id FROM answers WHERE question_id = ?";
     private static final String ANSWER_IMAGE_BY_ID = "SELECT image FROM answers WHERE id = ?";
 
-    private static final String INSERT_ANSWER = "INSERT INTO answers (question_id, text, correct, image) VALUES (?, ?, ?, ?)";
+    private static final String INSERT_ANSWER = "INSERT INTO answers (question_id, text, correct, image, next_answer_id) VALUES (?, ?, ?, ?, ?)";
 
     private static final String UPDATE_ANSWER = "UPDATE answers SET question_id = ?, text = ?, correct = ?, next_answer_id = ? WHERE id = ?";
     private static final String UPDATE_ANSWER_IMAGE = "UPDATE answers SET image = ? WHERE id = ?";
@@ -66,6 +67,11 @@ public class AnswerDao {
                 ps.setString(2, entity.getText());
                 ps.setBoolean(3, entity.isCorrect());
                 ps.setString(4, entity.getImage());
+                if (entity.getNextAnswerId() == null) {
+                    ps.setNull(5, Types.INTEGER);
+                } else {
+                    ps.setInt(5, entity.getNextAnswerId());
+                }
 
                 return ps;
             }, keyHolder);

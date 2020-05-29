@@ -93,7 +93,6 @@ public class QuestionDao {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         try {
-            System.out.println(entity.getImage());
             jdbcTemplate.update(connection -> {
                         PreparedStatement ps = connection
                                 .prepareStatement(INSERT_QUESTION, new String[]{"id"});
@@ -111,15 +110,14 @@ public class QuestionDao {
             throw new DatabaseException("Database access exception while question insert");
         }
 
-        System.out.println(entity.getAnswerList());
-        System.out.println(keyHolder.getKey().intValue());
-
-        for (AnswerDto answer : entity.getAnswerList()) {
-            answerDao.insert(answer, keyHolder.getKey().intValue());
+        for (int i = entity.getAnswerList().size() - 1; i >= 0; i--) {
+            if (entity.getType() == QuestionType.SEQUENCE && i != entity.getAnswerList().size() - 1) {
+                entity.getAnswerList().get(i).setNextAnswerId(entity.getAnswerList().get(i + 1).getId());
+            }
+            answerDao.insert(entity.getAnswerList().get(i), keyHolder.getKey().intValue());
         }
 
         entity.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
-
     }
 
     public boolean updateQuestion(Question question) {
@@ -130,16 +128,6 @@ public class QuestionDao {
                 question.getId());
 
         return affectedRowNumber > 0;
-    }
-
-    public boolean updateQuestionImage(MultipartFile image, int questionId) {
-        int affectedRowsNumber = 0;
-        try {
-            affectedRowsNumber = jdbcTemplate.update(UPDATE_QUESTION_IMAGE, image.getBytes(), questionId);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return affectedRowsNumber > 0;
     }
 
     public List<Question> getQuestionsByQuizId(int quizId) {

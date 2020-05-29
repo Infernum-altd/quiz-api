@@ -36,10 +36,6 @@ public class QuestionService {
         return questionDao.updateQuestion(question);
     }
 
-    public boolean updateImageByQuestionId(MultipartFile image, int answerId) {
-        return questionDao.updateQuestionImage(image, answerId);
-    }
-
     public List<Question> getQuestionsByQuizId(int quizId) {
         List<Question> questions = questionDao.getQuestionsByQuizId(quizId);
 
