@@ -1,11 +1,15 @@
 package com.quiz.dao;
 
 import com.quiz.dao.mapper.QuizMapper;
+import com.quiz.dto.QuestionDto;
 import com.quiz.dto.QuizDto;
+import com.quiz.dto.TagDto;
 import com.quiz.entities.Quiz;
 import com.quiz.entities.StatusType;
 import com.quiz.exceptions.DatabaseException;
+import com.quiz.service.StoreFileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -30,6 +34,8 @@ import static com.quiz.dao.mapper.QuizMapper.*;
 public class QuizDao {
 
     private final JdbcTemplate jdbcTemplate;
+    private final QuestionDao questionDao;
+    private final TagDao tagDao;
 
     private final static String GET_QUIZZES_BY_STATUS = "SELECT * FROM quizzes WHERE status = ?::status_type";
     private final static String GET_ALL_QUIZZES = "SELECT quizzes.id, quizzes.name, image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category FROM quizzes INNER JOIN categories ON categories.id = category_id WHERE quizzes.status = 'ACTIVE' LIMIT ? OFFSET ?";
@@ -40,7 +46,7 @@ public class QuizDao {
     private final static String GET_QUIZZES_BY_TAG = "SELECT * FROM quizzes INNER JOIN quizzes_tags on id = quiz_id where tag_id = ?";
     private final static String GET_QUIZZES_BY_NAME = "SELECT * FROM quizzes WHERE name LIKE ?";
     private final static String GET_QUIZ_IMAGE_BY_QUIZ_ID = "SELECT image FROM quizzes WHERE id = ?";
-    private final static String INSERT_QUIZ = "INSERT INTO quizzes (name , author, category_id, date, description,status, modification_time) VALUES (?,?,?,?,?,?::status_type,?)";
+    private final static String INSERT_QUIZ = "INSERT INTO quizzes (name , author, category_id, date, description,status, modification_time,image) VALUES (?,?,?,CURRENT_DATE,?,?::status_type,?,?)";
     private final static String ADD_TAG_TO_QUIZ = "INSERT INTO quizzes_tags (quiz_id, tag_id) VALUES (?,?)";
     private final static String UPDATE_QUIZ = "UPDATE quizzes SET name = ?, author = ?, category_id = ?, date = ?, description = ?, status = ?::status_type, modification_time = ? WHERE id = ?";
     private final static String UPDATE_QUIZ_IMAGE = "UPDATE quizzes SET image = ? WHERE id = ?";
@@ -114,7 +120,7 @@ public class QuizDao {
     }
 
     public List<Quiz> getAllQuizzes(int pageSize, int pageNumber, int userId) {
-        List<Quiz> quizzes = jdbcTemplate.query(GET_ALL_QUIZZES, new Object[]{pageSize, pageNumber*pageSize}, new QuizMapper());
+        List<Quiz> quizzes = jdbcTemplate.query(GET_ALL_QUIZZES, new Object[]{pageSize, pageNumber * pageSize}, new QuizMapper());
 
         if (quizzes.isEmpty()) {
             return null;
@@ -171,7 +177,7 @@ public class QuizDao {
                 new Object[]{userId},
                 new QuizMapper());
 
-        if (quizzesCreatedByUser.isEmpty()){
+        if (quizzesCreatedByUser.isEmpty()) {
             return null;
         }
 
@@ -246,7 +252,7 @@ public class QuizDao {
     }
 
     @Transactional
-    public Quiz insert(Quiz entity) {
+    public QuizDto insert(QuizDto entity) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         try {
@@ -256,23 +262,29 @@ public class QuizDao {
                 ps.setString(1, entity.getName());
                 ps.setInt(2, entity.getAuthor());
                 ps.setInt(3, entity.getCategory_id());
-                ps.setDate(4, entity.getDate());
-                ps.setString(5, entity.getDescription());
-                ps.setString(6, String.valueOf(entity.getStatus()));
-                ps.setTimestamp(7, entity.getModificationTime());
+                ps.setString(4, entity.getDescription());
+                ps.setString(5, String.valueOf(entity.getStatus()));
+                ps.setTimestamp(6, entity.getModificationTime());
+                ps.setString(7, entity.getImage());
                 return ps;
             }, keyHolder);
-
         } catch (DataAccessException e) {
             throw new DatabaseException("Database access exception while quiz insert");
         }
 
-        entity.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
+        entity.setId(keyHolder.getKey().intValue());
+
+        for (TagDto tag : entity.getTags()) {
+            addTagToQuiz(entity.getId(), tagDao.insert(tag).getId());
+        }
+
+        for (QuestionDto question : entity.getQuestions()) {
+            questionDao.insert(question, keyHolder.getKey().intValue());
+        }
 
         return entity;
     }
 
-    @Transactional
     public boolean addTagToQuiz(int quizId, int tagId) {
         int affectedRowNumber;
         try {
@@ -496,7 +508,7 @@ public class QuizDao {
         return quizzes;
     }
 
-    public int getNumberOfRecord(){
+    public int getNumberOfRecord() {
         return jdbcTemplate.queryForObject(COUNT_NUMBER_OF_PLAYED_GAMES,
                 (resultSet, i) -> resultSet.getInt("count"));
     }

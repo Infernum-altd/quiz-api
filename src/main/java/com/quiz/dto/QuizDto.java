@@ -4,9 +4,12 @@ import com.quiz.entities.Quiz;
 import com.quiz.entities.StatusType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.sql.Timestamp;
-import java.util.Date;
+import java.sql.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -24,6 +27,9 @@ public class QuizDto {
     private String authorName;
     private String authorSurname;
     private String authorEmail;
+    private String image;
+    private List<QuestionDto> questions;
+    private List<TagDto> tags;
 
     public QuizDto(int id, String name, int author, int category_id, Date date, String description, StatusType status, Timestamp modificationTime) {
         this.id = id;
@@ -35,7 +41,8 @@ public class QuizDto {
         this.status = status;
         this.modificationTime = modificationTime;
     }
-    public QuizDto(int id, String name, int author, int category_id, Date date, String description, StatusType status, Timestamp modificationTime, String category,String authorName,String authorSurname, String authorEmail) {
+
+    public QuizDto(int id, String name, int author, int category_id, Date date, String description, StatusType status, Timestamp modificationTime, String category, String authorName, String authorSurname, String authorEmail) {
         this.id = id;
         this.name = name;
         this.author = author;
@@ -44,13 +51,13 @@ public class QuizDto {
         this.description = description;
         this.status = status;
         this.modificationTime = modificationTime;
-        this.category=category;
-        this.authorName=authorName;
-        this.authorSurname=authorSurname;
-        this.authorEmail=authorEmail;
+        this.category = category;
+        this.authorName = authorName;
+        this.authorSurname = authorSurname;
+        this.authorEmail = authorEmail;
     }
 
-    public QuizDto(Quiz quiz){
+    public QuizDto(Quiz quiz) {
         this.id = quiz.getId();
         this.name = quiz.getName();
         this.author = quiz.getAuthor();

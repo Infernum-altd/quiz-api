@@ -2,11 +2,16 @@ package com.quiz.dto;
 
 import com.quiz.entities.Question;
 import com.quiz.entities.QuestionType;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class QuestionDto {
     private int id;
     private int quizId;
@@ -14,22 +19,16 @@ public class QuestionDto {
     private String text;
     private boolean active;
     private int languageId;
+    private String image;
+    private List<AnswerDto> answerList;
 
-    public QuestionDto(Question question){
-        this.id=question.getId();
-        this.quizId=question.getQuizId();
-        this.type=question.getType();
-        this.text=question.getText();
-        this.active=question.isActive();
-        this.languageId=question.getLanguageId();
+    public QuestionDto(Question question) {
+        this.id = question.getId();
+        this.quizId = question.getQuizId();
+        this.type = question.getType();
+        this.text = question.getText();
+        this.active = question.isActive();
+        this.languageId = question.getLanguageId();
     }
 
-    public QuestionDto(int id, int quizId, QuestionType type, String text, boolean active, int languageId) {
-        this.id = id;
-        this.quizId = quizId;
-        this.type = type;
-        this.text = text;
-        this.active = active;
-        this.languageId = languageId;
-    }
 }

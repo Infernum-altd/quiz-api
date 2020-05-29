@@ -1,5 +1,7 @@
 package com.quiz.dao;
 
+import com.quiz.dto.AnswerDto;
+import com.quiz.dto.QuestionDto;
 import com.quiz.entities.Question;
 import com.quiz.entities.QuestionType;
 import com.quiz.exceptions.DatabaseException;
@@ -23,12 +25,13 @@ import static com.quiz.dao.mapper.QuestionMapper.*;
 @RequiredArgsConstructor
 public class QuestionDao {
     private final JdbcTemplate jdbcTemplate;
+    private final AnswerDao answerDao;
 
     private static final String QUESTION_FIND_BY_ID = "SELECT id, quiz_id, type, text, active FROM questions WHERE id = ?";
     private static final String QUESTION_FIND_BY_QUIZ_ID = "SELECT id, quiz_id, type, text, active FROM questions WHERE quiz_id = ?";
     private static final String QUESTION_IMAGE_BY_QUESTION_ID = "SELECT image from questions WHERE id = ?";
 
-    private static final String INSERT_QUESTION = "INSERT INTO questions (quiz_id, type, text, active) VALUES ( ?, ?::question_type, ?, ?)";
+    private static final String INSERT_QUESTION = "INSERT INTO questions (quiz_id, type, text, active, image) VALUES ( ?, ?::question_type, ?,?,?)";
 
     private static final String UPDATE_QUESTION = "UPDATE questions SET type=?, text=?, active=? WHERE id=?";
     private static final String UPDATE_QUESTION_IMAGE = "UPDATE questions SET image = ? WHERE id = ?";
@@ -85,9 +88,12 @@ public class QuestionDao {
     }
 
     @Transactional
-    public Question insert(Question entity) {
+    public void insert(QuestionDto entity, int quizId) {
+        entity.setQuizId(quizId);
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
         try {
+            System.out.println(entity.getImage());
             jdbcTemplate.update(connection -> {
                         PreparedStatement ps = connection
                                 .prepareStatement(INSERT_QUESTION, new String[]{"id"});
@@ -95,17 +101,25 @@ public class QuestionDao {
                         ps.setString(2, String.valueOf(entity.getType()));
                         ps.setString(3, entity.getText());
                         ps.setBoolean(4, entity.isActive());
+                        ps.setString(5, entity.getImage());
                         return ps;
                     },
                     keyHolder
             );
+
         } catch (DataAccessException e) {
             throw new DatabaseException("Database access exception while question insert");
         }
 
+        System.out.println(entity.getAnswerList());
+        System.out.println(keyHolder.getKey().intValue());
+
+        for (AnswerDto answer : entity.getAnswerList()) {
+            answerDao.insert(answer, keyHolder.getKey().intValue());
+        }
+
         entity.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
 
-        return entity;
     }
 
     public boolean updateQuestion(Question question) {

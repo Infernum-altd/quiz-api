@@ -37,10 +37,4 @@ public class TagController {
     public ResponseEntity<List<Tag>> getTagsByQuiz(@PathVariable int quizId) {
         return ResponseEntity.ok(tagService.findTagsByQuiz(quizId));
     }
-
-    @PostMapping("/new")
-    public ResponseEntity<TagDto> insert(@RequestBody Tag tag) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(tagService.insertTag(tag));
-    }
 }

@@ -65,7 +65,7 @@ public class SharingQuizController {
     }
 
     @PostMapping("/new_quiz")
-    public ResponseEntity<QuizDto> insert(@RequestBody Quiz quiz) {
+    public ResponseEntity<QuizDto> insert(@RequestBody QuizDto quiz) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(quizService.insertQuiz(quiz));
     }
@@ -84,13 +84,6 @@ public class SharingQuizController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-
-    @PostMapping("/add_tag")
-    public ResponseEntity<String> addTagToQuiz(@RequestParam(value = "quizId") int quizId, @RequestParam(value = "tagId") int tagId) {
-        boolean isRecordAffected = quizService.addTag(quizId, tagId);
-        return ResponseEntity.status(isRecordAffected ? HttpStatus.CREATED : HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
-
     @GetMapping("/top_quizzes")
     public ResponseEntity<List<Quiz>> getTopQuizzes(@RequestParam(value = "limit") int limit) {
         return ResponseEntity.ok(quizService.findTopPopularQuizzes(limit));
@@ -107,13 +100,13 @@ public class SharingQuizController {
     }
 
     @GetMapping("/filter/{searchByUser}/{pageSize}/{pageNumber}/{userId}")
-    public ResponseEntity<ResponcePaginatedList<Quiz>> getFilteredQuizzes(@PathVariable String searchByUser, @PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId){
+    public ResponseEntity<ResponcePaginatedList<Quiz>> getFilteredQuizzes(@PathVariable String searchByUser, @PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable int userId) {
         List<Quiz> quizzes = quizService.getQuizzesByFilter(searchByUser, userId);
         return ResponseEntity.ok(new ResponcePaginatedList<Quiz>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
     @PostMapping("/mark/{quizId}/{userId}")
-    public ResponseEntity<String> markQuizAsFavorite (@PathVariable int quizId, @PathVariable int userId){
+    public ResponseEntity<String> markQuizAsFavorite(@PathVariable int quizId, @PathVariable int userId) {
         boolean isRecordAffected = quizService.markQuizAsFavorite(quizId, userId);
         if (isRecordAffected) {
             return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -122,7 +115,7 @@ public class SharingQuizController {
     }
 
     @PostMapping("/unmark/{quizId}/{userId}")
-    public ResponseEntity<String> unmarkQuizAsFavorite (@PathVariable int quizId, @PathVariable int userId){
+    public ResponseEntity<String> unmarkQuizAsFavorite(@PathVariable int quizId, @PathVariable int userId) {
         boolean isRecordAffected = quizService.unmarkQuizAsFavorite(quizId, userId);
         if (isRecordAffected) {
             return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -146,7 +139,7 @@ public class SharingQuizController {
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<QuizDto>> getQuizzesByStatus(@PathVariable StatusType status){
+    public ResponseEntity<List<QuizDto>> getQuizzesByStatus(@PathVariable StatusType status) {
         return ResponseEntity.ok(quizService.findQuizzesByStatus(status));
     }
 }

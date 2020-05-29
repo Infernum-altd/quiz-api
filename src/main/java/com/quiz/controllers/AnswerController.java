@@ -32,12 +32,6 @@ public class AnswerController {
         return ResponseEntity.ok(answerService.findAnswersByQuestionId(questionId));
     }
 
-    @PostMapping("/new")
-    public ResponseEntity<AnswerDto> insert(@RequestBody Answer answer) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(answerService.insertAnswer(answer));
-    }
-
     @PostMapping("/update")
     public ResponseEntity<String> update(@RequestBody Answer answer) {
         boolean isRecordAffected = answerService.updateAnswer(answer);

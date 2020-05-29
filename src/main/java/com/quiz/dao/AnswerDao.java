@@ -1,8 +1,10 @@
 package com.quiz.dao;
 
 import com.quiz.dao.mapper.AnswerMapper;
+import com.quiz.dto.AnswerDto;
 import com.quiz.entities.Answer;
 import com.quiz.exceptions.DatabaseException;
+import com.quiz.service.StoreFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -28,7 +30,7 @@ public class AnswerDao {
     private static final String ANSWER_FIND_BY_QUESTION_ID = "SELECT id, question_id, text, correct, next_answer_id FROM answers WHERE question_id = ?";
     private static final String ANSWER_IMAGE_BY_ID = "SELECT image FROM answers WHERE id = ?";
 
-    private static final String INSERT_ANSWER = "INSERT INTO answers (question_id, text, correct) VALUES (?, ?, ?)";
+    private static final String INSERT_ANSWER = "INSERT INTO answers (question_id, text, correct, image) VALUES (?, ?, ?, ?)";
 
     private static final String UPDATE_ANSWER = "UPDATE answers SET question_id = ?, text = ?, correct = ?, next_answer_id = ? WHERE id = ?";
     private static final String UPDATE_ANSWER_IMAGE = "UPDATE answers SET image = ? WHERE id = ?";
@@ -51,27 +53,30 @@ public class AnswerDao {
         }
     }
 
-    @Transactional
-    public Answer insert(Answer answer) {
+    public AnswerDto insert(AnswerDto entity, int questionId) {
+        entity.setQuestionId(questionId);
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         try {
             jdbcTemplate.update(connection -> {
                 PreparedStatement ps = connection
                         .prepareStatement(INSERT_ANSWER, new String[]{"id"});
-                ps.setInt(1, answer.getQuestionId());
-                ps.setString(2, answer.getText());
-                ps.setBoolean(3, answer.isCorrect());
+                ps.setInt(1, entity.getQuestionId());
+                ps.setString(2, entity.getText());
+                ps.setBoolean(3, entity.isCorrect());
+                ps.setString(4, entity.getImage());
 
                 return ps;
             }, keyHolder);
+
         } catch (DataAccessException e) {
             throw new DatabaseException("Database access exception while quiz insert");
         }
 
-        answer.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
+        entity.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
 
-        return answer;
+        return entity;
     }
 
     public byte[] getAnswerImageByAnswerId(int answerId) {

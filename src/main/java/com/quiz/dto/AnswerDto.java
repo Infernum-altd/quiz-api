@@ -3,14 +3,15 @@ package com.quiz.dto;
 import com.quiz.entities.Answer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
-@NoArgsConstructor
 public class AnswerDto {
     private int id;
     private int questionId;
     private String text;
     private boolean correct;
+    private String image;
     private int nextAnswerId;
 
     public AnswerDto(Answer answer) {
@@ -21,11 +22,4 @@ public class AnswerDto {
         this.nextAnswerId = answer.getNextAnswerId();
     }
 
-    public AnswerDto(int id, int questionId, String text, boolean correct, int nextAnswerId) {
-        this.id = id;
-        this.questionId = questionId;
-        this.text = text;
-        this.correct = correct;
-        this.nextAnswerId = nextAnswerId;
-    }
 }

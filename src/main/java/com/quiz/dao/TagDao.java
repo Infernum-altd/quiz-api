@@ -1,6 +1,7 @@
 package com.quiz.dao;
 
 import com.quiz.dao.mapper.TagMapper;
+import com.quiz.dto.TagDto;
 import com.quiz.entities.Tag;
 import com.quiz.exceptions.DatabaseException;
 import lombok.RequiredArgsConstructor;
@@ -83,7 +84,7 @@ public class TagDao {
     }
 
     @Transactional
-    public Tag insert(Tag entity) {
+    public TagDto insert(TagDto entity) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         try {

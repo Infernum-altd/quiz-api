@@ -29,8 +29,4 @@ public class TagService {
         return tagDao.getTagsByQuiz(quizId);
     }
 
-    public TagDto insertTag(Tag tag){
-        tagDao.insert(tag);
-        return new TagDto(tag);
-    }
 }

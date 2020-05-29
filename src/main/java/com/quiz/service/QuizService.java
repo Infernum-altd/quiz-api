@@ -62,15 +62,15 @@ public class QuizService {
         return quizDao.updateQuizImage(image, quizId);
     }
 
-    public QuizDto insertQuiz(Quiz quiz) {
-        quizDao.insert(quiz);
-        return new QuizDto(quiz);
+    public QuizDto insertQuiz(QuizDto quiz) {
+        return quizDao.insert(quiz);
     }
 
 
-    public String getCategoryNameByCategoryId(int categoryId){
+    public String getCategoryNameByCategoryId(int categoryId) {
         return quizDao.getCategoryNameByCategoryId(categoryId);
     }
+
     public boolean addTag(int quizId, int tagId) {
         return quizDao.addTagToQuiz(quizId, tagId);
     }
@@ -98,16 +98,17 @@ public class QuizService {
     public boolean unmarkQuizAsFavorite(int quizId, int userId) {
         return quizDao.unmarkQuizAsFavorite(quizId, userId);
     }
-    public List<Quiz> findRecommendations(int userId, int limit){
-        return quizDao.getRecommendations(userId,limit);
+
+    public List<Quiz> findRecommendations(int userId, int limit) {
+        return quizDao.getRecommendations(userId, limit);
     }
 
-    public List<Quiz> findRecommendationsByFriends(int userId, int limit){
-        return quizDao.getRecommendationsByFriends(userId,limit);
+    public List<Quiz> findRecommendationsByFriends(int userId, int limit) {
+        return quizDao.getRecommendationsByFriends(userId, limit);
     }
 
     public List<Quiz> findPopularQuizzes(int limit) {
-        return  quizDao.getPopularQuizzes(limit);
+        return quizDao.getPopularQuizzes(limit);
     }
 
     public List<Quiz> filterQuizzesByUserId(String userSearch, int userId, String sort) {
