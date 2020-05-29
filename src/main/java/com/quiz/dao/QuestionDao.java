@@ -32,7 +32,7 @@ public class QuestionDao {
 
     private static final String UPDATE_QUESTION = "UPDATE questions SET type=?, text=?, active=? WHERE id=?";
     private static final String UPDATE_QUESTION_IMAGE = "UPDATE questions SET image = ? WHERE id = ?";
-    private static final String GET_QUESTIONS_BY_QUIZ_ID = "SELECT id, type, text FROM questions WHERE quiz_id =? AND active=true";
+    private static final String GET_QUESTIONS_BY_QUIZ_ID = "SELECT id, type, text, image FROM questions WHERE quiz_id =? AND active=true";
 
     public static final String TABLE_QUESTIONS = "questions";
 
@@ -137,6 +137,7 @@ public class QuestionDao {
                     question.setId(resultSet.getInt(QUESTION_ID));
                     question.setType(QuestionType.valueOf(resultSet.getString(QUESTION_TYPE)));
                     question.setText(resultSet.getString(QUESTION_TEXT));
+                    question.setImage(resultSet.getString(QUESTION_IMAGE));
 
                     return question;
                 }

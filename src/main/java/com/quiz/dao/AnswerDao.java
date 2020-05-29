@@ -25,7 +25,7 @@ public class AnswerDao {
     private final JdbcTemplate jdbcTemplate;
 
     private static final String ANSWER_FIND_BY_ID = "SELECT id, question_id, text, correct, next_answer_id FROM answers WHERE id = ?";
-    private static final String ANSWER_FIND_BY_QUESTION_ID = "SELECT id, question_id, text, correct, next_answer_id FROM answers WHERE question_id = ?";
+    private static final String ANSWER_FIND_BY_QUESTION_ID = "SELECT id, question_id, text, correct, next_answer_id, image FROM answers WHERE question_id = ?";
     private static final String ANSWER_IMAGE_BY_ID = "SELECT image FROM answers WHERE id = ?";
 
     private static final String INSERT_ANSWER = "INSERT INTO answers (question_id, text, correct) VALUES (?, ?, ?)";
@@ -45,7 +45,14 @@ public class AnswerDao {
 
     public List<Answer> findAnswersByQuestionId(int id) {
         try {
-            return jdbcTemplate.query(ANSWER_FIND_BY_QUESTION_ID, new Object[]{id}, new AnswerMapper());
+            return jdbcTemplate.query(ANSWER_FIND_BY_QUESTION_ID,
+                    new Object[]{id},
+                    ((resultSet, i) -> new Answer(resultSet.getInt(ANSWER_ID),
+                                resultSet.getInt(ANSWER_QUESTION_ID),
+                                resultSet.getString(ANSWER_TEXT),
+                                resultSet.getBoolean(ANSWER_CORRECT),
+                                resultSet.getInt(ANSWER_NEXT_ANSWER_ID),
+                                resultSet.getString("image"))));
         } catch (DataAccessException e) {
             throw new DatabaseException(String.format("Find answer by id '%s' database error occured", id));
         }

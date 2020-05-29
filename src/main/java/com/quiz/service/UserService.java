@@ -3,16 +3,16 @@ package com.quiz.service;
 import com.quiz.dao.UserDao;
 import com.quiz.dto.UserDto;
 import com.quiz.entities.NotificationStatus;
-import com.quiz.entities.Quiz;
 import com.quiz.entities.User;
 import com.quiz.exceptions.EmailExistException;
 import com.quiz.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +20,9 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class UserService {
+    @Value("client.app")
+    String urlPath;
+
     @Autowired
     private MailSender mailSender;
 
@@ -46,7 +49,7 @@ public class UserService {
         if(!StringUtils.isEmpty(user.getEmail())){
             String message = String.format(
               "Dear,%s \n" +
-                      "Welcome to Quizer. Visit: http://localhost:4200/activate/%s",
+                      "Welcome to Quizer. Visit:" + urlPath +"activate/%s",
                     user.getEmail(),
                     user.getPassword()
             );
@@ -73,8 +76,7 @@ public class UserService {
     }
 
     public boolean updatePasswordById(int id, String newPassword) {
-//        return userDao.updatePasswordById(id, passwordEncoder.encode(newPassword));
-        return userDao.updatePasswordById(id, newPassword);
+        return userDao.updatePasswordById(id, passwordEncoder.encode(newPassword));
     }
 
     public boolean updateStatusById(int id) {

@@ -15,4 +15,5 @@ public class Question {
     private boolean active;
     private int languageId;
     private List<Answer> answerList;
+    private String image;
 }
