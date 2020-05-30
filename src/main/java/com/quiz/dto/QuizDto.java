@@ -30,42 +30,4 @@ public class QuizDto {
     private boolean favorite;
     private boolean changed;
     private String moderatorComment;
-
-    public QuizDto(int id, String name, int author, int category_id, Date date, String description, StatusType status, Timestamp modificationTime) {
-        this.id = id;
-        this.name = name;
-        this.author = author;
-        this.category_id = category_id;
-        this.date = date;
-        this.description = description;
-        this.status = status;
-        this.modificationTime = modificationTime;
-    }
-    public QuizDto(int id, String name, int author, int category_id, Date date, String description, StatusType status, Timestamp modificationTime, String category,String authorName,String authorSurname, String authorEmail, String moderatorComment) {
-        this.id = id;
-        this.name = name;
-        this.author = author;
-        this.category_id = category_id;
-        this.date = date;
-        this.description = description;
-        this.status = status;
-        this.modificationTime = modificationTime;
-        this.category=category;
-        this.authorName=authorName;
-        this.authorSurname=authorSurname;
-        this.authorEmail=authorEmail;
-        this.moderatorComment=moderatorComment;
-    }
-
-    public QuizDto(Quiz quiz){
-        this.id = quiz.getId();
-        this.name = quiz.getName();
-        this.author = quiz.getAuthor();
-        this.category_id = quiz.getCategory_id();
-        this.date = quiz.getDate();
-        this.description = quiz.getDescription();
-        this.status = quiz.getStatus();
-        this.modificationTime = quiz.getModificationTime();
-    }
-
 }

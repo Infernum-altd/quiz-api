@@ -12,7 +12,6 @@ public class Answer {
     private int id;
     private int questionId;
     private String text;
-    private String image;
     private boolean correct;
     private int nextAnswerId;
     private String image;

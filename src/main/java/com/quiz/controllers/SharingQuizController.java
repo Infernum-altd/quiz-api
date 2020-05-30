@@ -10,11 +10,9 @@ import com.quiz.entities.StatusType;
 import com.quiz.service.QuizCheckService;
 import com.quiz.service.QuizService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -37,10 +35,6 @@ public class SharingQuizController {
     @GetMapping("/{quizId}")
     public ResponseEntity<Quiz> getQuiz(@PathVariable int quizId) {
         return ResponseEntity.ok(quizService.findQuizById(quizId));
-    }
-    @GetMapping("/info/{quizId}")
-    public ResponseEntity<QuizDto> getQuizInfo(@PathVariable int quizId) {
-        return ResponseEntity.ok(quizService.findQuizInfoById(quizId));
     }
 
     @GetMapping("/info/{quizId}")
@@ -138,10 +132,12 @@ public class SharingQuizController {
     @GetMapping("/status/{status}")
     public ResponseEntity<List<QuizDto>> getQuizzesByStatus(@PathVariable StatusType status) {
         return ResponseEntity.ok(quizService.findQuizzesByStatus(status));
+    }
+
     @GetMapping("/status/{status}/{pageSize}/{pageNumber}")
     public ResponseEntity<ResponcePaginatedList<QuizDto>> getQuizzesByStatus(@PathVariable int pageSize, @PathVariable int pageNumber, @PathVariable StatusType status) {
         List<QuizDto> quizzes = quizService.findQuizzesByStatus(status);
-        return ResponseEntity.ok(new ResponcePaginatedList<QuizDto>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
+        return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
     @PostMapping("update/status/{quizId}")

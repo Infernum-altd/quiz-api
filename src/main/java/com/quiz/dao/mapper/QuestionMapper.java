@@ -14,7 +14,6 @@ public class QuestionMapper implements RowMapper<Question> {
     public static final String QUESTION_ID = "id";
     public static final String QUESTION_QUIZ_ID = "quiz_id";
     public static final String QUESTION_TYPE = "type";
-    public static final String QUESTION_IMAGE = "image";
     public static final String QUESTION_TEXT = "text";
     public static final String QUESTION_ACTIVE = "active";
     public static final String QUESTION_LANGUAGE_ID = "language_id";

@@ -117,7 +117,7 @@ public class QuizService {
         return quizDao.filterQuizzesByUserId(userSearch, userId, sort);
     }
 
-    public List<Quiz> searchInFavoriteQuizzes(int userId, String userSearch) {
+    public List<QuizDto> searchInFavoriteQuizzes(int userId, String userSearch) {
         return quizDao.searchInFavoriteQuizzes(userId, userSearch);
     }
 

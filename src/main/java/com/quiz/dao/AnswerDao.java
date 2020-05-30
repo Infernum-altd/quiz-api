@@ -27,8 +27,6 @@ import static com.quiz.dao.mapper.AnswerMapper.*;
 public class AnswerDao {
     private final JdbcTemplate jdbcTemplate;
 
-    private static final String ANSWER_FIND_BY_ID = "SELECT id, question_id, text, correct, next_answer_id FROM answers WHERE id = ?";
-    private static final String ANSWER_FIND_BY_QUESTION_ID = "SELECT id, question_id, text, correct, next_answer_id, image FROM answers WHERE question_id = ?";
     private static final String ANSWER_FIND_BY_ID = "SELECT id, question_id, text, correct, image, next_answer_id FROM answers WHERE id = ?";
     private static final String ANSWER_FIND_BY_QUESTION_ID = "SELECT id, question_id, text, correct, image, next_answer_id FROM answers WHERE question_id = ? ORDER BY id DESC";
     private static final String ANSWER_IMAGE_BY_ID = "SELECT image FROM answers WHERE id = ?";
