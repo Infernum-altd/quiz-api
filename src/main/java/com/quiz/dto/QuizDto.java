@@ -1,12 +1,10 @@
 package com.quiz.dto;
 
-import com.quiz.entities.Quiz;
 import com.quiz.entities.StatusType;
+import com.quiz.entities.Tag;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.sql.Timestamp;
 import java.sql.Date;
 import java.util.List;
@@ -14,9 +12,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class QuizDto {
-
-    private int id;
+    private Integer id;
     private String name;
+    private String image;
     private int author;
     private int category_id;
     private Date date;
@@ -27,45 +25,8 @@ public class QuizDto {
     private String authorName;
     private String authorSurname;
     private String authorEmail;
-    private String image;
     private List<QuestionDto> questions;
-    private List<TagDto> tags;
-
-    public QuizDto(int id, String name, int author, int category_id, Date date, String description, StatusType status, Timestamp modificationTime) {
-        this.id = id;
-        this.name = name;
-        this.author = author;
-        this.category_id = category_id;
-        this.date = date;
-        this.description = description;
-        this.status = status;
-        this.modificationTime = modificationTime;
-    }
-
-    public QuizDto(int id, String name, int author, int category_id, Date date, String description, StatusType status, Timestamp modificationTime, String category, String authorName, String authorSurname, String authorEmail) {
-        this.id = id;
-        this.name = name;
-        this.author = author;
-        this.category_id = category_id;
-        this.date = date;
-        this.description = description;
-        this.status = status;
-        this.modificationTime = modificationTime;
-        this.category = category;
-        this.authorName = authorName;
-        this.authorSurname = authorSurname;
-        this.authorEmail = authorEmail;
-    }
-
-    public QuizDto(Quiz quiz) {
-        this.id = quiz.getId();
-        this.name = quiz.getName();
-        this.author = quiz.getAuthor();
-        this.category_id = quiz.getCategory_id();
-        this.date = quiz.getDate();
-        this.description = quiz.getDescription();
-        this.status = quiz.getStatus();
-        this.modificationTime = quiz.getModificationTime();
-    }
-
+    private List<Tag> tags;
+    private boolean favorite;
+    private boolean changed;
 }

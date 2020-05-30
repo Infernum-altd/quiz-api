@@ -32,10 +32,6 @@ public class QuestionService {
         return questionDao.getQuestionImageByQuestionId(questionId);
     }
 
-    public boolean updateQuestion(Question question) {
-        return questionDao.updateQuestion(question);
-    }
-
     public List<Question> getQuestionsByQuizId(int quizId) {
         List<Question> questions = questionDao.getQuestionsByQuizId(quizId);
 

@@ -7,7 +7,6 @@ import com.quiz.entities.StatusType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,14 +14,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class QuizService {
 
-    @Autowired
     private final QuizDao quizDao;
 
     public List<QuizDto> findQuizzesByStatus(StatusType status) {
         return quizDao.getQuizzesByStatus(status);
     }
 
-    public List<Quiz> findAllQuizzes(int pageSize, int pageNumber, int userId) {
+    public List<QuizDto> findAllQuizzes(int pageSize, int pageNumber, int userId) {
         return quizDao.getAllQuizzes(pageSize, pageNumber, userId);
     }
 
@@ -30,15 +28,19 @@ public class QuizService {
         return quizDao.findById(id);
     }
 
+    public QuizDto getQuizInfo(int id){
+        return quizDao.getQuizInfo(id);
+    }
+
     public List<Quiz> findQuizzesCreatedByUserId(int userId, String sort) {
         return quizDao.getQuizzesCreatedByUser(userId, sort);
     }
 
-    public List<Quiz> findFavoriteQuizzes(int userId) {
+    public List<QuizDto> findFavoriteQuizzes(int userId) {
         return quizDao.getFavoriteQuizzesByUserId(userId);
     }
 
-    public List<Quiz> findQuizzesByCategory(int categoryId, int userId) {
+    public List<QuizDto> findQuizzesByCategory(int categoryId, int userId) {
         return quizDao.getQuizzesByCategory(categoryId, userId);
     }
 
@@ -52,14 +54,6 @@ public class QuizService {
 
     public String getImageByQuizId(int quizId) {
         return quizDao.getQuizImageByQuizId(quizId);
-    }
-
-    public boolean updateQuiz(Quiz quiz) {
-        return quizDao.updateQuiz(quiz);
-    }
-
-    public boolean updateQuizImage(MultipartFile image, int quizId) {
-        return quizDao.updateQuizImage(image, quizId);
     }
 
     public QuizDto insertQuiz(QuizDto quiz) {
@@ -87,7 +81,7 @@ public class QuizService {
         return quizDao.getRecentGames(userId, limit);
     }
 
-    public List<Quiz> getQuizzesByFilter(String searchByUser, int userId) {
+    public List<QuizDto> getQuizzesByFilter(String searchByUser, int userId) {
         return quizDao.getQuizzesByFilter(searchByUser, userId);
     }
 
@@ -107,7 +101,7 @@ public class QuizService {
         return quizDao.getRecommendationsByFriends(userId, limit);
     }
 
-    public List<Quiz> findPopularQuizzes(int limit) {
+    public List<QuizDto> findPopularQuizzes(int limit) {
         return quizDao.getPopularQuizzes(limit);
     }
 

@@ -1,10 +1,8 @@
 package com.quiz.controllers;
 
-import com.quiz.dto.TagDto;
 import com.quiz.entities.Tag;
 import com.quiz.service.TagService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

@@ -2,6 +2,7 @@ package com.quiz.controllers;
 
 import com.quiz.dao.GameDao;
 import com.quiz.dto.GameDto;
+import com.quiz.dto.QuizDto;
 import com.quiz.entities.*;
 import com.quiz.service.PaginationService;
 import com.quiz.entities.Quiz;
@@ -105,10 +106,10 @@ public class ProfileController {
     }
 
     @GetMapping("/myfavorite/{userId}/{pageSize}/{pageNumber}")
-    public ResponseEntity<ResponcePaginatedList<Quiz>> getFavoriteQuizzes(@PathVariable int userId,
+    public ResponseEntity<ResponcePaginatedList<QuizDto>> getFavoriteQuizzes(@PathVariable int userId,
                                                                           @PathVariable int pageSize,
                                                                           @PathVariable int pageNumber){
-        List<Quiz> quizzes = quizService.findFavoriteQuizzes(userId);
+        List<QuizDto> quizzes = quizService.findFavoriteQuizzes(userId);
         return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(quizzes, pageSize, pageNumber), quizzes.size()));
     }
 
@@ -127,7 +128,7 @@ public class ProfileController {
     }
 
     @PostMapping("/newicon/{userId}")
-    public ResponseEntity<String> changeProfileIcon(@RequestParam(value = "image") MultipartFile image, @PathVariable int userId) throws IOException {
+    public ResponseEntity<String> changeProfileIcon(@RequestParam(value = "image") MultipartFile image, @PathVariable int userId) {
         boolean isRecordAffected = userRepo.updateProfileImage(storeFileService.uploadToLocalFileSystem(image), userId);
 
         if (isRecordAffected){
@@ -151,7 +152,7 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-    @GetMapping("status/{userId}")
+    @GetMapping("/status/{userId}")
     public ResponseEntity<NotificationStatus> getUserNotificationStatus(@PathVariable int userId){
         return ResponseEntity.ok(userRepo.getNotificationStatus(userId));
     }
@@ -162,7 +163,7 @@ public class ProfileController {
     }
 
     @PostMapping("updateActive/{userId}")
-    public ResponseEntity<String> updateStatus(@RequestBody String status, @PathVariable int userId){
+    public ResponseEntity<String> updateStatus(@PathVariable int userId){
         boolean isRecordAffected = userRepo.updateStatusById(userId);
 
         if (isRecordAffected){

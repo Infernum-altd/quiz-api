@@ -27,10 +27,6 @@ public class AnswerService {
         return answerDao.getAnswerImageByAnswerId(answerId);
     }
 
-    public boolean updateAnswer(Answer answer) {
-        return answerDao.updateAnswer(answer);
-    }
-
     public boolean updateAnswerImage(MultipartFile image, int answerId) {
         return answerDao.updateAnswerImage(image, answerId);
     }

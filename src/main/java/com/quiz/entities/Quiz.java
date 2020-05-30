@@ -20,7 +20,4 @@ public class Quiz {
     private String description;
     private StatusType status;
     private Timestamp modificationTime;
-    private String category;
-    private boolean isFavorite;
-    private List<String> tags;
 }

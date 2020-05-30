@@ -30,7 +30,7 @@ public class GameService {
 
     public int addGameSession(int quizId, int hostId, int questionTimer, int maxUsersNumber) {
         User host = userDao.findById(hostId);
-        
+
         GameSession gameSession = new GameSession(hostId, questionsToMap(questionService.getQuestionsByQuizId(quizId)), questionTimer);
 
         gameSession.getPlayerSet().add(new Player(host.getId(), host.getName() + " " + host.getSurname(), true));

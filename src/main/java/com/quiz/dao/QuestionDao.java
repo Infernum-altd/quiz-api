@@ -33,9 +33,10 @@ public class QuestionDao {
 
     private static final String INSERT_QUESTION = "INSERT INTO questions (quiz_id, type, text, active, image) VALUES ( ?, ?::question_type, ?,?,?)";
 
-    private static final String UPDATE_QUESTION = "UPDATE questions SET type=?, text=?, active=? WHERE id=?";
-    private static final String UPDATE_QUESTION_IMAGE = "UPDATE questions SET image = ? WHERE id = ?";
-    private static final String GET_QUESTIONS_BY_QUIZ_ID = "SELECT id, type, text FROM questions WHERE quiz_id =? AND active=true";
+    private static final String UPDATE_QUESTION = "UPDATE questions SET type=?, text=?, active=?, image=? WHERE id=?";
+    private static final String GET_QUESTIONS_BY_QUIZ_ID = "SELECT id, quiz_id, type, text, image, active FROM questions WHERE quiz_id =? AND active=true";
+
+    private static final String DELETE_QUESTION = "DELETE FROM questions WHERE id = ?";
 
     public static final String TABLE_QUESTIONS = "questions";
 
@@ -89,6 +90,7 @@ public class QuestionDao {
 
     @Transactional
     public void insert(QuestionDto entity, int quizId) {
+
         entity.setQuizId(quizId);
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -120,14 +122,48 @@ public class QuestionDao {
         entity.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
     }
 
-    public boolean updateQuestion(Question question) {
-        int affectedRowNumber = jdbcTemplate.update(UPDATE_QUESTION,
-                question.getType(),
-                question.getText(),
-                question.isActive(),
-                question.getId());
+    @Transactional
+    public void update(QuestionDto entity, int quizId) {
+        if (entity.getId() == null) {
+            insert(entity, quizId);
+        } else if (entity.isDeleted()) {
+            delete(entity);
+        } else if (entity.isChanged()) {
+            jdbcTemplate.update(UPDATE_QUESTION,
+                    entity.getType(),
+                    entity.getText(),
+                    entity.isActive(),
+                    entity.getImage(),
+                    entity.getId());
+        }
 
-        return affectedRowNumber > 0;
+        if (entity.isChangedType()) {
+            answerDao.deleteAnswersByQuestionId(entity.getId());
+        } else {
+            entity.getAnswerList().removeIf(item->{
+                if(item.isDeleted()){
+                    answerDao.delete(item);
+                    return true;
+                }
+                return false;
+            });
+        }
+        for (int i = entity.getAnswerList().size() - 1; i >= 0; i--) {
+            if (entity.getType() == QuestionType.SEQUENCE && i != entity.getAnswerList().size() - 1) {
+                entity.getAnswerList().get(i).setNextAnswerId(entity.getAnswerList().get(i + 1).getId());
+            }
+            answerDao.update(entity.getAnswerList().get(i), entity.getId());
+        }
+    }
+
+    @Transactional
+    public void delete(QuestionDto entity) {
+        for (AnswerDto answer : entity.getAnswerList()) {
+            answerDao.delete(answer);
+        }
+        jdbcTemplate.update(DELETE_QUESTION,
+                entity.getId()
+        );
     }
 
     public List<Question> getQuestionsByQuizId(int quizId) {
@@ -141,6 +177,23 @@ public class QuestionDao {
                     question.setText(resultSet.getString(QUESTION_TEXT));
 
                     return question;
+                }
+        );
+    }
+
+    public List<QuestionDto> getQuestionInfoByQuizId(int quizId) {
+        return jdbcTemplate.query(GET_QUESTIONS_BY_QUIZ_ID,
+                new Object[]{quizId},
+                (resultSet, i) -> {
+                    QuestionDto questionDto = new QuestionDto();
+                    questionDto.setId(resultSet.getInt(QUESTION_ID));
+                    questionDto.setQuizId(resultSet.getInt(QUESTION_QUIZ_ID));
+                    questionDto.setType(QuestionType.valueOf(resultSet.getString(QUESTION_TYPE)));
+                    questionDto.setText(resultSet.getString(QUESTION_TEXT));
+                    questionDto.setImage(resultSet.getString("image"));
+                    questionDto.setActive(resultSet.getBoolean(QUESTION_ACTIVE));
+
+                    return questionDto;
                 }
         );
     }
