@@ -148,7 +148,7 @@ public class ProfileController {
     }
 
     @PostMapping("/newicon/{userId}")
-    public ResponseEntity<String> changeProfileIcon(@RequestParam(value = "image") MultipartFile image, @PathVariable int userId) throws IOException {
+    public ResponseEntity<String> changeProfileIcon(@RequestParam(value = "image") MultipartFile image, @PathVariable int userId) {
         boolean isRecordAffected = userRepo.updateProfileImage(storeFileService.uploadToLocalFileSystem(image), userId);
 
         if (isRecordAffected) {
@@ -172,8 +172,8 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-    @GetMapping("status/{userId}")
-    public ResponseEntity<NotificationStatus> getUserNotificationStatus(@PathVariable int userId) {
+    @GetMapping("/status/{userId}")
+    public ResponseEntity<NotificationStatus> getUserNotificationStatus(@PathVariable int userId){
         return ResponseEntity.ok(userRepo.getNotificationStatus(userId));
     }
 
