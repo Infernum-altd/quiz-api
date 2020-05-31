@@ -33,6 +33,7 @@ public class QuizMapper implements RowMapper<Quiz> {
         quiz.setDescription(resultSet.getString(QUIZ_DESCRIPTION));
         quiz.setStatus(StatusType.valueOf(resultSet.getString(QUIZ_STATUS)));
         quiz.setModificationTime(resultSet.getTimestamp(QUIZ_MODIFICATION_TIME));
+        quiz.setCategory(resultSet.getString(QUIZ_CATEGORY));
 
         return quiz;
     }

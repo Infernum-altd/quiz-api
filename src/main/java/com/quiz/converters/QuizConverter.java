@@ -21,6 +21,7 @@ public class QuizConverter {
         quizDto.setStatus(quiz.getStatus());
         quizDto.setModificationTime(quiz.getModificationTime());
         quizDto.setImage(quiz.getImage());
+        quizDto.setCategory(quiz.getCategory());
 
         quizDto.setQuestions(new ArrayList<>());
         quizDto.setTags(new ArrayList<>());
