@@ -135,7 +135,7 @@ public class GameService {
     }
 
     private boolean isRightAnswer(String text, int questionNumber, int gameId) {
-        return this.answerDao.findById(this.currentGames.get(gameId).getQuestions().get(questionNumber).getId()).getText().toLowerCase().equals(text.toLowerCase());
+        return this.answerDao.findAnswersByQuestionId(this.currentGames.get(gameId).getQuestions().get(questionNumber).getId()).get(0).getText().toLowerCase().equals(text.toLowerCase());
     }
 
     private boolean isRightOption(List<Answer> answers) {
@@ -153,7 +153,7 @@ public class GameService {
 
     private boolean isRightSequence(List<Answer> answers) {
         for (int i = 0; i < answers.size() - 1; i++) {
-            if (this.answerDao.findById(answers.get(i).getId()).getNextAnswerId() != this.answerDao.findById(answers.get(i + 1).getId()).getNextAnswerId()) {
+            if (this.answerDao.findById(answers.get(i).getId()).getNextAnswerId() != this.answerDao.findById(answers.get(i + 1).getId()).getId()) {
                 return false;
             }
         }
