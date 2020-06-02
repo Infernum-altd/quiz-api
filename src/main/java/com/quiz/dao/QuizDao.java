@@ -75,7 +75,7 @@ public class QuizDao {
     private final static String GET_QUIZZES_BY_NAME = "SELECT * FROM quizzes WHERE name LIKE ?";
     private final static String GET_QUIZ_IMAGE_BY_QUIZ_ID = "SELECT image FROM quizzes WHERE id = ?";
     //private final static String INSERT_QUIZ = "INSERT INTO quizzes (name , author, category_id, date, description,status, modification_time) VALUES (?,?,?,?,?,CAST(? AS status_type),?)";
-    private final static String INSERT_QUIZ = "INSERT INTO quizzes (name , author, category_id, date, description,status, modification_time,image) VALUES (?,?,?,CURRENT_DATE,?,?::status_type,?,?)";
+    private final static String INSERT_QUIZ = "INSERT INTO quizzes (name , author, category_id, date, description,status, modification_time,image) VALUES (?,?,?,CURRENT_DATE,?,CAST(? AS status_type),?,?)";
     private final static String ADD_TAG_TO_QUIZ = "INSERT INTO quizzes_tags (quiz_id, tag_id) VALUES (?,?)";
     private final static String UPDATE_QUIZ = "UPDATE quizzes SET name = ?, author = ?, category_id = ?, date = ?, description = ?, status = ?::status_type, modification_time = ?, image = ? WHERE id = ?";
     private final static String GET_FILTERED_QUIZZES = "SELECT quizzes.id, quizzes.name, quizzes.image, author, category_id, date, description, status, modification_time, categories.id, categories.name AS category, users.name AS authorName, users.surname AS authorSurname FROM quizzes INNER JOIN categories ON categories.id = category_id INNER JOIN users ON quizzes.author = users.id WHERE quizzes.name ~* ? OR categories.name ~* ? OR CONCAT(users.name, ' ', surname) ~*? OR date::text ~* ?";
@@ -198,6 +198,7 @@ public class QuizDao {
                         quiz.setName(resultSet.getString("qname"));
                         quiz.setCategory_id(resultSet.getInt("qcategoryid"));
                         quiz.setStatus(StatusType.valueOf(resultSet.getString("qstatus")));
+                        quiz.setImage(resultSet.getString("qimage"));
                         quiz.setCategory(resultSet.getString("cname"));
                         quiz.setId(resultSet.getInt("qid"));
                         quiz.setAuthor(resultSet.getInt("qauthor"));

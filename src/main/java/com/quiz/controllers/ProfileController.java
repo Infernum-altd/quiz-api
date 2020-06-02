@@ -67,12 +67,11 @@ public class ProfileController {
         return ResponseEntity.ok(new ResponcePaginatedList<User>(paginationService.paginate(users, pageSize, pageNumber), users.size()));
     }
 
-    @GetMapping("/adminUsers/filter/{searchByUser}/{pageSize}/{pageNumber}/{userId}")
+    @GetMapping("/adminUsers/filter/{searchByUser}/{pageSize}/{pageNumber}")
     public ResponseEntity<ResponcePaginatedList<User>> getFilteredUsers(@PathVariable String searchByUser,
                                                                         @PathVariable int pageSize,
-                                                                        @PathVariable int pageNumber,
-                                                                        @PathVariable int userId) {
-        List<User> users = userRepo.getUsersByFilter(searchByUser, userId);
+                                                                        @PathVariable int pageNumber) {
+        List<User> users = userRepo.getUsersByFilter(searchByUser);
         return ResponseEntity.ok(new ResponcePaginatedList<>(paginationService.paginate(users, pageSize, pageNumber), users.size()));
     }
 

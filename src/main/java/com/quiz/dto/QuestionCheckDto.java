@@ -12,6 +12,7 @@ import java.util.List;
 public class QuestionCheckDto {
     private int id;
     private int quizId;
+    private String image;
     private QuestionType type;
     private String text;
     private boolean active;
@@ -25,6 +26,7 @@ public class QuestionCheckDto {
         this.text=question.getText();
         this.active=question.isActive();
         this.languageId=question.getLanguageId();
+        this.image = question.getImage();
         this.answers=answers;
     }
 }

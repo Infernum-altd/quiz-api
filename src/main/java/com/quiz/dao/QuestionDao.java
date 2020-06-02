@@ -28,10 +28,10 @@ public class QuestionDao {
     private final AnswerDao answerDao;
 
     private static final String QUESTION_FIND_BY_ID = "SELECT id, quiz_id, type, text, active FROM questions WHERE id = ?";
-    private static final String QUESTION_FIND_BY_QUIZ_ID = "SELECT id, quiz_id, type, text, active FROM questions WHERE quiz_id = ?";
+    private static final String QUESTION_FIND_BY_QUIZ_ID = "SELECT id, quiz_id, type, text, active, image FROM questions WHERE quiz_id = ?";
     private static final String QUESTION_IMAGE_BY_QUESTION_ID = "SELECT image from questions WHERE id = ?";
 
-    private static final String INSERT_QUESTION = "INSERT INTO questions (quiz_id, type, text, active, image) VALUES ( ?, ?::question_type, ?,?,?)";
+    private static final String INSERT_QUESTION = "INSERT INTO questions (quiz_id, type, text, active, image) VALUES ( ?, CAST(? AS question_type, ?,?,?)";
 
     private static final String UPDATE_QUESTION = "UPDATE questions SET type=?, text=?, active=?, image=? WHERE id=?";
     private static final String GET_QUESTIONS_BY_QUIZ_ID = "SELECT id, quiz_id, type, text, image, active FROM questions WHERE quiz_id =? AND active=true";

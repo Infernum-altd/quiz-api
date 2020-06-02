@@ -111,8 +111,8 @@ public class UserService {
         if(!status.equals("AllStatus") && role.equals("AllRole")){ return userDao.getUsersByStatus(status,userId);}
         return userDao.getUsersByRoleStatus(role,status,userId);
     }
-    public List<User> getUsersByFilter(String searchByUser, int userId) {
-        return userDao.getUsersByFilter(searchByUser, userId);
+    public List<User> getUsersByFilter(String searchByUser) {
+        return userDao.getUsersByFilter(searchByUser);
     }
 
     public void deleteUserById(int id) { userDao.deleteUserById(id); }

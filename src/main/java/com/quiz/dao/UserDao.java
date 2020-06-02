@@ -83,7 +83,6 @@ public class UserDao {
                 return null;
             }
         } catch (DataAccessException e) {
-            // TODO: 09.04.2020  check message
             throw new DatabaseException(String.format("Find user by email '%s' database error occured", email));
         }
 
@@ -231,7 +230,7 @@ public class UserDao {
         }
         return usersByRoleStatus;
     }
-    public List<User> getUsersByFilter(String searchByUser, int userId) {
+    public List<User> getUsersByFilter(String searchByUser) {
         List<User> getFilteredUsers = jdbcTemplate.query(
                 GET_FILTERED_USERS,
                 new Object[]{searchByUser, searchByUser, searchByUser, searchByUser},
