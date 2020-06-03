@@ -20,8 +20,12 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class UserService {
-    @Value("client.app")
+    @Value("${client.app}")
     String urlPath;
+
+    private String activationMessage = "Dear,%s \n" +
+            "Welcome to Quizer. \n" +
+            "Visit: %s/activate/%s";
 
     @Autowired
     private MailSender mailSender;
@@ -48,9 +52,9 @@ public class UserService {
 
         if(!StringUtils.isEmpty(user.getEmail())){
             String message = String.format(
-              "Dear,%s \n" +
-                      "Welcome to Quizer. Visit:" + urlPath +"activate/%s",
+                    activationMessage,
                     user.getEmail(),
+                    urlPath,
                     user.getPassword()
             );
             mailSender.send(user.getEmail(),"Activation code",message);
